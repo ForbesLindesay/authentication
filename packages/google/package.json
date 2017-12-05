@@ -1,13 +1,13 @@
 {
   "name": "@authentication/google",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@authentication/base-error": "^0.0.0",
-    "@authentication/oauth2": "^0.0.0",
-    "@authentication/types": "^0.0.0",
+    "@authentication/base-error": "^0.0.1",
+    "@authentication/oauth2": "^0.0.1",
+    "@authentication/types": "^0.0.1",
     "@types/node": "^8.0.33"
   },
   "scripts": {
