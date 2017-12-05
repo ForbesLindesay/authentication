@@ -1,0 +1,41 @@
+{
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "postinstall": "node postinstall",
+    "bootstrap": "lerna bootstrap",
+    "build": "git add . && lerna run prepublish --since master",
+    "build:all": "lerna run prepublish",
+    "prerelease": "yarn build:all",
+    "prettier": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
+    "release": "lerna publish",
+    "test": "jest && lerna run test --parallel",
+    "watch:jest": "jest --watch",
+    "clean":
+      "rimraf packages/*/lib && rimraf packages/*/build && rimraf packages/*/node_modules && rimraf node_modules"
+  },
+  "devDependencies": {
+    "@types/jest": "^21.1.5",
+    "@types/mkdirp": "^0.5.1",
+    "@types/node": "^8.0.33",
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "@types/rimraf": "^2.0.2",
+    "babel-core": "^6.26.0",
+    "jest": "^21.2.1",
+    "lerna": "^2.4.0",
+    "lsr": "^2.0.0",
+    "prettier": "^1.8.2",
+    "rimraf": "^2.6.2",
+    "ts-jest": "^21.1.4",
+    "typescript": "^2.5.3"
+  },
+  "jest": {
+    "transformIgnorePatterns": ["<rootDir>.*(node_modules)(?!.*authentication.*).*$"],
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "/__tests__/.+\\.test\\.(tsx?)$",
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"]
+  }
+}
