@@ -1,9 +1,7 @@
 import {URL} from 'url';
-import {Request} from 'express';
-import OAuth2Authentication, {
-  StateStore,
-  StateStoreKind,
-} from '@authentication/oauth2';
+import {Request, Response, NextFunction} from 'express';
+import OAuth2Authentication from '@authentication/oauth2';
+import {Mixed} from '@authentication/types';
 import {Profile} from '@authentication/types';
 import parseProfile from './parseProfile';
 import GooglePlusAPIError from './errors/GooglePlusAPIError';
@@ -12,18 +10,26 @@ import UserInfoError from './errors/UserInfoError';
 export interface Options {
   clientID?: string;
   clientSecret?: string;
-  sessionKey?: string;
-  stateStore?: StateStore | StateStoreKind;
   callbackURL?: string | URL;
+  /**
+   * Optionally provide keys to sign the cookie used to store "state"
+   */
+  cookieKeys?: string[];
+  /**
+   * Optionally override the default name for the cookie used to store "state"
+   *
+   * default: "authentication_oauth2"
+   */
+  cookieName?: string;
   trustProxy?: boolean;
 }
-export interface InitOptions {
+export interface InitOptions<State> {
   callbackURL?: string | URL;
   /**
    * see https://developers.google.com/+/web/api/rest/oauth#authorization-scopes
    */
   scope?: string | ReadonlyArray<string>;
-  state?: string;
+  state?: State;
 
   /**
    * Indicates whether your application can refresh access tokens when the user
@@ -92,9 +98,9 @@ const defaultScope = [
  * The Google authentication strategy authenticates requests by delegating to
  * Google using the OAuth 2.0 protocol.
  */
-export default class GoogleAuthentication {
+export default class GoogleAuthentication<State = Mixed> {
   static DEFAULT_SCOPE: ReadonlyArray<string> = defaultScope;
-  private readonly _oauth: OAuth2Authentication;
+  private readonly _oauth: OAuth2Authentication<State>;
   constructor(options: Options) {
     const clientID =
       options.clientID === undefined
@@ -117,11 +123,10 @@ export default class GoogleAuthentication {
     this._oauth = new OAuth2Authentication({
       clientID,
       clientSecret,
+      cookieKeys: options.cookieKeys,
+      cookieName: options.cookieName,
       authorizePath: new URL('https://accounts.google.com/o/oauth2/v2/auth'),
       accessTokenPath: new URL('https://www.googleapis.com/oauth2/v4/token'),
-
-      sessionKey: options.sessionKey,
-      stateStore: options.stateStore,
       callbackURL: options.callbackURL,
       trustProxy: options.trustProxy,
     });
@@ -171,23 +176,33 @@ export default class GoogleAuthentication {
   userCancelledLogin(req: Request) {
     return this._oauth.userCancelledLogin(req);
   }
-  authenticateInit(req: Request, options: InitOptions = {}) {
-    return this._oauth.authenticateInit(req, {
+  redirectToProvider(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+    options: InitOptions<State> = {},
+  ) {
+    return this._oauth.redirectToProvider(req, res, next, {
       callbackURL: options.callbackURL,
       scope: options.scope || defaultScope,
       state: options.state,
       params: authorizationParams(options),
     });
   }
-  async authenticateCallback(req: Request, options: CallbackOptions = {}) {
-    const {accessToken, refreshToken} = await this._oauth.authenticateCallback(
-      req,
-      {
-        callbackURL: options.callbackURL,
-      },
-    );
+  async completeAuthentication(
+    req: Request,
+    res: Response,
+    options: CallbackOptions = {},
+  ) {
+    const {
+      accessToken,
+      refreshToken,
+      state,
+    } = await this._oauth.completeAuthentication(req, res, {
+      callbackURL: options.callbackURL,
+    });
     const profile = await this.userProfile(accessToken);
-    return {accessToken, refreshToken, profile};
+    return {accessToken, refreshToken, profile, state};
   }
 
   static GooglePlusAPIError = GooglePlusAPIError;
@@ -198,7 +213,7 @@ export default class GoogleAuthentication {
  * Return extra Google-specific parameters to be included in the authorization
  * request.
  */
-function authorizationParams(options: InitOptions) {
+function authorizationParams<State>(options: InitOptions<State>) {
   const params: {[key: string]: string} = {};
 
   // https://developers.google.com/identity/protocols/OAuth2WebServer

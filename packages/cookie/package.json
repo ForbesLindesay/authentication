@@ -1,0 +1,22 @@
+{
+  "name": "@authentication/cookie",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@types/cookies": "^0.7.1",
+    "@types/ms": "^0.7.30",
+    "@types/node": "^8.0.33",
+    "cookies": "^0.7.1",
+    "ms": "^2.1.1"
+  },
+  "scripts": {
+    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare cookie"
+  },
+  "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/cookie",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

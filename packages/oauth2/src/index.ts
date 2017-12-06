@@ -1,25 +1,30 @@
 import {Agent, ClientResponse} from 'http';
 import {URL} from 'url';
-import {Request} from 'express';
+import {Request, Response, NextFunction} from 'express';
+import Cookie from '@authentication/cookie';
+import {Mixed} from '@authentication/types';
 import AuthorizationError from './errors/AuthorizationError';
 import StateVerificationFailure from './errors/StateVerificationFailure';
 import TokenError from './errors/TokenError';
 import InternalOAuthError from './errors/InternalOAuthError';
-import StateStore from './state/StateStore';
-import NullStore from './state/NullStore';
-import SessionStore from './state/SessionStore';
+import getUID from './getUID';
 import originalURL from './originalURL';
 const OAuth2Base = require('oauth').OAuth2;
 
-export {StateStore};
-
-export enum StateStoreKind {
-  Null = 'Null',
-  Session = 'Session',
-}
 export interface Options {
   clientID: string;
   clientSecret: string;
+
+  /**
+   * Optionally provide keys to sign the cookie used to store "state"
+   */
+  cookieKeys?: string[];
+  /**
+   * Optionally override the default name for the cookie used to store "state"
+   *
+   * default: "authentication_oauth2"
+   */
+  cookieName?: string;
 
   /**
    * Provide a base URL if authorizePath or accessTokenPath are relative.
@@ -58,16 +63,15 @@ export interface Options {
   useAuthorizationHeaderForGET?: boolean;
 
   sessionKey?: string;
-  stateStore?: StateStore | StateStoreKind;
   scopeSeparator?: string;
   callbackURL?: string | URL;
   trustProxy?: boolean;
 }
-export interface InitOptions {
+export interface InitOptions<T> {
   callbackURL?: string | URL;
   params?: {[key: string]: string};
   scope?: string | ReadonlyArray<string>;
-  state?: string;
+  state?: T;
 }
 export interface CallbackOptions {
   callbackURL?: string | URL;
@@ -83,6 +87,12 @@ function resolveURL(
   return path === undefined
     ? new URL(defaultPath, base)
     : typeof path === 'string' ? new URL(path, base) : path;
+}
+
+export interface AccessTokenData<Results> {
+  accessToken: string;
+  refreshToken?: string;
+  results: Results;
 }
 
 /**
@@ -108,15 +118,15 @@ function parseErrorResponse(body: string, status: number): TokenError | null {
   return null;
 }
 
-export default class OAuth2Authentication<Results = any> {
+export default class OAuth2Authentication<State = Mixed, Results = any> {
   private _base: any;
   private _authorizeURL: URL;
   private _accessTokenURL: URL;
   private _clientID: string;
-  private _stateStore: StateStore;
   private _scopeSeparator: string;
   private _callbackURL: void | string | URL;
   private _trustProxy: void | boolean;
+  private _cookie: Cookie<{k: string; d?: State}>;
   constructor(options: Options) {
     this._authorizeURL = resolveURL(
       options.baseSite,
@@ -152,25 +162,15 @@ export default class OAuth2Authentication<Results = any> {
       );
     }
 
-    if (options.stateStore && options.stateStore !== StateStoreKind.Null) {
-      if (typeof options.stateStore === 'string') {
-        switch (options.stateStore) {
-          case StateStoreKind.Session:
-            this._stateStore = new SessionStore({
-              key:
-                options.sessionKey || 'oauth2:' + this._authorizeURL.hostname,
-            });
-        }
-      } else {
-        this._stateStore = options.stateStore;
-      }
-    } else {
-      this._stateStore = new NullStore();
-    }
-
     this._scopeSeparator = options.scopeSeparator || ' ';
     this._callbackURL = options.callbackURL;
     this._trustProxy = options.trustProxy;
+    this._cookie = new Cookie(options.cookieName || 'authentication_oauth2', {
+      keys: options.cookieKeys,
+      maxAge: Cookie.Session,
+      sameSite: Cookie.SameSitePolicy.AnySite,
+      signed: Cookie.SignedKind.Optional,
+    });
   }
 
   /**
@@ -188,20 +188,17 @@ export default class OAuth2Authentication<Results = any> {
   getOAuthAccessToken(
     code: string,
     params?: {[key: string]: string},
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    results: Results;
-  }> {
-    return new Promise<{
-      accessToken: string;
-      refreshToken: string;
-      results: Results;
-    }>((resolve, reject) => {
+  ): Promise<AccessTokenData<Results>> {
+    return new Promise<AccessTokenData<Results>>((resolve, reject) => {
       this._base.getOAuthAccessToken(
         code,
         params ? {...params} : {},
-        (err: any, accessToken: string, refreshToken: string, results: any) => {
+        (
+          err: any,
+          accessToken: string,
+          refreshToken: undefined | string,
+          results: Results,
+        ) => {
           if (err) {
             if (err.statusCode && err.data) {
               try {
@@ -257,10 +254,11 @@ export default class OAuth2Authentication<Results = any> {
   /**
    * Begin authentication by getting the URL to redirect the user to on the OAuth 2.0 service provider
    */
-  async authenticateInit(
+  private async _redirectToProvider(
     req: Request,
-    options: InitOptions = {},
-  ): Promise<URL> {
+    res: Response,
+    options: InitOptions<State> = {},
+  ): Promise<void> {
     const callbackURLInitial = options.callbackURL || this._callbackURL;
     const callbackURL =
       typeof callbackURLInitial === 'string'
@@ -291,35 +289,36 @@ export default class OAuth2Authentication<Results = any> {
     }
     authorizeUrl.searchParams.set('client_id', this._clientID);
 
-    const state = options.state;
-    if (state) {
-      authorizeUrl.searchParams.set('state', state);
-    } else {
-      const state = await this._stateStore.store(req, {
-        authorizationURL: this._authorizeURL,
-        tokenURL: this._accessTokenURL,
-        clientID: this._clientID,
-      });
-
-      if (state) {
-        authorizeUrl.searchParams.set('state', state);
-      }
-    }
-
-    return authorizeUrl;
+    const stateID = await getUID(24);
+    authorizeUrl.searchParams.set('state', stateID);
+    this._cookie.set(req, res, {k: stateID, d: options.state});
+    res.redirect(authorizeUrl.href);
+  }
+  /**
+   * Begin authentication by getting the URL to redirect the user to on the OAuth 2.0 service provider
+   */
+  redirectToProvider(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+    options: InitOptions<State> = {},
+  ) {
+    this._redirectToProvider(req, res, options).catch(next);
   }
 
   /**
    * Complete authentication by processing the response from the OAuth 2.0 service provider to
    * get the accessToken and refreshToken. These can then be used to fetch a profile.
    */
-  async authenticateCallback(
+  async completeAuthentication(
     req: Request,
+    res: Response,
     options: CallbackOptions = {},
   ): Promise<{
     accessToken: string;
-    refreshToken: string;
+    refreshToken?: string;
     results: Results;
+    state?: State;
   }> {
     if (req.query && req.query.error) {
       throw new AuthorizationError(
@@ -341,21 +340,17 @@ export default class OAuth2Authentication<Results = any> {
           )
         : callbackURLInitial;
 
-    const verifyStateResult = await this._stateStore.verify(
-      req,
-      req.query.state,
-      {
-        authorizationURL: this._authorizeURL,
-        tokenURL: this._accessTokenURL,
-        clientID: this._clientID,
-      },
-    );
-    const verifyStateInfo =
-      verifyStateResult !== true ? verifyStateResult.info : null;
-    if (verifyStateResult !== true && verifyStateResult.ok !== true) {
+    const cookie = this._cookie.get(req, res);
+    if (!cookie) {
       throw new StateVerificationFailure(
-        (verifyStateInfo && verifyStateInfo.message) ||
-          'Invalid state in response',
+        'The cookie used to verify state in the oauth transaction was not set.',
+      );
+    }
+    this._cookie.set(req, res, null);
+    const {k: stateID, d: state} = cookie;
+    if (stateID !== (req.query && req.query.state)) {
+      throw new StateVerificationFailure(
+        'The oauth provider did not provide a valid "state" parameter in the response.',
       );
     }
 
@@ -378,10 +373,9 @@ export default class OAuth2Authentication<Results = any> {
       accessToken,
       refreshToken,
       results,
+      state,
     };
   }
-
-  static StateStoreKind = StateStoreKind;
   static AuthorizationError = AuthorizationError;
   static InternalOAuthError = InternalOAuthError;
   static StateVerificationFailure = StateVerificationFailure;

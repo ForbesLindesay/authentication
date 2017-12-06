@@ -26,10 +26,10 @@ When the user first visits http://localhost:3000/__/auth/google they will be
 re-directed to google to complete the sign in. Google will then redirect them
 back to the `callbackURL`, with additional info in the query. You can check if
 the user decided to cancel the login by calling `userCancelledLogin`, otherwise
-calling `authenticateCallback` may throw an error.
+calling `completeAuthentication` may throw an error.
 
-Once the user has successfully logged in, calling `authenticateCallback` returns
-a `profile` with info about the user (e.g. their `id` and `emails`), an
+Once the user has successfully logged in, calling `completeAuthentication`
+returns a `profile` with info about the user (e.g. their `id` and `emails`), an
 `accessToken` (for further API requests) and a `refreshToken` if you need to
 request new access tokens.
 
@@ -46,8 +46,10 @@ const googleAuthentication = new GoogleAuthentication({
 app.get('/__/auth/google', async (req, res, next) => {
   try {
     if (!googleAuthentication.isCallbackRequest(req)) {
-      const url = await googleAuthentication.authenticateInit(req);
-      return res.redirect(url.href);
+      googleAuthentication.redirectToProvider(req, res, next, {
+        state: 'Hello world',
+      });
+      return;
     }
     if (googleAuthentication.userCancelledLogin(req)) {
       return res.redirect('/');
@@ -56,8 +58,9 @@ app.get('/__/auth/google', async (req, res, next) => {
       accessToken,
       refreshToken,
       profile,
-    } = await googleAuthentication.authenticateCallback(req);
-    console.log({accessToken, refreshToken});
+      state, // => 'Hello world'
+    } = await googleAuthentication.completeAuthentication(req, res);
+    console.log({accessToken, refreshToken, state});
     res.json(profile);
   } catch (ex) {
     next(ex);
@@ -94,7 +97,7 @@ const isCallbackRequest = googleAuthentication.isCallbackRequest(req);
 ```
 
 Returns `true` if the request has parameters indicating that it is a callback
-from google. If this returns `false` you should call `authenticateInit` and
+from google. If this returns `false` you should call `redirectToProvider` and
 redirect to the resulting URL.
 
 ### userCancelledLogin
@@ -107,10 +110,10 @@ Returns `true` if the user clicked "Cancel" at some point in the login process
 and google redirected them back to your app. You should probably return the user
 to the login page at this point, instead of displaying an error.
 
-### authenticateInit
+### redirectToProvider
 
 ```js
-const url = await googleAuthentication.authenticateInit(req, initOptions);
+const url = await googleAuthentication.redirectToProvider(req, initOptions);
 res.redirect(url.href);
 ```
 
@@ -125,6 +128,11 @@ Options:
 * `scope?: string | ReadonlyArray<string>` - defaults to `[]`, see
   https://developers.google.com/+/web/api/rest/oauth#authorization-scopes for a
   full list of possible scopes.
+* `state?: any` - a JSON serializeable value that you can use once the
+  authentication is complete. This is useful for recording where the user was
+  before they started to log in - i.e. a URL to redirect them to after login is
+  complete. You can also use it to store other things, like an action that the
+  user wanted to take as soon as they are logged in.
 * `accessType?: 'online' | 'offline'` - Indicates whether your application can
   refresh access tokens when the user is not present at the browser. Valid
   parameter values are online, which is the default value, and offline. Set the
@@ -163,20 +171,20 @@ Typescript:
 import {InitOptions} from '@authentication/google';
 ```
 
-TODO: explain state?
-
-### authenticateCallback
+### completeAuthentication
 
 ```js
 const {
   accessToken,
   refreshToken,
   profile,
-} = await googleAuthentication.authenticateCallback(req, callbackOptions);
+  state,
+} = await googleAuthentication.completeAuthentication(req, callbackOptions);
 ```
 
 Verifies the supplied authentication info with google and returns an
-`accessToken` and a `profile`.
+`accessToken` and a `profile`. It also returns the `state` that you passed in
+when calling `redirectToProvider`.
 
 Options:
 

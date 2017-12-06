@@ -14,8 +14,10 @@ app.use((req, res, next) => {
 app.get('/__/auth/google', async (req, res, next) => {
   try {
     if (!googleAuthentication.isCallbackRequest(req)) {
-      const url = await googleAuthentication.authenticateInit(req);
-      return res.redirect(url.href);
+      googleAuthentication.redirectToProvider(req, res, next, {
+        state: 'Hello world',
+      });
+      return;
     }
     if (googleAuthentication.userCancelledLogin(req)) {
       return res.redirect('/');
@@ -24,8 +26,9 @@ app.get('/__/auth/google', async (req, res, next) => {
       accessToken,
       refreshToken,
       profile,
-    } = await googleAuthentication.authenticateCallback(req);
-    console.log({accessToken, refreshToken});
+      state,
+    } = await googleAuthentication.completeAuthentication(req, res);
+    console.log({accessToken, refreshToken, state});
     res.json(profile);
   } catch (ex) {
     next(ex);

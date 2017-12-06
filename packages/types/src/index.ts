@@ -1,2 +1,3 @@
+import Mixed from './Mixed';
 import Profile from './Profile';
-export {Profile};
+export {Mixed, Profile};
