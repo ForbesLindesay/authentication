@@ -26,14 +26,8 @@ export interface Options {
    */
   cookieName?: string;
 
-  /**
-   * Provide a base URL if authorizePath or accessTokenPath are relative.
-   */
-  baseSite?: string | URL;
-  // default: '/oauth/authorize'
-  authorizePath?: string | URL;
-  // default: '/oauth/access_token'
-  accessTokenPath?: string | URL;
+  authorizePath: string | URL;
+  accessTokenPath: string | URL;
 
   customHeaders?: {[key: string]: string};
   /**
@@ -79,14 +73,8 @@ export interface CallbackOptions {
 }
 export {TokenError};
 
-function resolveURL(
-  base: undefined | string | URL,
-  path: undefined | string | URL,
-  defaultPath: string,
-) {
-  return path === undefined
-    ? new URL(defaultPath, base)
-    : typeof path === 'string' ? new URL(path, base) : path;
+function resolveURL(path: string | URL) {
+  return typeof path === 'string' ? new URL(path) : path;
 }
 
 export interface AccessTokenData<Results> {
@@ -128,16 +116,8 @@ export default class OAuth2Authentication<State = Mixed, Results = any> {
   private _trustProxy: void | boolean;
   private _cookie: Cookie<{k: string; d?: State}>;
   constructor(options: Options) {
-    this._authorizeURL = resolveURL(
-      options.baseSite,
-      options.authorizePath,
-      '/oauth/authorize',
-    );
-    this._accessTokenURL = resolveURL(
-      options.baseSite,
-      options.accessTokenPath,
-      '/oauth/access_token',
-    );
+    this._authorizeURL = resolveURL(options.authorizePath);
+    this._accessTokenURL = resolveURL(options.accessTokenPath);
     this._clientID = options.clientID;
     this._base = new OAuth2Base(
       options.clientID,
@@ -220,7 +200,7 @@ export default class OAuth2Authentication<State = Mixed, Results = any> {
     });
   }
   get(
-    url: string,
+    url: URL,
     accessToken: string,
   ): Promise<{
     data: string;
@@ -231,7 +211,7 @@ export default class OAuth2Authentication<State = Mixed, Results = any> {
       response: ClientResponse;
     }>((resolve, reject) => {
       this._base.get(
-        url,
+        url.href,
         accessToken,
         (err: any, data: string, response: ClientResponse) => {
           if (err) {

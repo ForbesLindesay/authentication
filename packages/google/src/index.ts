@@ -140,7 +140,7 @@ export default class GoogleAuthentication<State = Mixed> {
   async userProfile(accessToken: string): Promise<Profile> {
     let body = '';
     try {
-      body = (await this._oauth.get(userProfileURL.href, accessToken)).data;
+      body = (await this._oauth.get(userProfileURL, accessToken)).data;
     } catch (err) {
       let json: any = null;
       if (err.data) {
