@@ -330,6 +330,13 @@ export default class OAuth2Authentication<State = Mixed, Results = any> {
         req.query.error_uri,
       );
     }
+    if (!(req.query && req.query.code)) {
+      throw new AuthorizationError(
+        'MISSING_CODE',
+        'The request is missing the "code" query string parameter.',
+        undefined,
+      );
+    }
 
     const callbackURLInitial = options.callbackURL || this._callbackURL;
     const callbackURL =

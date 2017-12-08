@@ -5,12 +5,14 @@ export default interface Profile {
   provider: string;
   id: string | number;
   displayName: string;
+  userName?: string;
   emails: {
     value: string;
     type?: string;
   }[];
   images?: {
     url?: string;
+    size?: number;
     /**
      * If there is a size parameter, it can be provided as a query string argument
      * to request the image at a specific size.

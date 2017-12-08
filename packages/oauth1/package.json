@@ -1,0 +1,23 @@
+{
+  "name": "@authentication/oauth1",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@authentication/base-error": "^0.0.1",
+    "@authentication/cookie": "^0.0.0",
+    "@authentication/types": "^0.0.1",
+    "@types/express": "^4.0.39",
+    "@types/node": "^8.0.33",
+    "oauth": "^0.9.15"
+  },
+  "scripts": {
+    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare oauth1"
+  },
+  "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/oauth1",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

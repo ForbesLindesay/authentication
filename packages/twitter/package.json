@@ -1,0 +1,21 @@
+{
+  "name": "@authentication/twitter",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@authentication/base-error": "^0.0.1",
+    "@authentication/oauth1": "^0.0.0",
+    "@authentication/types": "^0.0.1",
+    "@types/node": "^8.0.33"
+  },
+  "scripts": {
+    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare twitter"
+  },
+  "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/twitter",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

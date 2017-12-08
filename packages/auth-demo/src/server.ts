@@ -1,9 +1,13 @@
 import GoogleAuthentication from '@authentication/google';
+import TwitterAuthentication from '@authentication/twitter';
 import express = require('express');
 const app: express.Express = express();
 
 const googleAuthentication = new GoogleAuthentication({
   callbackURL: '/__/auth/google',
+});
+const twitterAuthentication = new TwitterAuthentication({
+  callbackURL: '/__/auth/twitter',
 });
 
 app.use((req, res, next) => {
@@ -30,6 +34,30 @@ app.get('/__/auth/google', async (req, res, next) => {
     } = await googleAuthentication.completeAuthentication(req, res);
     console.log({accessToken, refreshToken, state});
     res.json(profile);
+  } catch (ex) {
+    next(ex);
+  }
+});
+app.get('/__/auth/twitter', async (req, res, next) => {
+  try {
+    if (!twitterAuthentication.isCallbackRequest(req)) {
+      twitterAuthentication.redirectToProvider(req, res, next, {
+        state: 'Hello world',
+      });
+      return;
+    }
+    if (twitterAuthentication.userCancelledLogin(req)) {
+      return res.redirect('/');
+    }
+    const {
+      token,
+      tokenSecret,
+      profile,
+      rawProfile,
+      state,
+    } = await twitterAuthentication.completeAuthentication(req, res);
+    console.log({token, tokenSecret, state});
+    res.json({profile, rawProfile});
   } catch (ex) {
     next(ex);
   }
