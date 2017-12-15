@@ -24,7 +24,7 @@ export enum SameSitePolicy {
    */
   AnySite = 'any-site',
 }
-export enum SignedKind {
+export enum SigningPolicy {
   /**
    * This is the default.  The cookie **must** be signed. If no
    * keys are provided and `COOKIE_SECRETS` is empty, an error
@@ -53,7 +53,7 @@ export enum SignedKind {
 }
 export interface Options {
   /**
-   * A base url used to check the sameSite policy.  If this is not set, we
+   * A base url used to check the sameSitePolicy.  If this is not set, we
    * will attempt to infer the baseURL from the request's headers.
    */
   baseURL?: string | URL;
@@ -65,7 +65,7 @@ export interface Options {
    * a boolean indicating whether the cookie is only to be sent over HTTP(S),
    * and not made available to client JavaScript (true by default).
    */
-  httpOnly?: boolean;
+  serverSideOnly?: boolean;
   keys?: string[];
   /**
    * a number representing the milliseconds from Date.now() for expiry or
@@ -94,15 +94,15 @@ export interface Options {
    * sending cross site cookies even with get requests, or `AnySite` to allow
    * requests from any site.
    */
-  sameSite?: SameSitePolicy;
+  sameSitePolicy?: SameSitePolicy;
   /**
    * a boolean indicating whether the cookie is only to be sent
    * over HTTPS (false by default for HTTP, true by default for HTTPS).
    *
    * You don't normally need to set this.
    */
-  secure?: boolean;
-  signed?: SignedKind;
+  httpsOnly?: boolean;
+  signingPolicy?: SigningPolicy;
 }
 
 export const Session: MaxAgeKind.Session = MaxAgeKind.Session;
@@ -110,7 +110,7 @@ export default class Cookie<T> {
   static readonly MaxAgeKind = MaxAgeKind;
   static readonly SameSitePolicy = SameSitePolicy;
   static readonly Session: MaxAgeKind.Session = MaxAgeKind.Session;
-  static readonly SignedKind = SignedKind;
+  static readonly SigningPolicy = SigningPolicy;
 
   private readonly _name: string;
   private readonly _sameSitePolicy: SameSitePolicy;
@@ -134,15 +134,22 @@ export default class Cookie<T> {
       throw new Error('If provided, options.keys must be an array of strings.');
     }
     let signed = true;
-    switch (options.signed) {
-      case SignedKind.Disabled:
+    switch (options.signingPolicy) {
+      case SigningPolicy.Disabled:
         signed = false;
         break;
-      case SignedKind.Optional:
-        signed = !!this._constructorOptions.keys;
+      case SigningPolicy.Optional:
+        signed = !!keys;
         break;
-      case SignedKind.Required:
-        signed = true;
+      default:
+        if (
+          options.signingPolicy === undefined &&
+          process.env.NODE_ENV === 'undefined'
+        ) {
+          signed = !!keys;
+        } else {
+          signed = true;
+        }
         break;
     }
     if (signed && !keys) {
@@ -169,23 +176,21 @@ export default class Cookie<T> {
     // same site
 
     this._sameSitePolicy = (
-      options.sameSite || SameSitePolicy.Lax
+      options.sameSitePolicy || SameSitePolicy.Lax
     ).toLowerCase() as SameSitePolicy;
     this._baseURL = parseBaseURL(options.baseURL);
 
-    // options
-
-    this._constructorOptions = {};
+    // optiohttpsOnly  this._constructorOptions = {};
     if (keys) {
-      this._constructorOptions.keys = keys;
+      this._consthttpsOnlyOptions.keys = keys;
     }
-    if (typeof options.secure === 'boolean') {
-      this._constructorOptions.secure = options.secure;
+    if (typeof options.httpsOnly === 'boolean') {
+      this._constructorOptions.secure = options.httpsOnly;
     }
     this._getOption.signed = signed;
     this._setOption = {
       domain: options.domain || undefined,
-      httpOnly: options.httpOnly !== false,
+      httpOnly: options.serverSideOnly !== false,
       maxAge,
       overwrite: options.overwrite !== false,
       path: options.path || '/',
@@ -228,15 +233,29 @@ export default class Cookie<T> {
     } catch (ex) {}
     return null;
   }
-  set(req: IncomingMessage, res: ServerResponse, value: T | null) {
+  set(req: IncomingMessage, res: ServerResponse, value: T) {
     if (!this._checkCSRF(req, 'set')) {
       return;
     }
     const cookies = new Cookies(req, res, this._constructorOptions);
-    cookies.set(this._name, value != null ? JSON.stringify(value) : undefined, {
+    cookies.set(this._name, JSON.stringify(value), this._setOption);
+  }
+  remove(req: IncomingMessage, res: ServerResponse) {
+    if (!this._checkCSRF(req, 'set')) {
+      return;
+    }
+    const cookies = new Cookies(req, res, this._constructorOptions);
+    cookies.set(this._name, undefined, {
       ...this._setOption,
-      maxAge: value != null ? this._setOption.maxAge : 0,
+      maxAge: 0,
     });
+  }
+  refresh(req: IncomingMessage, res: ServerResponse) {
+    const cookies = new Cookies(req, res, this._constructorOptions);
+    const str = cookies.get(this._name, this._getOption);
+    if (str) {
+      cookies.set(this._name, str, this._setOption);
+    }
   }
 }
 

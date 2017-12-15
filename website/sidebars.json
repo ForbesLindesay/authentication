@@ -1,0 +1,7 @@
+{
+  "docs": {
+    "Guides": ["getting-started"],
+    "Packages": ["cookie"],
+    "Common Authentication Methods": []
+  }
+}
