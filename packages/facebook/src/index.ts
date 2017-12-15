@@ -13,7 +13,7 @@ export {Profile};
 export interface Options {
   appID?: string;
   appSecret?: string;
-  callbackURL?: string | URL;
+  callbackURL: string | URL;
   /**
    * Optionally provide keys to sign the cookie used to store "state"
    */
@@ -27,7 +27,6 @@ export interface Options {
   trustProxy?: boolean;
 }
 export interface InitOptions<State> {
-  callbackURL?: string | URL;
   /**
    * See: https://developers.facebook.com/docs/facebook-login/permissions/
    * e.g. email
@@ -46,7 +45,6 @@ export interface InitOptions<State> {
 }
 export interface CallbackOptions {
   imageSize?: number;
-  callbackURL?: string | URL;
   profileFields?: ReadonlyArray<string>;
 }
 
@@ -63,6 +61,7 @@ export default class FacebookAuthentication<State = Mixed> {
   static DEFAULT_SCOPE: ReadonlyArray<string> = defaultScope;
   private readonly _oauth: OAuth2Authentication<State>;
   private readonly _clientSecret: string;
+  public readonly callbackPath: string;
   constructor(options: Options) {
     const clientID =
       options.appID === undefined ? process.env.FACEBOOK_APP_ID : options.appID;
@@ -81,6 +80,14 @@ export default class FacebookAuthentication<State = Mixed> {
       );
     }
     this._clientSecret = clientSecret;
+    if (typeof options.callbackURL === 'string') {
+      this.callbackPath = new URL(
+        options.callbackURL,
+        'http://example.com',
+      ).pathname;
+    } else {
+      this.callbackPath = options.callbackURL.pathname;
+    }
     this._oauth = new OAuth2Authentication({
       clientID,
       clientSecret,
@@ -257,7 +264,6 @@ export default class FacebookAuthentication<State = Mixed> {
     options: InitOptions<State> = {},
   ) {
     return this._oauth.redirectToProvider(req, res, next, {
-      callbackURL: options.callbackURL,
       scope: options.scope || defaultScope,
       state: options.state,
       params: authorizationParams(options),
@@ -283,9 +289,7 @@ export default class FacebookAuthentication<State = Mixed> {
       accessToken,
       refreshToken,
       state,
-    } = await this._oauth.completeAuthentication(req, res, {
-      callbackURL: options.callbackURL,
-    });
+    } = await this._oauth.completeAuthentication(req, res);
     const {profile, rawProfile} = await this.userProfile(accessToken, options);
     return {accessToken, refreshToken, profile, rawProfile, state};
   }
