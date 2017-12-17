@@ -12,16 +12,16 @@ process.on('unhandledRejection', e => {
 
 /* List of projects/orgs using your project for the users page */
 const users = [
-  {
-    caption: 'User1',
-    image: '/test-site/img/docusaurus.svg',
-    infoLink: 'https://www.facebook.com',
-    pinned: true,
-  },
+  // {
+  //   caption: 'User1',
+  //   image: '/test-site/img/docusaurus.svg',
+  //   infoLink: 'https://www.facebook.com',
+  //   pinned: true,
+  // },
 ];
 
 const siteConfig = {
-  title: '@authentication' /* title for your website */,
+  title: 'authentication' /* title for your website */,
   tagline: 'Secure, Modular Authentication for Node.js',
   url: 'https://facebook.github.io' /* your website url */,
   baseUrl: '/' /* base url for your project */,
@@ -34,8 +34,8 @@ const siteConfig = {
   ],
   users,
   /* path to images for header/footer */
-  headerIcon: 'img/docusaurus.svg',
-  footerIcon: 'img/docusaurus.svg',
+  headerIcon: 'img/at.svg',
+  footerIcon: 'img/at.svg',
   favicon: 'img/favicon.png',
   /* colors for website */
   colors: {
@@ -49,7 +49,7 @@ const siteConfig = {
     // Highlight.js theme to use for syntax highlighting in code blocks
     theme: 'default',
   },
-  scripts: ['https://buttons.github.io/buttons.js'],
+  scripts: ['/js/language-switcher.js', 'https://buttons.github.io/buttons.js'],
   // You may provide arbitrary config keys to be used as needed by your template.
   repoUrl: 'https://github.com/ForbesLindesay/authentication',
 };

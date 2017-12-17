@@ -36,12 +36,25 @@ class HomeSplash extends React.Component {
       <div className="homeContainer">
         <div className="homeSplashFade">
           <div className="wrapper homeWrapper">
-            <div className="projectLogo">
-              <img src={siteConfig.baseUrl + 'img/docusaurus.svg'} />
-            </div>
+            {/* <div className="projectLogo">
+              <img src={siteConfig.baseUrl + 'img/at.svg'} />
+            </div> */}
             <div className="inner">
               <h2 className="projectTitle">
-                {siteConfig.title}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <img
+                    height="48"
+                    width="48"
+                    src={siteConfig.baseUrl + 'img/at.svg'}
+                  />
+                  {siteConfig.title}
+                </div>
                 <small>{siteConfig.tagline}</small>
               </h2>
               <div className="section promoSection">
@@ -96,38 +109,51 @@ class Index extends React.Component {
               align="center"
               contents={[
                 {
-                  content: 'This is the content of my feature',
-                  image: siteConfig.baseUrl + 'img/docusaurus.svg',
+                  content: 'The default options are always secure',
+                  image: siteConfig.baseUrl + 'img/padlock.svg',
                   imageAlign: 'top',
-                  title: 'Feature One',
+                  title: 'Secure',
                 },
                 {
-                  content: 'The content of my second feature',
-                  image: siteConfig.baseUrl + 'img/docusaurus.svg',
+                  content: 'Written in TypeScript',
+                  image: siteConfig.baseUrl + 'img/typescript.svg',
                   imageAlign: 'top',
-                  title: 'Feature Two',
+                  title: 'Type Safe',
+                },
+                {
+                  content: 'You can use just the parts you need',
+                  image: siteConfig.baseUrl + 'img/npm.svg',
+                  imageAlign: 'top',
+                  title: 'Modular',
+                },
+                {
+                  content: 'Always use promises instead of callbacks',
+                  image: siteConfig.baseUrl + 'img/promises.svg',
+                  imageAlign: 'top',
+                  title: 'Promises',
                 },
               ]}
               layout="fourColumn"
             />
           </Container>
 
-          <div
+          {/* <div
             className="productShowcaseSection paddingBottom"
             style={{textAlign: 'center'}}
           >
             <h2>Feature Callout</h2>
             <MarkdownBlock>These are features of this project</MarkdownBlock>
-          </div>
+          </div> */}
 
-          <Container padding={['bottom', 'top']} background="light">
+          {/*<Container padding={['bottom', 'top']} background="light">
             <GridBlock
               contents={[
                 {
-                  content: 'Talk about learning how to use this',
-                  image: siteConfig.baseUrl + 'img/docusaurus.svg',
+                  content:
+                    '@authentication always makes sure to choose secure defaults, and throw an early exception if you miss out important options like keys for signing cookies.',
+                  image: siteConfig.baseUrl + 'img/at.svg',
                   imageAlign: 'right',
-                  title: 'Learn How',
+                  title: 'Secure',
                 },
               ]}
             />
@@ -138,13 +164,13 @@ class Index extends React.Component {
               contents={[
                 {
                   content: 'Talk about trying this out',
-                  image: siteConfig.baseUrl + 'img/docusaurus.svg',
+                  image: siteConfig.baseUrl + 'img/at.svg',
                   imageAlign: 'left',
                   title: 'Try it Out',
                 },
               ]}
             />
-          </Container>
+          </Container> */}
 
           {/* <div className="productShowcaseSection paddingBottom">
             <h2>{"Who's Using This?"}</h2>

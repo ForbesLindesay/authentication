@@ -6,16 +6,10 @@ Cookie provides a simple way to store session state in a cookie. It is secure by
 
 ## Installation
 
-To install with yarn:
+To install, run the following command in your terminal:
 
 ```sh
 yarn add @authentication/cookie
-```
-
-To install with npm:
-
-```sh
-npm install @authentication/cookie
 ```
 
 ## Usage

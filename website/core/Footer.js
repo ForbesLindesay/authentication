@@ -62,7 +62,7 @@ class Footer extends React.Component {
               className="github-button"
               href={this.props.config.repoUrl}
               data-icon="octicon-star"
-              data-count-href="/facebook/docusaurus/stargazers"
+              data-count-href="/ForbesLindesay/authentication/stargazers"
               data-show-count={true}
               data-count-aria-label="# stargazers on GitHub"
               aria-label="Star this project on GitHub"
@@ -85,7 +85,7 @@ class Footer extends React.Component {
           />
         </a> */}
         <section className="copyright">
-          Copyright &copy; {currentYear} Facebook Inc.
+          Copyright &copy; {currentYear} Forbes Lindesay
         </section>
       </footer>
     );
