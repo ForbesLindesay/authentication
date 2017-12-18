@@ -39,9 +39,9 @@ export interface InitOptions<State> {
   display?: string;
   /**
    * If a user declines your app a given permission, Facebook will not re-request that
-   * permission unless you explicilty pass `authType: 'rerequrest'`
+   * permission unless you explicilty pass `isReRequest: true`
    */
-  authType?: 'rerequest';
+  isReRequest?: boolean;
 }
 export interface CallbackOptions {
   imageSize?: number;
@@ -52,13 +52,13 @@ const userProfileURL = new URL('https://graph.facebook.com/v2.5/me');
 const permissionsURL = new URL(
   'https://graph.facebook.com/v2.5/me/permissions',
 );
-const defaultScope: string[] = [];
+export const DEFAULT_SCOPE: string[] = [];
 /**
  * The Facebook authentication strategy authenticates requests by delegating to
  * Facebook using the OAuth 2.0 protocol.
  */
 export default class FacebookAuthentication<State = Mixed> {
-  static DEFAULT_SCOPE: ReadonlyArray<string> = defaultScope;
+  static DEFAULT_SCOPE: ReadonlyArray<string> = DEFAULT_SCOPE;
   private readonly _oauth: OAuth2Authentication<State>;
   private readonly _clientSecret: string;
   public readonly callbackPath: string;
@@ -93,8 +93,8 @@ export default class FacebookAuthentication<State = Mixed> {
       clientSecret,
       cookieKeys: options.cookieKeys,
       cookieName: options.cookieName,
-      authorizePath: new URL('https://www.facebook.com/dialog/oauth'),
-      accessTokenPath: new URL('https://graph.facebook.com/oauth/access_token'),
+      authorizeURL: new URL('https://www.facebook.com/dialog/oauth'),
+      accessTokenURL: new URL('https://graph.facebook.com/oauth/access_token'),
       callbackURL: options.callbackURL,
       trustProxy: options.trustProxy,
     });
@@ -264,7 +264,7 @@ export default class FacebookAuthentication<State = Mixed> {
     options: InitOptions<State> = {},
   ) {
     return this._oauth.redirectToProvider(req, res, next, {
-      scope: options.scope || defaultScope,
+      scope: options.scope || DEFAULT_SCOPE,
       state: options.state,
       params: authorizationParams(options),
     });
@@ -308,9 +308,12 @@ function authorizationParams<State>(options: InitOptions<State>) {
   }
 
   // https://developers.facebook.com/docs/facebook-login/reauthentication/
-  if (options.authType) {
-    params.auth_type = options.authType;
+  if (options.isReRequest) {
+    params.auth_type = 'rerequest';
   }
 
   return params;
 }
+
+module.exports = FacebookAuthentication;
+module.exports.default = FacebookAuthentication;

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://facebook.github.io/blog</id>
+    <title>authentication Blog</title>
+    <updated>2017-12-15T06:00:00Z</updated>
+    <generator>Feed for Node.js</generator>
+    <link rel="alternate" href="https://facebook.github.io/blog"/>
+    <subtitle>The best place to stay up-to-date with the latest authentication news and events.</subtitle>
+    <logo>https://facebook.github.ioimg/at.svg</logo>
+    <rights>Copyright © 2017 Forbes Lindesay</rights>
+    <entry>
+        <title type="html"><![CDATA[Announcement]]></title>
+        <id>https://facebook.github.io/blog/2017/12/15/announcement.html</id>
+        <link href="https://facebook.github.io/blog/2017/12/15/announcement.html">
+        </link>
+        <updated>2017-12-15T06:00:00Z</updated>
+        <summary type="html"><![CDATA[This will be the post that announces @authentication to the world]]></summary>
+        <author>
+            <name>Forbes Lindesay</name>
+            <uri>http://twitter.com/ForbesLindesay</uri>
+        </author>
+    </entry>
+</feed>

@@ -26,8 +26,8 @@ export interface Options {
    */
   cookieName?: string;
 
-  authorizePath: string | URL;
-  accessTokenPath: string | URL;
+  authorizeURL: string | URL;
+  accessTokenURL: string | URL;
 
   customHeaders?: {[key: string]: string};
   /**
@@ -58,17 +58,15 @@ export interface Options {
 
   sessionKey?: string;
   scopeSeparator?: string;
-  callbackURL?: string | URL;
+  callbackURL: string | URL;
   trustProxy?: boolean;
 }
 export interface InitOptions<T> {
-  callbackURL?: string | URL;
   params?: {[key: string]: string};
   scope?: string | ReadonlyArray<string>;
   state?: T;
 }
 export interface CallbackOptions {
-  callbackURL?: string | URL;
   params?: {[key: string]: string};
 }
 export {TokenError};
@@ -107,17 +105,18 @@ function parseErrorResponse(body: string, status: number): TokenError | null {
 }
 
 export default class OAuth2Authentication<State = Mixed, Results = any> {
-  private _base: any;
-  private _authorizeURL: URL;
-  private _accessTokenURL: URL;
-  private _clientID: string;
-  private _scopeSeparator: string;
-  private _callbackURL: void | string | URL;
-  private _trustProxy: void | boolean;
-  private _cookie: Cookie<{k: string; d?: State}>;
+  private readonly _base: any;
+  private readonly _authorizeURL: URL;
+  private readonly _accessTokenURL: URL;
+  private readonly _clientID: string;
+  private readonly _scopeSeparator: string;
+  private readonly _callbackURL: string | URL;
+  public readonly callbackPath: string;
+  private readonly _trustProxy: void | boolean;
+  private readonly _cookie: Cookie<{k: string; d?: State}>;
   constructor(options: Options) {
-    this._authorizeURL = resolveURL(options.authorizePath);
-    this._accessTokenURL = resolveURL(options.accessTokenPath);
+    this._authorizeURL = resolveURL(options.authorizeURL);
+    this._accessTokenURL = resolveURL(options.accessTokenURL);
     this._clientID = options.clientID;
     this._base = new OAuth2Base(
       options.clientID,
@@ -144,12 +143,16 @@ export default class OAuth2Authentication<State = Mixed, Results = any> {
 
     this._scopeSeparator = options.scopeSeparator || ' ';
     this._callbackURL = options.callbackURL;
+    this.callbackPath = (typeof options.callbackURL === 'string'
+      ? new URL(options.callbackURL, 'http://example.com')
+      : options.callbackURL
+    ).pathname;
     this._trustProxy = options.trustProxy;
     this._cookie = new Cookie(options.cookieName || 'authentication_oauth2', {
       keys: options.cookieKeys,
       maxAge: Cookie.Session,
-      sameSite: Cookie.SameSitePolicy.AnySite,
-      signed: Cookie.SignedKind.Optional,
+      sameSitePolicy: Cookie.SameSitePolicy.AnySite,
+      signingPolicy: Cookie.SigningPolicy.Optional,
     });
   }
 
@@ -231,6 +234,15 @@ export default class OAuth2Authentication<State = Mixed, Results = any> {
     return req.query && req.query.error === 'access_denied';
   }
 
+  private getCallbackURL(req: Request) {
+    return typeof this._callbackURL === 'string'
+      ? new URL(
+          this._callbackURL,
+          originalURL(req, {trustProxy: this._trustProxy}),
+        )
+      : this._callbackURL;
+  }
+
   /**
    * Begin authentication by getting the URL to redirect the user to on the OAuth 2.0 service provider
    */
@@ -239,14 +251,7 @@ export default class OAuth2Authentication<State = Mixed, Results = any> {
     res: Response,
     options: InitOptions<State> = {},
   ): Promise<void> {
-    const callbackURLInitial = options.callbackURL || this._callbackURL;
-    const callbackURL =
-      typeof callbackURLInitial === 'string'
-        ? new URL(
-            callbackURLInitial,
-            originalURL(req, {trustProxy: this._trustProxy}),
-          )
-        : callbackURLInitial;
+    const callbackURL = this.getCallbackURL(req);
 
     const authorizeUrl = new URL(this._authorizeURL.href);
     const p = options.params;
@@ -318,14 +323,7 @@ export default class OAuth2Authentication<State = Mixed, Results = any> {
       );
     }
 
-    const callbackURLInitial = options.callbackURL || this._callbackURL;
-    const callbackURL =
-      typeof callbackURLInitial === 'string'
-        ? new URL(
-            callbackURLInitial,
-            originalURL(req, {trustProxy: this._trustProxy}),
-          )
-        : callbackURLInitial;
+    const callbackURL = this.getCallbackURL(req);
 
     const cookie = this._cookie.get(req, res);
     if (!cookie) {
@@ -333,7 +331,7 @@ export default class OAuth2Authentication<State = Mixed, Results = any> {
         'The cookie used to verify state in the oauth transaction was not set.',
       );
     }
-    this._cookie.set(req, res, null);
+    this._cookie.remove(req, res);
     const {k: stateID, d: state} = cookie;
     if (stateID !== (req.query && req.query.state)) {
       throw new StateVerificationFailure(

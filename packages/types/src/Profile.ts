@@ -1,3 +1,25 @@
+export interface Image {
+  url: string;
+  /**
+   * If the image does not accept a `sizeParameter`, this represents the size of
+   * the image.
+   */
+  size?: number;
+  /**
+   * If there is a size parameter, it can be provided as a query string argument
+   * to request the image at a specific size.
+   */
+  sizeParameter?: string;
+}
+export interface Name {
+  formatted?: string;
+  familyName?: string;
+  givenName?: string;
+  middleName?: string;
+  honorificPrefix?: string;
+  honorificSuffix?: string;
+}
+
 /**
  * Adapted from https://developers.google.com/+/web/api/rest/latest/people#resource
  */
@@ -10,19 +32,8 @@ export default interface Profile {
     value: string;
     type?: string;
   }[];
-  images?: {
-    url?: string;
-    size?: number;
-    /**
-     * If there is a size parameter, it can be provided as a query string argument
-     * to request the image at a specific size.
-     */
-    sizeParameter?: string;
-  }[];
-  image?: {
-    url?: string;
-    sizeParameter?: string;
-  };
+  images: Image[];
+  image?: Image;
   name?: {
     formatted?: string;
     familyName?: string;

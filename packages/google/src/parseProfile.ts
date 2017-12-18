@@ -1,4 +1,4 @@
-import {Profile} from '@authentication/types';
+import {Profile, Image} from '@authentication/types';
 import RawGoogleProfile from './RawGoogleProfile';
 /**
  * Parse profile.
@@ -18,10 +18,14 @@ import RawGoogleProfile from './RawGoogleProfile';
  *   - https://developers.google.com/+/web/api/rest/oauth
  */
 export default function parseProfile(json: RawGoogleProfile) {
+  const imageURL = json.image && json.image.url;
   const profile: Profile = {
     ...json,
     provider: 'google',
     emails: json.emails || [],
+    images: imageURL ? [{url: imageURL, sizeParameter: 'sz'}] : [],
+    image: imageURL ? {url: imageURL, sizeParameter: 'sz'} : undefined,
+    name: json.name || {},
   };
   if (typeof profile.id !== 'string' && typeof profile.id !== 'number') {
     throw new TypeError(
@@ -33,10 +37,6 @@ export default function parseProfile(json: RawGoogleProfile) {
   }
   if (profile.emails.some(e => typeof e.value !== 'string')) {
     throw new TypeError('Every email in profile.emails should have a `value`');
-  }
-  if (profile.image && profile.image.url) {
-    profile.images = [profile.image];
-    profile.image.sizeParameter = 'sz';
   }
 
   return profile;

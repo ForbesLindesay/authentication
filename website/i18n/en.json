@@ -6,13 +6,16 @@
     "tagline": "Secure, Modular Authentication for Node.js",
     "cookie": "cookie",
     "doc1": "document number 2",
+    "facebook": "Facebook",
     "getting-started": "Getting Started",
+    "google": "Google",
+    "profile": "Profile",
     "Docs": "Docs",
     "Help": "Help",
     "Blog": "Blog",
     "Guides": "Guides",
     "Packages": "Packages",
-    "Common Authentication Methods": "Common Authentication Methods"
+    "Common Providers": "Common Providers"
   },
   "pages-strings": {
     "Help Translate|recruit community translators for your project": "Help Translate",

@@ -1,0 +1,181 @@
+<html lang="en"><head><meta charset="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"/><title>Facebook · authentication</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta property="og:title" content="Facebook · authentication"/><meta property="og:type" content="website"/><meta property="og:url" content="https://facebook.github.io/index.html"/><meta property="og:description" content="This library provides authentication via Facebook&#x27;s OAuth2 API."/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://facebook.github.io/blog/atom.xml" title="authentication Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://facebook.github.io/blog/feed.xml" title="authentication Blog RSS Feed"/><script type="text/javascript" src="/js/language-switcher.js"></script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><link rel="stylesheet" href="/css/main.css"/></head><body class="sideNavVisible"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/at.svg"/><h2 class="headerTitle">authentication</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li><a href="/docs/getting-started.html" target="_self">Docs</a></li><li><a href="/en/help.html" target="_self">Help</a></li><li><a href="/blog" target="_self">Blog</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Common Providers</span></h2></div><div class="navGroups"><div class="navGroup navGroupActive"><h3>Guides</h3><ul><li class="navListItem"><a class="navItem" href="/docs/getting-started.html">Getting Started</a></li><li class="navListItem"><a class="navItem" href="/docs/profile.html">Profile</a></li></ul></div><div class="navGroup navGroupActive"><h3>Packages</h3><ul><li class="navListItem"><a class="navItem" href="/docs/cookie.html">cookie</a></li></ul></div><div class="navGroup navGroupActive"><h3>Common Providers</h3><ul><li class="navListItem navListItemActive"><a class="navItem navItemActive" href="/docs/facebook.html">Facebook</a></li><li class="navListItem"><a class="navItem" href="/docs/google.html">Google</a></li></ul></div></div></section></div><script>
+          var toggler = document.getElementById('navToggler');
+          var nav = document.getElementById('docsNav');
+          toggler.onclick = function() {
+            nav.classList.toggle('docsSliderActive');
+          };
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1>Facebook</h1></header><article><div><span><p>This library provides authentication via Facebook's OAuth2 API.</p>
+<h2><a class="anchor" aria-hidden="true" name="installation"></a><a href="#installation" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installation</h2>
+<p>To install, run the following command in your terminal:</p>
+<pre><code class="hljs">yarn <span class="hljs-keyword">add</span><span class="bash"> @authentication/facebook
+</span></code></pre>
+<h2><a class="anchor" aria-hidden="true" name="usage"></a><a href="#usage" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Usage</h2>
+<p>First you need to get your &quot;App ID&quot; and &quot;App Secret&quot; from Facebook:</p>
+<ol>
+<li>&quot;Add a New App&quot; on <a href="https://developers.facebook.com/apps/">Facebook's Apps Page</a></li>
+<li>&quot;+ Add Product&quot; -&gt; &quot;Facebook Login&quot; -&gt; &quot;Set Up&quot;</li>
+<li>Ignore the &quot;Quickstart&quot; and go to &quot;Facebook Login&quot; -&gt; &quot;Settings&quot; in the sidebar.</li>
+<li>Add your callback URL to &quot;Valid OAuth redirect URIs&quot; (e.g.
+<code>http://localhost:3000/__/auth/facebook</code>) then &quot;Save Changes&quot;</li>
+<li>Go to &quot;Settings&quot; -&gt; &quot;Basic&quot;:</li>
+<li>&quot;Add Platform&quot; -&gt; &quot;Website&quot;</li>
+<li>Enter site URL (e.g. <a href="http://localhost:3000/">http://localhost:3000/</a>)</li>
+<li>Add &quot;localhost&quot; (or your domain name) to &quot;App Domains&quot;</li>
+<li>&quot;Save Changes&quot;</li>
+<li>Copy &quot;App ID&quot; into the <code>FACEBOOK_APP_ID</code> environment variable</li>
+<li>Copy &quot;App Secret&quot; into <code>FACEBOOK_APP_SECRET</code> environment variable</li>
+</ol>
+<p>For the sign in process, the user is first directed to Facebook, where they are asked if they want to grant your website permission to see their information, then Facebook redirects them back to your website at the <code>callbackURL</code> - which must be one of the &quot;Valid OAuth redirect URIs&quot;.</p>
+<p>The <code>__</code> prefix is a convention to mean &quot;do not cache these requests in a
+service worker&quot; it is supported out of the box by moped/create-react-app/etc.
+You can choose any URL to be the <code>callbackURL</code> as long as it matches the URL you
+gave to Facebook.</p>
+<p>When the user posts to <a href="http://localhost:3000/__/auth/facebook">http://localhost:3000/__/auth/facebook</a> they will be re-directed to Facebook to complete the sign in. Facebook will then redirect them back to the <code>callbackURL</code>, with additional info in the query. You can check if the user decided to cancel the login by calling <code>userCancelledLogin</code>, otherwise calling <code>completeAuthentication</code> may throw an error.</p>
+<p>Once the user has successfully logged in, calling <code>completeAuthentication</code>
+returns a <code>profile</code> with info about the user (e.g. their <code>id</code> and <code>emails</code>), an
+<code>accessToken</code> (for further API requests) and a <code>refreshToken</code> if you need to
+request new access tokens.</p>
+<pre><code class="hljs css typescript"><span class="hljs-keyword">import</span> FacebookAuthentication <span class="hljs-keyword">from</span> <span class="hljs-string">'@authentication/facebook'</span>;
+<span class="hljs-keyword">import</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+
+<span class="hljs-keyword">const</span> app = express();
+
+<span class="hljs-keyword">const</span> facebookAuthentication = <span class="hljs-keyword">new</span> FacebookAuthentication&lt;{message: <span class="hljs-built_in">string</span>}&gt;({
+  callbackURL: <span class="hljs-string">'/__/auth/facebook'</span>
+});
+
+app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function">(<span class="hljs-params">req, res, next</span>) =&gt;</span> {
+  res.send(
+    <span class="hljs-string">`&lt;form action=<span class="hljs-subst">${
+      facebookAuthentication.callbackPath
+    }</span> method="post"&gt;&lt;button type="submit"&gt;Login&lt;/button&gt;&lt;/form&gt;`</span>
+  );
+});
+
+app.post(facebookAuthentication.callbackPath, <span class="hljs-keyword">async</span> (req, res, next) =&gt; {
+  facebookAuthentication.redirectToProvider(req, res, next, {
+    <span class="hljs-comment">// you can pass some abritrary state through to the callback here</span>
+    state: {message: <span class="hljs-string">'Hello world'</span>}
+  });
+});
+app.get(facebookAuthentication.callbackPath, <span class="hljs-keyword">async</span> (req, res, next) =&gt; {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">if</span> (facebookAuthentication.userCancelledLogin(req)) {
+      <span class="hljs-keyword">return</span> res.redirect(<span class="hljs-string">'/'</span>);
+    }
+    <span class="hljs-keyword">const</span> {
+      accessToken, <span class="hljs-comment">// use this to make requests to the Facebook API on behalf of the user</span>
+      refreshToken,
+      profile,
+      state <span class="hljs-comment">// =&gt; {message: 'Hello world'}</span>
+    } = <span class="hljs-keyword">await</span> facebookAuthentication.completeAuthentication(req, res);
+    res.json(profile);
+  } <span class="hljs-keyword">catch</span> (ex) {
+    next(ex);
+  }
+});
+
+app.listen(<span class="hljs-number">3000</span>);
+</code></pre>
+<pre><code class="hljs css javascript"><span class="hljs-keyword">const</span> FacebookAuthentication = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@authentication/facebook'</span>);
+<span class="hljs-keyword">const</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+
+<span class="hljs-keyword">const</span> app = express();
+
+<span class="hljs-keyword">const</span> facebookAuthentication = <span class="hljs-keyword">new</span> FacebookAuthentication({
+  <span class="hljs-attr">callbackURL</span>: <span class="hljs-string">'/__/auth/facebook'</span>
+});
+
+app.get(<span class="hljs-string">'/'</span>, (req, res, next) =&gt; {
+  res.send(
+    <span class="hljs-string">`&lt;form action=<span class="hljs-subst">${
+      facebookAuthentication.callbackPath
+    }</span> method="post"&gt;&lt;button type="submit"&gt;Login&lt;/button&gt;&lt;/form&gt;`</span>
+  );
+});
+
+app.post(facebookAuthentication.callbackPath, <span class="hljs-keyword">async</span> (req, res, next) =&gt; {
+  facebookAuthentication.redirectToProvider(req, res, next, {
+    <span class="hljs-comment">// you can pass some abritrary state through to the callback here</span>
+    state: {<span class="hljs-attr">message</span>: <span class="hljs-string">'Hello world'</span>}
+  });
+});
+app.get(facebookAuthentication.callbackPath, <span class="hljs-keyword">async</span> (req, res, next) =&gt; {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">if</span> (facebookAuthentication.userCancelledLogin(req)) {
+      <span class="hljs-keyword">return</span> res.redirect(<span class="hljs-string">'/'</span>);
+    }
+    <span class="hljs-keyword">const</span> {
+      accessToken, <span class="hljs-comment">// use this to make requests to the Facebook API on behalf of the user</span>
+      refreshToken,
+      profile,
+      state <span class="hljs-comment">// =&gt; {message: 'Hello world'}</span>
+    } = <span class="hljs-keyword">await</span> facebookAuthentication.completeAuthentication(req, res);
+    res.json(profile);
+  } <span class="hljs-keyword">catch</span> (ex) {
+    next(ex);
+  }
+});
+
+app.listen(<span class="hljs-number">3000</span>);
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" name="api"></a><a href="#api" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>API</h2>
+<h3><a class="anchor" aria-hidden="true" name="constructor"></a><a href="#constructor" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Constructor</h3>
+<pre><code class="hljs css typescript"><span class="hljs-keyword">import</span> FacebookAuthentication <span class="hljs-keyword">from</span> <span class="hljs-string">'@authentication/facebook'</span>;
+
+<span class="hljs-keyword">const</span> facebookAuthentication = <span class="hljs-keyword">new</span> FacebookAuthentication&lt;State&gt;(options);
+</code></pre>
+<pre><code class="hljs css javascript"><span class="hljs-keyword">const</span> FacebookAuthentication = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@authentication/facebook'</span>);
+
+<span class="hljs-keyword">const</span> facebookAuthentication = <span class="hljs-keyword">new</span> FacebookAuthentication(options);
+</code></pre>
+<p>Options:</p>
+<ul>
+<li><code>appID</code> (required, <code>string</code>) - defaults to <code>process.env.FACEBOOK_APP_ID</code>. This is the App ID you get from Facebook. It is needed to tell Facebook which application is being signed into.</li>
+<li><code>appSecret</code> (required, <code>string</code>) - defaults to <code>process.env.FACEBOOK_APP_SECRET</code>. This is the App Secret you get from Facebook. It is needed to verify the account with Facebook.</li>
+<li><code>callbackURL</code> (required, <code>string | URL</code>) - a relative or absolute <a href="https://nodejs.org/api/url.html#url_class_url">URL</a> that represents the path that will handle facebook's callbacks.</li>
+<li><code>cookieKeys</code> (optional, <code>string[]</code>) - Optionally sign the cookie used to store the <code>state</code> between the two steps of the oauth process</li>
+<li><code>cookieName</code> (optional, <code>string</code>) - Optionally override the name of the cookie used to store the <code>state</code> between the two steps of the oauth process (defaults to <code>'authentication_oauth2'</code>).</li>
+<li><code>trustProxy</code> (optional, <code>boolean</code>) - If <code>callbackURL</code> is a relative URL, it will be resolved relative to the request URL. If <code>trustProxy</code> is true it will trust <code>x-forwarded</code> headers. You can also use the <code>BASE_URL</code> environment varialbe to specify the base url.</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" name="iscallbackrequest"></a><a href="#iscallbackrequest" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>isCallbackRequest</h3>
+<pre><code class="hljs css js"><span class="hljs-keyword">const</span> isCallbackRequest = facebookAuthentication.isCallbackRequest(req);
+</code></pre>
+<p>Returns <code>true</code> if the request has parameters indicating that it is a callback
+from facebook. If this returns <code>false</code> you should call <code>redirectToProvider</code> and
+redirect to the resulting URL.</p>
+<h3><a class="anchor" aria-hidden="true" name="usercancelledlogin"></a><a href="#usercancelledlogin" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>userCancelledLogin</h3>
+<pre><code class="hljs css js"><span class="hljs-keyword">const</span> userCancelledLogin = facebookAuthentication.userCancelledLogin(req);
+</code></pre>
+<p>Returns <code>true</code> if the user clicked &quot;Cancel&quot; at some point in the login process and facebook redirected them back to your app. You should probably return the user to the login page at this point, instead of displaying an error.</p>
+<h3><a class="anchor" aria-hidden="true" name="redirecttoprovider"></a><a href="#redirecttoprovider" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>redirectToProvider</h3>
+<pre><code class="hljs css js">facebookAuthentication.redirectToProvider(req, res, next, options);
+</code></pre>
+<p>Redirect the user to Facebook with the appropriate parameters to request access to their profile.</p>
+<p>Options:</p>
+<ul>
+<li><code>scope</code> (optional, <code>string | string[]</code>) - defaults to <code>DEFAULT_SCOPE</code>, see <a href="https://developers.facebook.com/docs/facebook-login/permissions/">Facebook's OAuth Docs</a> for a full list of possible scopes.</li>
+<li><code>state</code> (optional, <code>State</code>) - a JSON serializeable value that you can use once the authentication is complete. This is useful for recording where the user was before they started to log in - e.g. a URL to redirect them to after login is complete or an action that the user wanted to take as soon as they are logged in.</li>
+<li><code>display</code> (optional, <code>string</code>) - use this to control the look and feel of the permissions page - see <a href="https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow">https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow</a></li>
+<li><code>isReRequest</code> (optional, <code>boolean</code>) - If a user declines your app a given permission, Facebook will not re-request that permission unless you explicilty pass <code>{isReRequest: true}</code>. You might want to do this after explaining in more detail why you need a given permission.</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" name="completeauthentication"></a><a href="#completeauthentication" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>completeAuthentication</h3>
+<pre><code class="hljs css js"><span class="hljs-keyword">const</span> {
+  accessToken,
+  refreshToken,
+  profile,
+  rawProfile, <span class="hljs-comment">// the raw profile is the un-normalized data from Facebook</span>
+  state,
+} = <span class="hljs-keyword">await</span> facebookAuthentication.completeAuthentication(req, res, options);
+</code></pre>
+<p>Verifies the supplied authentication info with Facebook and returns an
+<code>accessToken</code> and a <code>profile</code>. It also returns the <code>state</code> that you passed in
+when calling <code>redirectToProvider</code>. See <a href="/docs/profile.html">Profile</a> for more info on the fields available in the <code>profile</code> object.</p>
+<p>Options:</p>
+<ul>
+<li><code>imageSize</code> (optional, <code>number</code>) - The prefered profile image size in pixels. Facebook will always return a range of a few sizes in the <code>images</code> array but specifying this will override the contents of the <code>image</code> property on the <code>profile</code>.</li>
+<li><code>profileFields</code> (optional, <code>string[]</code>) - Request additional fields as part of the profile request. By default, fields needed for <code>profile</code> are fetched, providing the appropriate scope was included.</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" name="callbackpath"></a><a href="#callbackpath" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>callbackPath</h3>
+<p>The <code>callbackPath</code> property is just a string pathname from the url you passed in as the <code>callbackURL</code>. This is there so you don't have to keep repeating it.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="cookie.html">← cookie</a><a class="docs-next button" href="google.html">Google →</a></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"><img src="/img/at.svg" alt="authentication" width="66" height="58"/></a><div><h5>Docs</h5><a href="/docs/en/doc1.html">Getting Started (or other categories)</a></div><div><h5>Community</h5><a href="https://twitter.com/ForbesLindesay" target="_blank">Twitter</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/ForbesLindesay/authentication">GitHub</a><a class="github-button" href="https://github.com/ForbesLindesay/authentication" data-icon="octicon-star" data-count-href="/ForbesLindesay/authentication/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2017 Forbes Lindesay</section></footer></div></body></html>

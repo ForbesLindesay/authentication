@@ -10,7 +10,7 @@ import UserInfoError from './errors/UserInfoError';
 export interface Options {
   clientID?: string;
   clientSecret?: string;
-  callbackURL?: string | URL;
+  callbackURL: string | URL;
   /**
    * Optionally provide keys to sign the cookie used to store "state"
    */
@@ -24,7 +24,6 @@ export interface Options {
   trustProxy?: boolean;
 }
 export interface InitOptions<State> {
-  callbackURL?: string | URL;
   /**
    * see https://developers.google.com/+/web/api/rest/oauth#authorization-scopes
    */
@@ -43,7 +42,7 @@ export interface InitOptions<State> {
    * and an access token the first time that your application exchanges an
    * authorization code for tokens.
    */
-  accessType?: 'online' | 'offline';
+  offlineAccess?: boolean;
   /**
    * A case-sensitive list of prompts to present the user. If you don't specify
    * this parameter, the user will be prompted only the first time your app requests
@@ -84,23 +83,25 @@ export interface InitOptions<State> {
    */
   openIDRealm?: string;
 }
-export interface CallbackOptions {
-  callbackURL?: string | URL;
-}
 
 const userProfileURL = new URL('https://www.googleapis.com/plus/v1/people/me');
-const defaultScope = [
+
+export const DEFAULT_SCOPE = [
   'https://www.googleapis.com/auth/plus.login',
   'profile',
   'email',
 ];
+
+export {GooglePlusAPIError, UserInfoError};
+
 /**
  * The Google authentication strategy authenticates requests by delegating to
  * Google using the OAuth 2.0 protocol.
  */
 export default class GoogleAuthentication<State = Mixed> {
-  static DEFAULT_SCOPE: ReadonlyArray<string> = defaultScope;
+  static DEFAULT_SCOPE: ReadonlyArray<string> = DEFAULT_SCOPE;
   private readonly _oauth: OAuth2Authentication<State>;
+  public readonly callbackPath: string;
   constructor(options: Options) {
     const clientID =
       options.clientID === undefined
@@ -125,11 +126,12 @@ export default class GoogleAuthentication<State = Mixed> {
       clientSecret,
       cookieKeys: options.cookieKeys,
       cookieName: options.cookieName,
-      authorizePath: new URL('https://accounts.google.com/o/oauth2/v2/auth'),
-      accessTokenPath: new URL('https://www.googleapis.com/oauth2/v4/token'),
+      authorizeURL: new URL('https://accounts.google.com/o/oauth2/v2/auth'),
+      accessTokenURL: new URL('https://www.googleapis.com/oauth2/v4/token'),
       callbackURL: options.callbackURL,
       trustProxy: options.trustProxy,
     });
+    this.callbackPath = this._oauth.callbackPath;
   }
 
   /**
@@ -183,24 +185,17 @@ export default class GoogleAuthentication<State = Mixed> {
     options: InitOptions<State> = {},
   ) {
     return this._oauth.redirectToProvider(req, res, next, {
-      callbackURL: options.callbackURL,
-      scope: options.scope || defaultScope,
+      scope: options.scope || DEFAULT_SCOPE,
       state: options.state,
       params: authorizationParams(options),
     });
   }
-  async completeAuthentication(
-    req: Request,
-    res: Response,
-    options: CallbackOptions = {},
-  ) {
+  async completeAuthentication(req: Request, res: Response) {
     const {
       accessToken,
       refreshToken,
       state,
-    } = await this._oauth.completeAuthentication(req, res, {
-      callbackURL: options.callbackURL,
-    });
+    } = await this._oauth.completeAuthentication(req, res);
     const profile = await this.userProfile(accessToken);
     return {accessToken, refreshToken, profile, state};
   }
@@ -217,8 +212,8 @@ function authorizationParams<State>(options: InitOptions<State>) {
   const params: {[key: string]: string} = {};
 
   // https://developers.google.com/identity/protocols/OAuth2WebServer
-  if (options.accessType) {
-    params['access_type'] = options.accessType;
+  if (options.offlineAccess) {
+    params['access_type'] = 'offline';
   }
   if (options.prompt) {
     params['prompt'] = options.prompt.join(' ');
@@ -226,7 +221,7 @@ function authorizationParams<State>(options: InitOptions<State>) {
   if (options.loginHint) {
     params['login_hint'] = options.loginHint;
   }
-  if (options.includeGrantedScopes) {
+  if (options.includeGrantedScopes !== false) {
     params['include_granted_scopes'] = 'true';
   }
 
@@ -256,3 +251,6 @@ function authorizationParams<State>(options: InitOptions<State>) {
 
   return params;
 }
+
+module.exports = GoogleAuthentication;
+module.exports.default = GoogleAuthentication;

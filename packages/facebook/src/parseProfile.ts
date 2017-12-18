@@ -21,21 +21,28 @@ export default function parseProfile(json: any) {
     userName: json.username,
     displayName: json.name,
     name: {
+      formatted: json.first_name + ' ' + json.last_name,
       familyName: json.last_name,
       givenName: json.first_name,
       middleName: json.middle_name,
     },
     gender: json.gender,
     url: json.link,
+    images: [],
   };
 
-  profile.images = [];
   pictures.forEach(size => {
     if (json[size] && !json[size].data.is_silhouette) {
-      profile.images!.push({
+      profile.images.push({
         url: json[size].data.url,
         size: Math.min(json[size].data.height, json[size].data.width),
       });
+      if (!profile.image) {
+        profile.image = {
+          url: json[size].data.url,
+          size: Math.min(json[size].data.height, json[size].data.width),
+        };
+      }
     }
   });
 

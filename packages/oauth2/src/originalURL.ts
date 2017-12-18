@@ -32,5 +32,8 @@ export default function originalURL(
     (trustProxy && req.headers['x-forwarded-host']) || req.headers.host;
   const protocol = tls ? 'https' : 'http';
   const path = req.url || '';
+  if (process.env.BASE_URL || process.env.BASE_URI) {
+    return new URL(path, process.env.BASE_URL || process.env.BASE_URI);
+  }
   return new URL(protocol + '://' + host + path);
 }

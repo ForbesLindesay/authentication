@@ -1,0 +1,171 @@
+<html lang="en"><head><meta charset="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"/><title>Google · authentication</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta property="og:title" content="Google · authentication"/><meta property="og:type" content="website"/><meta property="og:url" content="https://facebook.github.io/index.html"/><meta property="og:description" content="This library provides authentication via Google&#x27;s OAuth2 API."/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://facebook.github.io/blog/atom.xml" title="authentication Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://facebook.github.io/blog/feed.xml" title="authentication Blog RSS Feed"/><script type="text/javascript" src="/js/language-switcher.js"></script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><link rel="stylesheet" href="/css/main.css"/></head><body class="sideNavVisible"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/at.svg"/><h2 class="headerTitle">authentication</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li><a href="/docs/getting-started.html" target="_self">Docs</a></li><li><a href="/en/help.html" target="_self">Help</a></li><li><a href="/blog" target="_self">Blog</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Common Providers</span></h2></div><div class="navGroups"><div class="navGroup navGroupActive"><h3>Guides</h3><ul><li class="navListItem"><a class="navItem" href="/docs/getting-started.html">Getting Started</a></li><li class="navListItem"><a class="navItem" href="/docs/profile.html">Profile</a></li></ul></div><div class="navGroup navGroupActive"><h3>Packages</h3><ul><li class="navListItem"><a class="navItem" href="/docs/cookie.html">cookie</a></li></ul></div><div class="navGroup navGroupActive"><h3>Common Providers</h3><ul><li class="navListItem"><a class="navItem" href="/docs/facebook.html">Facebook</a></li><li class="navListItem navListItemActive"><a class="navItem navItemActive" href="/docs/google.html">Google</a></li></ul></div></div></section></div><script>
+          var toggler = document.getElementById('navToggler');
+          var nav = document.getElementById('docsNav');
+          toggler.onclick = function() {
+            nav.classList.toggle('docsSliderActive');
+          };
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1>Google</h1></header><article><div><span><p>This library provides authentication via Google's OAuth2 API.</p>
+<h2><a class="anchor" aria-hidden="true" name="installation"></a><a href="#installation" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Installation</h2>
+<p>To install, run the following command in your terminal:</p>
+<pre><code class="hljs">yarn <span class="hljs-keyword">add</span><span class="bash"> @authentication/google
+</span></code></pre>
+<h2><a class="anchor" aria-hidden="true" name="usage"></a><a href="#usage" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Usage</h2>
+<p>Follow the instructions on <a href="https://developers.google.com/identity/sign-in/web/devconsole-project">Google DevConsole Project</a> to register your application and get a Client ID and Client Secret. Set the <code>GOOGLE_CLIENT_ID</code> environment variable to your Client ID and <code>GOOGLE_CLIENT_SECRET</code> to your Client Secret.</p>
+<p>The <code>__</code> prefix is a convention to mean &quot;do not cache these requests in a
+service worker&quot; it is supported out of the box by moped/create-react-app/etc.
+You can choose any URL to be the <code>callbackURL</code> as long as it matches the URL you
+gave to Google.</p>
+<p>When the user posts to <a href="http://localhost:3000/__/auth/google">http://localhost:3000/__/auth/google</a> they will be
+re-directed to google to complete the sign in. Google will then redirect them
+back to the <code>callbackURL</code>, with additional info in the query. You can check if
+the user decided to cancel the login by calling <code>userCancelledLogin</code>, otherwise
+calling <code>completeAuthentication</code> may throw an error.</p>
+<p>Once the user has successfully logged in, calling <code>completeAuthentication</code>
+returns a <code>profile</code> with info about the user (e.g. their <code>id</code> and <code>emails</code>), an
+<code>accessToken</code> (for further API requests) and a <code>refreshToken</code> if you need to
+request new access tokens.</p>
+<pre><code class="hljs css typescript"><span class="hljs-keyword">import</span> GoogleAuthentication <span class="hljs-keyword">from</span> <span class="hljs-string">'@authentication/google'</span>;
+<span class="hljs-keyword">import</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+
+<span class="hljs-keyword">const</span> app = express();
+
+<span class="hljs-keyword">const</span> googleAuthentication = <span class="hljs-keyword">new</span> GoogleAuthentication&lt;{message: <span class="hljs-built_in">string</span>}&gt;({
+  callbackURL: <span class="hljs-string">'/__/auth/google'</span>
+});
+
+app.get(<span class="hljs-string">'/'</span>, <span class="hljs-function">(<span class="hljs-params">req, res, next</span>) =&gt;</span> {
+  res.send(
+    <span class="hljs-string">`&lt;form action=<span class="hljs-subst">${
+      googleAuthentication.callbackPath
+    }</span> method="post"&gt;&lt;button type="submit"&gt;Login&lt;/button&gt;&lt;/form&gt;`</span>
+  );
+});
+
+app.post(googleAuthentication.callbackPath, <span class="hljs-keyword">async</span> (req, res, next) =&gt; {
+  googleAuthentication.redirectToProvider(req, res, next, {
+    <span class="hljs-comment">// you can pass some abritrary state through to the callback here</span>
+    state: {message: <span class="hljs-string">'Hello world'</span>}
+  });
+});
+app.get(googleAuthentication.callbackPath, <span class="hljs-keyword">async</span> (req, res, next) =&gt; {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">if</span> (googleAuthentication.userCancelledLogin(req)) {
+      <span class="hljs-keyword">return</span> res.redirect(<span class="hljs-string">'/'</span>);
+    }
+    <span class="hljs-keyword">const</span> {
+      accessToken, <span class="hljs-comment">// use this to make requests to the Google API on behalf of the user</span>
+      refreshToken,
+      profile,
+      state <span class="hljs-comment">// =&gt; {message: 'Hello world'}</span>
+    } = <span class="hljs-keyword">await</span> googleAuthentication.completeAuthentication(req, res);
+    res.json(profile);
+  } <span class="hljs-keyword">catch</span> (ex) {
+    next(ex);
+  }
+});
+
+app.listen(<span class="hljs-number">3000</span>);
+</code></pre>
+<pre><code class="hljs css javascript"><span class="hljs-keyword">const</span> GoogleAuthentication = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@authentication/google'</span>);
+<span class="hljs-keyword">const</span> express = <span class="hljs-built_in">require</span>(<span class="hljs-string">'express'</span>);
+
+<span class="hljs-keyword">const</span> app = express();
+
+<span class="hljs-keyword">const</span> googleAuthentication = <span class="hljs-keyword">new</span> GoogleAuthentication({
+  <span class="hljs-attr">callbackURL</span>: <span class="hljs-string">'/__/auth/google'</span>
+});
+
+app.get(<span class="hljs-string">'/'</span>, (req, res, next) =&gt; {
+  res.send(
+    <span class="hljs-string">`&lt;form action=<span class="hljs-subst">${
+      googleAuthentication.callbackPath
+    }</span> method="post"&gt;&lt;button type="submit"&gt;Login&lt;/button&gt;&lt;/form&gt;`</span>
+  );
+});
+
+app.post(googleAuthentication.callbackPath, <span class="hljs-keyword">async</span> (req, res, next) =&gt; {
+  googleAuthentication.redirectToProvider(req, res, next, {
+    <span class="hljs-comment">// you can pass some abritrary state through to the callback here</span>
+    state: {<span class="hljs-attr">message</span>: <span class="hljs-string">'Hello world'</span>}
+  });
+});
+app.get(googleAuthentication.callbackPath, <span class="hljs-keyword">async</span> (req, res, next) =&gt; {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">if</span> (googleAuthentication.userCancelledLogin(req)) {
+      <span class="hljs-keyword">return</span> res.redirect(<span class="hljs-string">'/'</span>);
+    }
+    <span class="hljs-keyword">const</span> {
+      accessToken, <span class="hljs-comment">// use this to make requests to the Google API on behalf of the user</span>
+      refreshToken,
+      profile,
+      state <span class="hljs-comment">// =&gt; {message: 'Hello world'}</span>
+    } = <span class="hljs-keyword">await</span> googleAuthentication.completeAuthentication(req, res);
+    res.json(profile);
+  } <span class="hljs-keyword">catch</span> (ex) {
+    next(ex);
+  }
+});
+
+app.listen(<span class="hljs-number">3000</span>);
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" name="api"></a><a href="#api" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>API</h2>
+<h3><a class="anchor" aria-hidden="true" name="constructor"></a><a href="#constructor" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Constructor</h3>
+<pre><code class="hljs css typescript"><span class="hljs-keyword">import</span> GoogleAuthentication <span class="hljs-keyword">from</span> <span class="hljs-string">'@authentication/google'</span>;
+
+<span class="hljs-keyword">const</span> googleAuthentication = <span class="hljs-keyword">new</span> GoogleAuthentication&lt;State&gt;(options);
+</code></pre>
+<pre><code class="hljs css javascript"><span class="hljs-keyword">const</span> GoogleAuthentication = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@authentication/google'</span>);
+
+<span class="hljs-keyword">const</span> googleAuthentication = <span class="hljs-keyword">new</span> GoogleAuthentication(options);
+</code></pre>
+<p>Options:</p>
+<ul>
+<li><code>clientID</code> (required, <code>string</code>) - defaults to <code>process.env.GOOGLE_CLIENT_ID</code>. This is the Client ID you get from Google. It is needed to tell google which application is being signed into.</li>
+<li><code>clientSecret</code> (required, <code>string</code>) - defaults to <code>process.env.GOOGLE_CLIENT_SECRET</code>. This is the Client Secret you get from Google. It is needed to verify the account with google.</li>
+<li><code>callbackURL</code> (required, <code>string | URL</code>) - a relative or absolute <a href="https://nodejs.org/api/url.html#url_class_url">URL</a> that represents the path that will handle google's callbacks.</li>
+<li><code>cookieKeys</code> (optional, <code>string[]</code>) - Optionally sign the cookie used to store the <code>state</code> between the two steps of the oauth process</li>
+<li><code>cookieName</code> (optional, <code>string</code>) - Optionally override the name of the cookie used to store the <code>state</code> between the two steps of the oauth process (defaults to <code>'authentication_oauth2'</code>).</li>
+<li><code>trustProxy</code> (optional, <code>boolean</code>) - If <code>callbackURL</code> is a relative URL, it will be resolved relative to the request URL. If <code>trustProxy</code> is true it will trust <code>x-forwarded</code> headers. You can also use the <code>BASE_URL</code> environment varialbe to specify the base url.</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" name="iscallbackrequest"></a><a href="#iscallbackrequest" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>isCallbackRequest</h3>
+<pre><code class="hljs css js"><span class="hljs-keyword">const</span> isCallbackRequest = googleAuthentication.isCallbackRequest(req);
+</code></pre>
+<p>Returns <code>true</code> if the request has parameters indicating that it is a callback
+from google. If this returns <code>false</code> you should call <code>redirectToProvider</code> and
+redirect to the resulting URL.</p>
+<h3><a class="anchor" aria-hidden="true" name="usercancelledlogin"></a><a href="#usercancelledlogin" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>userCancelledLogin</h3>
+<pre><code class="hljs css js"><span class="hljs-keyword">const</span> userCancelledLogin = googleAuthentication.userCancelledLogin(req);
+</code></pre>
+<p>Returns <code>true</code> if the user clicked &quot;Cancel&quot; at some point in the login process
+and google redirected them back to your app. You should probably return the user
+to the login page at this point, instead of displaying an error.</p>
+<h3><a class="anchor" aria-hidden="true" name="redirecttoprovider"></a><a href="#redirecttoprovider" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>redirectToProvider</h3>
+<pre><code class="hljs css js">googleAuthentication.redirectToProvider(req, res, next, options);
+</code></pre>
+<p>Redirect the user to google with the appropriate parameters to request access to their profile.</p>
+<p>Options:</p>
+<ul>
+<li><code>scope</code> (optional, <code>string | string[]</code>) - defaults to <code>DEFAULT_SCOPE</code>, see <a href="https://developers.google.com/+/web/api/rest/oauth#authorization-scopes">Google's OAuth Docs</a> for a full list of possible scopes.</li>
+<li><code>state</code> (optional, <code>State</code>) - a JSON serializeable value that you can use once the authentication is complete. This is useful for recording where the user was before they started to log in - e.g. a URL to redirect them to after login is complete or an action that the user wanted to take as soon as they are logged in.</li>
+<li><code>offlineAccess</code> (optional, <code>boolean</code>) - Set this to <code>true</code> if your application needs to refresh access tokens when the user is not present at the browser. This is the method of refreshing access tokens described in <a href="https://developers.google.com/identity/protocols/OAuth2WebServer">Google's Docs</a>. This value instructs the Google authorization server to return a refresh token and an access token the first time that your application exchanges an authorization code for tokens.</li>
+<li><code>prompt</code> (optional, <code>('consent' | 'select_account')[]</code>) - A case-sensitive list of prompts to present the user. If you don't specify this parameter, the user will be prompted only the first time your app requests access.</li>
+<li><code>loginHint</code> (optional, <code>string</code>) - If your application knows which user is trying to authenticate, it can use this parameter to provide a hint to the Google Authentication Server. The server uses the hint to simplify the login flow either by prefilling the email field in the sign-in form or by selecting the appropriate multi-login session. Set the parameter value to an email address or sub identifier, which is equivalent to the user's Google ID.</li>
+<li><code>includeGrantedScopes</code> (optional, <code>boolean</code>) - Enables applications to use incremental authorization to request access to additional scopes in context. Defaults to <code>true</code> which causes the returned access token to include any previously granted scopes, not just the requested ones. See the incremental authorization section of <a href="https://developers.google.com/identity/protocols/OAuth2WebServer">https://developers.google.com/identity/protocols/OAuth2WebServer</a> for examples.</li>
+<li><code>hostedDomain</code> (optional, <code>string</code>) - used in Google Apps for Work</li>
+<li><code>requestVisibleActions</code> (optional, <code>string[]</code>) - <a href="https://developers.google.com/+/web/app-activities/#writing_an_app_activity_using_the_google_apis_client_libraries">Used for google+</a></li>
+<li><code>openIDRealm</code> (optional, <code>string</code>) - <a href="https://developers.google.com/accounts/docs/OpenID?hl=ja#adjust-uri">This parameter is needed when migrating users from Google's OpenID 2.0 to OAuth 2.0</a></li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" name="completeauthentication"></a><a href="#completeauthentication" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>completeAuthentication</h3>
+<pre><code class="hljs css js"><span class="hljs-keyword">const</span> {
+  accessToken,
+  refreshToken,
+  profile,
+  state,
+} = <span class="hljs-keyword">await</span> googleAuthentication.completeAuthentication(req, res);
+</code></pre>
+<p>Verifies the supplied authentication info with google and returns an
+<code>accessToken</code> and a <code>profile</code>. It also returns the <code>state</code> that you passed in
+when calling <code>redirectToProvider</code>. See <a href="/docs/profile.html">Profile</a> for more info on the fields available in the <code>profile</code> object.</p>
+<h3><a class="anchor" aria-hidden="true" name="callbackpath"></a><a href="#callbackpath" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>callbackPath</h3>
+<p>The <code>callbackPath</code> property is just a string pathname from the url you passed in as the <code>callbackURL</code>. This is there so you don't have to keep repeating it.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="facebook.html">← Facebook</a></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"><img src="/img/at.svg" alt="authentication" width="66" height="58"/></a><div><h5>Docs</h5><a href="/docs/en/doc1.html">Getting Started (or other categories)</a></div><div><h5>Community</h5><a href="https://twitter.com/ForbesLindesay" target="_blank">Twitter</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/ForbesLindesay/authentication">GitHub</a><a class="github-button" href="https://github.com/ForbesLindesay/authentication" data-icon="octicon-star" data-count-href="/ForbesLindesay/authentication/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2017 Forbes Lindesay</section></footer></div></body></html>

@@ -28,6 +28,7 @@ const cookie = new Cookie<number>(
 
 app.use((req, res, next) => {
   cookie.refresh(req, res);
+  next();
 });
 app.get('/set-cookie/:value', (req, res, next) => {
   cookie.set(req, res, parseInt(req.params.value, 10));
@@ -55,6 +56,7 @@ const cookie = new Cookie(
 
 app.use((req, res, next) => {
   cookie.refresh(req, res);
+  next();
 });
 app.get('/set-cookie/:value', (req, res, next) => {
   cookie.set(req, res, parseInt(req.params.value, 10));
