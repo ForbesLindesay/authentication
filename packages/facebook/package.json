@@ -1,13 +1,13 @@
 {
   "name": "@authentication/facebook",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@authentication/base-error": "^0.0.1",
-    "@authentication/oauth2": "^0.0.2",
-    "@authentication/types": "^0.0.2",
+    "@authentication/oauth2": "^0.0.3",
+    "@authentication/types": "^0.0.3",
     "@types/node": "^8.0.33"
   },
   "scripts": {
