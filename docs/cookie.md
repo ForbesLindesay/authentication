@@ -1,5 +1,5 @@
 ---
-title: cookie
+title: Cookie
 ---
 
 Cookie provides a simple way to store session state in a cookie. It is secure by default (even including built in CSRF protection for all non-GET requests).

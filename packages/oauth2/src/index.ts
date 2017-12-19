@@ -182,15 +182,35 @@ export default class OAuth2Authentication<State = Mixed, Results = any> {
           refreshToken: undefined | string,
           results: Results,
         ) => {
+          const params = results as any;
           if (err) {
             if (err.statusCode && err.data) {
               try {
-                return reject(parseErrorResponse(err.data, err.statusCode));
+                const e = parseErrorResponse(err.data, err.statusCode);
+                if (e) {
+                  return reject(e);
+                }
               } catch (_) {}
             }
             reject(
               new InternalOAuthError('Failed to obtain access token', err),
             );
+          } else if (!accessToken) {
+            // NOTE: GitHub returns an HTTP 200 OK on error responses.  As a result, the
+            //       underlying `oauth` implementation understandably does not parse the
+            //       response as an error.  This code swizzles the implementation to
+            //       handle this condition.
+            if (params.error) {
+              return reject(
+                new TokenError(
+                  params.error,
+                  params.error_description,
+                  params.error_uri,
+                  400,
+                ),
+              );
+            }
+            reject(new InternalOAuthError('Failed to obtain access token'));
           } else {
             resolve({
               accessToken,
