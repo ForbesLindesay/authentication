@@ -20,8 +20,9 @@
     "start": "moped start"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/auth-demo",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues"
 }

@@ -14,8 +14,10 @@
     "prepublish": "tsc -p tsconfig.build.json && node ../../prepare github"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/github",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues",
+  "homepage": "https://www.atauthentication.com/docs/github.html"
 }

@@ -1,4 +1,10 @@
-const {readdirSync, writeFileSync, statSync, readFileSync} = require('fs');
+const {
+  readdirSync,
+  writeFileSync,
+  statSync,
+  readFileSync,
+  existsSync,
+} = require('fs');
 
 const LICENSE = readFileSync(__dirname + '/LICENSE.md');
 
@@ -71,7 +77,12 @@ readdirSync(__dirname + '/packages').forEach(directory => {
   pkg.repository =
     'https://github.com/ForbesLindesay/authentication/tree/master/packages/' +
     directory;
-  pkg.license = 'MIT';
+  pkg.bugs = 'https://github.com/ForbesLindesay/authentication/issues';
+  if (existsSync(__dirname + '/docs/' + directory + '.md')) {
+    pkg.homepage =
+      'https://www.atauthentication.com/docs/' + directory + '.html';
+  }
+  pkg.license = 'GPL-3.0';
   if (!pkg.private) {
     pkg.publishConfig = {
       access: 'public',

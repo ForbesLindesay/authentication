@@ -15,8 +15,10 @@
     "prepublish": "tsc -p tsconfig.build.json && node ../../prepare cookie"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/cookie",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues",
+  "homepage": "https://www.atauthentication.com/docs/cookie.html"
 }

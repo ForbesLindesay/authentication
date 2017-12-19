@@ -14,8 +14,10 @@
     "prepublish": "tsc -p tsconfig.build.json && node ../../prepare facebook"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/facebook",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues",
+  "homepage": "https://www.atauthentication.com/docs/facebook.html"
 }

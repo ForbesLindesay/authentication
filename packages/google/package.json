@@ -14,8 +14,10 @@
     "prepublish": "tsc -p tsconfig.build.json && node ../../prepare google"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/google",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues",
+  "homepage": "https://www.atauthentication.com/docs/google.html"
 }

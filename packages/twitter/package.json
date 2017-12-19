@@ -14,8 +14,9 @@
     "prepublish": "tsc -p tsconfig.build.json && node ../../prepare twitter"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/twitter",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues"
 }

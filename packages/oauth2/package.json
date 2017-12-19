@@ -16,8 +16,9 @@
     "prepublish": "tsc -p tsconfig.build.json && node ../../prepare oauth2"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/oauth2",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues"
 }
