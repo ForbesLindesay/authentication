@@ -1,0 +1,21 @@
+{
+  "name": "@authentication/github",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@authentication/base-error": "^0.0.1",
+    "@authentication/oauth2": "^0.0.2",
+    "@authentication/types": "^0.0.2",
+    "@types/node": "^8.0.33"
+  },
+  "scripts": {
+    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare github"
+  },
+  "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/github",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

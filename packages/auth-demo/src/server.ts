@@ -1,4 +1,5 @@
 import FacebookAuthentication from '@authentication/facebook';
+import GitHubAuthentication from '@authentication/github';
 import GoogleAuthentication from '@authentication/google';
 import TwitterAuthentication from '@authentication/twitter';
 import express = require('express');
@@ -6,6 +7,9 @@ const app: express.Express = express();
 
 const facebookAuthentication = new FacebookAuthentication({
   callbackURL: '/__/auth/facebook',
+});
+const gitHubAuthentication = new GitHubAuthentication({
+  callbackURL: '/__/auth/github',
 });
 const googleAuthentication = new GoogleAuthentication({
   callbackURL: '/__/auth/google',
@@ -20,7 +24,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/__/auth/facebook', async (req, res, next) => {
+app.get(facebookAuthentication.callbackPath, async (req, res, next) => {
   try {
     if (!facebookAuthentication.isCallbackRequest(req)) {
       facebookAuthentication.redirectToProvider(req, res, next, {
@@ -47,7 +51,32 @@ app.get('/__/auth/facebook', async (req, res, next) => {
     next(ex);
   }
 });
-app.get('/__/auth/google', async (req, res, next) => {
+app.get(gitHubAuthentication.callbackPath, async (req, res, next) => {
+  try {
+    if (!gitHubAuthentication.isCallbackRequest(req)) {
+      gitHubAuthentication.redirectToProvider(req, res, next, {
+        state: 'Hello world',
+      });
+      return;
+    }
+    if (gitHubAuthentication.userCancelledLogin(req)) {
+      return res.redirect('/');
+    }
+    const {
+      accessToken,
+      refreshToken,
+      profile,
+      rawProfile,
+      rawEmails,
+      state,
+    } = await gitHubAuthentication.completeAuthentication(req, res);
+    console.log({accessToken, refreshToken, state, rawProfile, rawEmails});
+    res.json(profile);
+  } catch (ex) {
+    next(ex);
+  }
+});
+app.get(googleAuthentication.callbackPath, async (req, res, next) => {
   try {
     if (!googleAuthentication.isCallbackRequest(req)) {
       googleAuthentication.redirectToProvider(req, res, next, {

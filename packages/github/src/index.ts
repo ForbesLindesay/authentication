@@ -1,11 +1,11 @@
 import {URL} from 'url';
 import {Request, Response, NextFunction} from 'express';
 import OAuth2Authentication from '@authentication/oauth2';
-import {Mixed} from '@authentication/types';
-import {Profile} from '@authentication/types';
-// import parseProfile from './parseProfile';
-// import GooglePlusAPIError from './errors/GooglePlusAPIError';
-// import UserInfoError from './errors/UserInfoError';
+import {Mixed, Profile} from '@authentication/types';
+import GitHubAPIError from './errors/GitHubAPIError';
+import parseProfile from './parseProfile';
+import RawGitHubProfile from './RawGitHubProfile';
+import RawEmail from './RawEmail';
 
 export interface Options {
   clientID?: string;
@@ -26,7 +26,8 @@ export interface Options {
 export interface InitOptions<State> {
   /**
    * valid scopes include: 'user', 'public_repo', 'repo', 'gist', or none.
-   * (see http://developer.github.com/v3/oauth/#scopes for more info)
+   * (see https://developer.github.com/apps/building-oauth-apps/scopes-for-oauth-apps/
+   * for more info)
    */
   scope?: string | ReadonlyArray<string>;
   state?: State;
@@ -35,9 +36,7 @@ export interface InitOptions<State> {
 const userProfileURL = new URL('https://api.github.com/user');
 const userEmailsURL = new URL('https://api.github.com/user/emails');
 
-export const DEFAULT_SCOPE = [
-  // 'user',
-];
+export const DEFAULT_SCOPE = ['read:user', 'user:email'];
 
 /**
  * The GitHub authentication strategy authenticates requests by delegating to
@@ -85,7 +84,13 @@ export default class GitHubAuthentication<State = Mixed> {
    *
    * This function constructs a normalized profile
    */
-  async userProfile(accessToken: string): Promise<Profile> {
+  async userProfile(
+    accessToken: string,
+  ): Promise<{
+    profile: Profile;
+    rawProfile: RawGitHubProfile;
+    rawEmails: null | RawEmail[];
+  }> {
     let body = '';
     try {
       body = (await this._oauth.get(userProfileURL, accessToken)).data;
@@ -98,7 +103,10 @@ export default class GitHubAuthentication<State = Mixed> {
       }
 
       if (json && json.message) {
-        throw new APIError(json.message);
+        throw new GitHubAPIError(
+          json.message + ' ' + json.documentation_url,
+          err.statusCode,
+        );
       }
       throw new OAuth2Authentication.InternalOAuthError(
         'Failed to fetch user profile',
@@ -113,7 +121,46 @@ export default class GitHubAuthentication<State = Mixed> {
       throw new Error('Failed to parse user profile');
     }
 
-    return `parseProfile`(json);
+    let emailsBody = '';
+    try {
+      emailsBody = (await this._oauth.get(userEmailsURL, accessToken)).data;
+    } catch (err) {
+      // 404 likely means we just didn't get the user:email OAuth scope
+      if (err.statusCode !== 404) {
+        let json: any = null;
+        if (err.data) {
+          try {
+            json = JSON.parse(err.data);
+          } catch (_) {}
+        }
+
+        if (json && json.message) {
+          throw new GitHubAPIError(
+            json.message + ' ' + json.documentation_url,
+            err.statusCode,
+          );
+        }
+        throw new OAuth2Authentication.InternalOAuthError(
+          'Failed to fetch user emails',
+          err,
+        );
+      }
+    }
+
+    let emails = null;
+    if (emailsBody) {
+      try {
+        emails = JSON.parse(emailsBody);
+      } catch (ex) {
+        throw new Error('Failed to parse user emails');
+      }
+    }
+
+    return {
+      profile: parseProfile(json, emails),
+      rawProfile: json,
+      rawEmails: emails,
+    };
   }
 
   isCallbackRequest(req: Request) {
@@ -139,8 +186,10 @@ export default class GitHubAuthentication<State = Mixed> {
       refreshToken,
       state,
     } = await this._oauth.completeAuthentication(req, res);
-    const profile = await this.userProfile(accessToken);
-    return {accessToken, refreshToken, profile, state};
+    const {profile, rawProfile, rawEmails} = await this.userProfile(
+      accessToken,
+    );
+    return {accessToken, refreshToken, profile, rawProfile, rawEmails, state};
   }
 }
 

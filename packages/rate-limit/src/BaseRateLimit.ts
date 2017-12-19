@@ -1,5 +1,6 @@
 import parseMs from './parseMs';
 import RateLimit, {ConsumeOptions} from './RateLimit';
+import LockByID from './LockByID';
 
 export interface State {
   value: number;
@@ -31,16 +32,19 @@ export function isRateLimitExceededError(
 export default abstract class BaseRateLimit<ID extends string | number>
   implements RateLimit<ID> {
   private readonly _store: Store<ID>;
+  private readonly _lock = new LockByID();
   protected abstract _take(state: null | State, now: number): State;
   constructor(store: Store<ID>) {
     this._store = store;
   }
   private _tx<T>(id: ID, fn: (store: StoreAPI<ID>) => Promise<T>): Promise<T> {
-    if (typeof (this._store as TransactionalStoreAPI<ID>).tx === 'function') {
-      return (this._store as TransactionalStoreAPI<ID>).tx(fn);
-    } else {
-      return fn(this._store as StoreAPI<ID>);
-    }
+    return this._lock.withLock(id, () => {
+      if (typeof (this._store as TransactionalStoreAPI<ID>).tx === 'function') {
+        return (this._store as TransactionalStoreAPI<ID>).tx(fn);
+      } else {
+        return fn(this._store as StoreAPI<ID>);
+      }
+    });
   }
   /**
    * Consume one from the rate limit specified by id.

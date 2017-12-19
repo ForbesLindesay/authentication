@@ -1,4 +1,4 @@
-import {Profile, Image} from '@authentication/types';
+import {Profile} from '@authentication/types';
 import RawGoogleProfile from './RawGoogleProfile';
 /**
  * Parse profile.

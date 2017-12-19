@@ -1,0 +1,18 @@
+{
+  "name": "@authentication/rate-limit",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@types/node": "^8.0.33"
+  },
+  "scripts": {
+    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare rate-limit"
+  },
+  "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/rate-limit",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

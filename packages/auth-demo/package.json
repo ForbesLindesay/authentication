@@ -6,6 +6,7 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
+    "@authentication/github": "^0.0.0",
     "@authentication/google": "^0.0.2",
     "@authentication/twitter": "^0.0.1",
     "@moped/scripts": "^0.0.11",

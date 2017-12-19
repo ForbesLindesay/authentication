@@ -101,8 +101,8 @@ export default class OAuth1Authentication<State = Mixed, TokenID = number> {
     this._cookie = new Cookie(options.cookieName || 'authentication_oauth1', {
       keys: options.cookieKeys,
       maxAge: Cookie.Session,
-      sameSite: Cookie.SameSitePolicy.AnySite,
-      signed: Cookie.SignedKind.Required,
+      sameSitePolicy: Cookie.SameSitePolicy.AnySite,
+      signingPolicy: Cookie.SigningPolicy.Required,
     });
     const requestTokenURL = parseURL(
       'options.requestTokenURL',
@@ -317,7 +317,7 @@ export default class OAuth1Authentication<State = Mixed, TokenID = number> {
         'The cookie used to verify state in the oauth transaction was not set.',
       );
     }
-    this._cookie.set(req, res, null);
+    this._cookie.remove(req, res);
     const {d: state, i: tokenID} = cookie;
     const oauthTokenSecret = await this._tokenStore.retrieve(tokenID);
     if (!oauthTokenSecret) {

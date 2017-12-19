@@ -182,7 +182,7 @@ export default class Cookie<T> {
 
     // optiohttpsOnly  this._constructorOptions = {};
     if (keys) {
-      this._consthttpsOnlyOptions.keys = keys;
+      this._constructorOptions.keys = keys;
     }
     if (typeof options.httpsOnly === 'boolean') {
       this._constructorOptions.secure = options.httpsOnly;
