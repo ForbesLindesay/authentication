@@ -8,7 +8,7 @@ export default interface BaseRateLimit<ID extends string | number> {
    * If consuming would take more than `options.timeout` milliseconds,
    * a `RateLimitExceededError` is thrown.
    */
-  consume(id: ID, options: ConsumeOptions): Promise<void>;
+  consume(id: ID, options?: ConsumeOptions): Promise<void>;
   /**
    * Get the timestamp at which a request will next be accepted
    */

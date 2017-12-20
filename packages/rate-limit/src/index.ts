@@ -3,6 +3,7 @@ import {
   RateLimitExceededError,
   isRateLimitExceededError,
   ConsumeOptions,
+  RateLimitState,
   StoreAPI,
   TransactionalStoreAPI,
   Store,
@@ -10,6 +11,7 @@ import {
 import BucketRateLimit, {BucketOptions} from './BucketRateLimit';
 import ExponentialRateLimit, {ExponentialOptions} from './ExponentialRateLimit';
 
+export {RateLimitState};
 export {RateLimit};
 export {
   RateLimitExceededError,

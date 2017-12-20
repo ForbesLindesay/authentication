@@ -19,15 +19,15 @@ yarn add @authentication/rate-limit
 If you've ever forgotten your password on an iPhone, you will have experienced an exponential rate limit. These work well for passwords because they allow the first 2 or 3 attempts to happen in rapid succession, not penalising people who make a simple typo. They then slowly get more punishing, so that if someone remembers their password after a few seconds, and enters it as the 4th or 5th guess, they'll still not have had to wait very long. However, once you try and brute force an exponential rate limit, you can quickly find yourself waiting days between attempts.
 
 ```typescript
-import {ExponentialRateLimit} from '@authentication/rate-limit';
+import {ExponentialRateLimit, RateLimitState} from '@authentication/rate-limit';
 
 // N.B. it is generally a bad idea to store this
 // state in memory, you should put in your database
 // so it is persisted between server restarts.
-const rateLimitStore = new Map<number, State>();
+const rateLimitStore = new Map<number, RateLimitState>();
 const rateLimit = new ExponentialRateLimit(
   {
-    async save(userID: number, state: State) {
+    async save(userID: number, state: RateLimitState) {
       rateLimitStore.set(userID, state);
     },
     async load(userID: number) {
@@ -121,15 +121,15 @@ export default async function verifyPasswordWithRateLimit(
 Bucket rate limits are generally used for APIs. The best way to understand how this works is to imagine a physical bucket full of balls. Each time you make a request, you must take out a ball. Every time an interval elapses, a new ball is added to the bucket. If the bucket is empty, you must wait for a ball to be added, before you can make a request. If the bucket gets full, no more balls will be added until one has been removed.
 
 ```typescript
-import {BucketRateLimit} from '@authentication/rate-limit';
+import {BucketRateLimit, RateLimitState} from '@authentication/rate-limit';
 
 // N.B. it is generally a bad idea to store this
 // state in memory, you should put in your database
 // so it is persisted between server restarts.
-const rateLimitStore = new Map<string, State>();
+const rateLimitStore = new Map<string, RateLimitState>();
 const rateLimit = new BucketRateLimit(
   {
-    async save(apiToken: string, state: State) {
+    async save(apiToken: string, state: RateLimitState) {
       rateLimitStore.set(apiToken, state);
     },
     async load(apiToken: string) {

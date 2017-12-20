@@ -2,15 +2,15 @@ import parseMs from './parseMs';
 import RateLimit, {ConsumeOptions} from './RateLimit';
 import LockByID from './LockByID';
 
-export interface State {
+export interface RateLimitState {
   value: number;
   timestamp: number;
 }
 export {ConsumeOptions};
 
 export interface StoreAPI<ID> {
-  save(id: ID, state: State): Promise<void | null | {}>;
-  load(id: ID): Promise<null | State>;
+  save(id: ID, state: RateLimitState): Promise<void | null | {}>;
+  load(id: ID): Promise<null | RateLimitState>;
   remove(id: ID): Promise<void | null | {}>;
 }
 export interface TransactionalStoreAPI<ID> {
@@ -33,7 +33,10 @@ export default abstract class BaseRateLimit<ID extends string | number>
   implements RateLimit<ID> {
   private readonly _store: Store<ID>;
   private readonly _lock = new LockByID();
-  protected abstract _take(state: null | State, now: number): State;
+  protected abstract _take(
+    state: null | RateLimitState,
+    now: number,
+  ): RateLimitState;
   constructor(store: Store<ID>) {
     this._store = store;
   }

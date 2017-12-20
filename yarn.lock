@@ -252,6 +252,10 @@
     "@types/express" "*"
     "@types/node" "*"
 
+"@types/bytes@^2.5.1":
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/@types/bytes/-/bytes-2.5.1.tgz#392c42adb65e16d32328b82b58fbc1611b75da89"
+
 "@types/connect@*":
   version "3.4.31"
   resolved "https://registry.yarnpkg.com/@types/connect/-/connect-3.4.31.tgz#1f92d6b117ecc05076c49ecd024f7976e528bad9"
@@ -1574,7 +1578,7 @@ byline@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/byline/-/byline-5.0.0.tgz#741c5216468eadc457b03410118ad77de8c1ddb1"
 
-bytes@3.0.0:
+bytes@3.0.0, bytes@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/bytes/-/bytes-3.0.0.tgz#d32815404d689699f85a4ea4fa8755dd13a96048"
 
@@ -4775,9 +4779,13 @@ mute-stream@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-nan@^2.3.0:
+nan@^2.3.0, nan@^2.4.0:
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.8.0.tgz#ed715f3fe9de02b57a5e6252d90a96675e1f085a"
+
+nanoassert@^1.0.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/nanoassert/-/nanoassert-1.1.0.tgz#4f3152e09540fde28c76f44b19bbcd1d5a42478d"
 
 natural-compare@^1.4.0:
   version "1.4.0"
@@ -4802,6 +4810,10 @@ no-case@^2.2.0:
 node-forge@0.6.33:
   version "0.6.33"
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.6.33.tgz#463811879f573d45155ad6a9f43dc296e8e85ebc"
+
+node-gyp-build@^3.0.0:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-3.2.2.tgz#f78a9f84834b1dbd293b0719fee48635d2789c27"
 
 node-int64@^0.4.0:
   version "0.4.0"
@@ -6110,6 +6122,13 @@ schema-utils@^0.4.2:
     ajv-keywords "^2.1.0"
     chalk "^2.3.0"
 
+secure-password@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/secure-password/-/secure-password-2.1.2.tgz#2d2ee45521cb8b62bb7ea2ad0be7617f31b5a23c"
+  dependencies:
+    nanoassert "^1.0.0"
+    sodium-native "^1.10.3"
+
 select-hose@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
@@ -6271,6 +6290,13 @@ sockjs@0.3.18:
   dependencies:
     faye-websocket "^0.10.0"
     uuid "^2.0.2"
+
+sodium-native@^1.10.3:
+  version "1.10.3"
+  resolved "https://registry.yarnpkg.com/sodium-native/-/sodium-native-1.10.3.tgz#3fab41e91cc349bc59b89d7f7039389e62401549"
+  dependencies:
+    nan "^2.4.0"
+    node-gyp-build "^3.0.0"
 
 sort-keys@^1.0.0:
   version "1.1.2"
@@ -6644,7 +6670,7 @@ thread-loader@^1.1.2:
     loader-runner "^2.3.0"
     loader-utils "^1.1.0"
 
-throat@^4.0.0:
+throat@^4.0.0, throat@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/throat/-/throat-4.1.0.tgz#89037cbc92c56ab18926e6ba4cbb200e15672a6a"
 
