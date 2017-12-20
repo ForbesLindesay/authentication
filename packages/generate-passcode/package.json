@@ -1,0 +1,21 @@
+{
+  "name": "@authentication/generate-passcode",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@types/node": "^8.0.33",
+    "base32": "^0.0.6"
+  },
+  "scripts": {
+    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare generate-passcode"
+  },
+  "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/generate-passcode",
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://www.atauthentication.com/docs/generate-passcode.html"
+}
