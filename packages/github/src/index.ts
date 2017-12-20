@@ -1,7 +1,7 @@
 import {URL} from 'url';
 import {Request, Response, NextFunction} from 'express';
 import OAuth2Authentication from '@authentication/oauth2';
-import {Mixed, Profile} from '@authentication/types';
+import {Mixed, Profile, RedirectStrategy} from '@authentication/types';
 import GitHubAPIError from './errors/GitHubAPIError';
 import parseProfile from './parseProfile';
 import RawGitHubProfile from './RawGitHubProfile';
@@ -42,7 +42,8 @@ export const DEFAULT_SCOPE = ['read:user', 'user:email'];
  * The GitHub authentication strategy authenticates requests by delegating to
  * GitHub using the OAuth 2.0 protocol.
  */
-export default class GitHubAuthentication<State = Mixed> {
+export default class GitHubAuthentication<State = Mixed>
+  implements RedirectStrategy<State, InitOptions<State>> {
   static DEFAULT_SCOPE: ReadonlyArray<string> = DEFAULT_SCOPE;
   private readonly _oauth: OAuth2Authentication<State>;
   public readonly callbackPath: string;
@@ -84,7 +85,7 @@ export default class GitHubAuthentication<State = Mixed> {
    *
    * This function constructs a normalized profile
    */
-  async userProfile(
+  async getUserProfile(
     accessToken: string,
   ): Promise<{
     profile: Profile;
@@ -186,7 +187,7 @@ export default class GitHubAuthentication<State = Mixed> {
       refreshToken,
       state,
     } = await this._oauth.completeAuthentication(req, res);
-    const {profile, rawProfile, rawEmails} = await this.userProfile(
+    const {profile, rawProfile, rawEmails} = await this.getUserProfile(
       accessToken,
     );
     return {accessToken, refreshToken, profile, rawProfile, rawEmails, state};

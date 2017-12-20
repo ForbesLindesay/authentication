@@ -104,7 +104,7 @@ function parseErrorResponse(body: string, status: number): TokenError | null {
   return null;
 }
 
-export default class OAuth2Authentication<State = Mixed, Results = any> {
+export default class OAuth2Authentication<State = Mixed, Results = Mixed> {
   private readonly _base: any;
   private readonly _authorizeURL: URL;
   private readonly _accessTokenURL: URL;

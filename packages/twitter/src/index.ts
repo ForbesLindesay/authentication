@@ -1,7 +1,7 @@
 import {URL} from 'url';
 import {Request, Response, NextFunction} from 'express';
 import OAuth1Authentication from '@authentication/oauth1';
-import {Mixed, Profile} from '@authentication/types';
+import {Mixed, Profile, RedirectStrategy} from '@authentication/types';
 import RawProfile from './RawProfile';
 import parseProfile from './parseProfile';
 
@@ -12,7 +12,7 @@ const userProfileURL = new URL(
 export {Profile};
 
 export interface Options {
-  callbackURL?: string | URL;
+  callbackURL: string | URL;
   consumerKey?: string;
   consumerSecret?: string;
   /**
@@ -39,7 +39,6 @@ export interface Options {
   includeEntities?: boolean;
 }
 export interface InitOptions<State> {
-  callbackURL?: string | URL;
   state?: State;
   /**
    * Forces the user to enter their credentials to ensure the correct
@@ -52,11 +51,13 @@ export interface InitOptions<State> {
    */
   screenName?: string;
 }
-export default class TwitterAuthentication<State = Mixed> {
+export default class TwitterAuthentication<State = Mixed>
+  implements RedirectStrategy<State, InitOptions<State>> {
   private readonly _oauth: OAuth1Authentication<State>;
   private readonly _includeEmail: boolean;
   private readonly _includeStatus: boolean;
   private readonly _includeEntities: boolean;
+  public readonly callbackPath: string;
   constructor(options: Options) {
     if (!options.cookieKeys && !process.env.COOKIE_SECRETS) {
       throw new Error(
@@ -100,6 +101,7 @@ export default class TwitterAuthentication<State = Mixed> {
       options.includeStatus !== undefined ? options.includeStatus : true;
     this._includeEntities =
       options.includeEntities !== undefined ? options.includeEntities : true;
+    this.callbackPath = this._oauth.callbackPath;
   }
   async userProfile(token: string, tokenSecret: string) {
     const url = new URL(userProfileURL.href);
@@ -113,19 +115,6 @@ export default class TwitterAuthentication<State = Mixed> {
       url.searchParams.set('include_entities', 'false');
     }
     const {body, res} = await this._oauth.get(url, token, tokenSecret);
-    // if (err) {
-    //   if (err.data) {
-    //     try {
-    //       json = JSON.parse(err.data);
-    //     } catch (_) {}
-    //   }
-
-    //   if (json && json.errors && json.errors.length) {
-    //     var e = json.errors[0];
-    //     return done(new APIError(e.message, e.code));
-    //   }
-    //   return done(new InternalOAuthError('Failed to fetch user profile', err));
-    // }
 
     let json = null;
     try {
@@ -165,7 +154,6 @@ export default class TwitterAuthentication<State = Mixed> {
       userAuthorizationParams.screen_name = options.screenName;
     }
     this._oauth.redirectToProvider(req, res, next, {
-      callbackURL: options.callbackURL,
       state: options.state,
       userAuthorizationParams,
     });

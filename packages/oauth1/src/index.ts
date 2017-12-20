@@ -4,8 +4,6 @@ import Cookie from '@authentication/cookie';
 import {Mixed} from '@authentication/types';
 import AuthorizationError from './errors/AuthorizationError';
 import StateVerificationFailure from './errors/StateVerificationFailure';
-import MemoryStore from './MemoryStore';
-import TokenStore from './TokenStore';
 import originalURL from './originalURL';
 const OAuth1Base = require('oauth').OAuth;
 
@@ -30,7 +28,7 @@ export enum SignatureMethod {
   HMAC_SHA1 = 'HMAC-SHA1',
   RSA_SHA1 = 'RSA-SHA1',
 }
-export interface Options<TokenID> {
+export interface Options {
   /**
    * provide keys to sign the cookie used to store "state"
    */
@@ -68,31 +66,24 @@ export interface Options<TokenID> {
   /**
    * URL to which the service provider will redirect the user after obtaining authorization
    */
-  callbackURL?: string | URL;
-  /**
-   * This store is used to store "oauth_token_secret". By default, these secrets are stored
-   * in memory, but if you have multiple servers and do not implemnet sticky sessions, you
-   * will need to store these out of process somewhere.
-   */
-  tokenStore?: TokenStore<TokenID>;
+  callbackURL: string | URL;
   trustProxy?: boolean;
   customHeaders?: {[key: string]: string};
 }
 export interface InitOptions<State> {
-  callbackURL?: string | URL;
   requestTokenParams?: {[key: string]: string};
   userAuthorizationParams?: {[key: string]: string};
   state?: State;
 }
 
-export default class OAuth1Authentication<State = Mixed, TokenID = number> {
-  private readonly _callbackURL: void | string | URL;
-  private readonly _cookie: Cookie<{i: TokenID; d?: State}>;
+export default class OAuth1Authentication<State = Mixed> {
+  private readonly _callbackURL: string | URL;
+  private readonly _cookie: Cookie<{t: string; d?: State}>;
   private readonly _base: any;
   private readonly _trustProxy: void | boolean;
   private readonly _userAuthorizationURL: URL;
-  private readonly _tokenStore: TokenStore<TokenID>;
-  constructor(options: Options<TokenID>) {
+  public readonly callbackPath: string;
+  constructor(options: Options) {
     if (!options.cookieKeys && !process.env.COOKIE_SECRETS) {
       throw new Error(
         'You must either pass in `cookieKeys` or set COOKIE_SECRETS to use oauth1',
@@ -102,7 +93,7 @@ export default class OAuth1Authentication<State = Mixed, TokenID = number> {
       keys: options.cookieKeys,
       maxAge: Cookie.Session,
       sameSitePolicy: Cookie.SameSitePolicy.AnySite,
-      signingPolicy: Cookie.SigningPolicy.Required,
+      signingPolicy: Cookie.SigningPolicy.Optional,
     });
     const requestTokenURL = parseURL(
       'options.requestTokenURL',
@@ -122,6 +113,10 @@ export default class OAuth1Authentication<State = Mixed, TokenID = number> {
     if (options.consumerSecret === undefined) {
       throw new TypeError('OAuthStrategy requires a consumerSecret option');
     }
+    this.callbackPath = (typeof options.callbackURL === 'string'
+      ? new URL(options.callbackURL, 'http://example.com')
+      : options.callbackURL
+    ).pathname;
     this._base = new OAuth1Base(
       requestTokenURL.href,
       accessTokenURL.href,
@@ -133,7 +128,6 @@ export default class OAuth1Authentication<State = Mixed, TokenID = number> {
       null,
       options.customHeaders,
     );
-    this._tokenStore = options.tokenStore || (new MemoryStore() as any);
     this._trustProxy = options.trustProxy;
   }
 
@@ -235,12 +229,15 @@ export default class OAuth1Authentication<State = Mixed, TokenID = number> {
     // token secret needs to be known.  The token secret will be temporarily
     // stored, so that it can be retrieved upon the user being
     // redirected back to the application.
+    //
+    // It is safe to share the tokenSecret with the user being authenticated,
+    // so we store it in an un-encrypted cookie.
 
     const requestTokenParams: {
       [key: string]: string;
     } = options.requestTokenParams ? {...options.requestTokenParams} : {};
 
-    const callbackURLInitial = options.callbackURL || this._callbackURL;
+    const callbackURLInitial = this._callbackURL;
     const callbackURL =
       typeof callbackURLInitial === 'string'
         ? new URL(
@@ -254,8 +251,7 @@ export default class OAuth1Authentication<State = Mixed, TokenID = number> {
     const {token, tokenSecret, params} = await this.getOAuthRequestToken(
       requestTokenParams,
     );
-    const tokenID = await this._tokenStore.save(tokenSecret);
-    this._cookie.set(req, res, {d: options.state, i: tokenID});
+    this._cookie.set(req, res, {d: options.state, t: tokenSecret});
 
     const userAuthorizationURL = new URL(this._userAuthorizationURL.href);
     userAuthorizationURL.searchParams.set('oauth_token', token);
@@ -318,8 +314,7 @@ export default class OAuth1Authentication<State = Mixed, TokenID = number> {
       );
     }
     this._cookie.remove(req, res);
-    const {d: state, i: tokenID} = cookie;
-    const oauthTokenSecret = await this._tokenStore.retrieve(tokenID);
+    const {d: state, t: oauthTokenSecret} = cookie;
     if (!oauthTokenSecret) {
       throw new StateVerificationFailure(
         'The oauth provider did not provide a valid "state" parameter in the response.',

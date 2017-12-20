@@ -1,8 +1,7 @@
 import {URL} from 'url';
 import {Request, Response, NextFunction} from 'express';
 import OAuth2Authentication from '@authentication/oauth2';
-import {Mixed} from '@authentication/types';
-import {Profile} from '@authentication/types';
+import {Mixed, Profile, RedirectStrategy} from '@authentication/types';
 import parseProfile from './parseProfile';
 import GooglePlusAPIError from './errors/GooglePlusAPIError';
 import UserInfoError from './errors/UserInfoError';
@@ -98,7 +97,8 @@ export {GooglePlusAPIError, UserInfoError};
  * The Google authentication strategy authenticates requests by delegating to
  * Google using the OAuth 2.0 protocol.
  */
-export default class GoogleAuthentication<State = Mixed> {
+export default class GoogleAuthentication<State = Mixed>
+  implements RedirectStrategy<State, InitOptions<State>> {
   static DEFAULT_SCOPE: ReadonlyArray<string> = DEFAULT_SCOPE;
   private readonly _oauth: OAuth2Authentication<State>;
   public readonly callbackPath: string;
@@ -139,7 +139,7 @@ export default class GoogleAuthentication<State = Mixed> {
    *
    * This function constructs a normalized profile
    */
-  async userProfile(accessToken: string): Promise<Profile> {
+  async getUserProfile(accessToken: string): Promise<{profile: Profile}> {
     let body = '';
     try {
       body = (await this._oauth.get(userProfileURL, accessToken)).data;
@@ -169,7 +169,7 @@ export default class GoogleAuthentication<State = Mixed> {
       throw new Error('Failed to parse user profile');
     }
 
-    return parseProfile(json);
+    return {profile: parseProfile(json)};
   }
 
   isCallbackRequest(req: Request) {
@@ -196,7 +196,7 @@ export default class GoogleAuthentication<State = Mixed> {
       refreshToken,
       state,
     } = await this._oauth.completeAuthentication(req, res);
-    const profile = await this.userProfile(accessToken);
+    const {profile} = await this.getUserProfile(accessToken);
     return {accessToken, refreshToken, profile, state};
   }
 

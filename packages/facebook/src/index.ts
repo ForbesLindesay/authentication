@@ -2,8 +2,7 @@ import {createHmac} from 'crypto';
 import {URL} from 'url';
 import {Request, Response, NextFunction} from 'express';
 import OAuth2Authentication from '@authentication/oauth2';
-import {Mixed} from '@authentication/types';
-import {Profile} from '@authentication/types';
+import {Mixed, Profile, RedirectStrategy} from '@authentication/types';
 import FacebookAuthorizationError from './errors/FacebookAuthorizationError';
 import FacebookGraphAPIError from './errors/FacebookGraphAPIError';
 import convertProfileFields from './convertProfileFields';
@@ -57,7 +56,8 @@ export const DEFAULT_SCOPE: string[] = [];
  * The Facebook authentication strategy authenticates requests by delegating to
  * Facebook using the OAuth 2.0 protocol.
  */
-export default class FacebookAuthentication<State = Mixed> {
+export default class FacebookAuthentication<State = Mixed>
+  implements RedirectStrategy<State, InitOptions<State>, CallbackOptions> {
   static DEFAULT_SCOPE: ReadonlyArray<string> = DEFAULT_SCOPE;
   private readonly _oauth: OAuth2Authentication<State>;
   private readonly _clientSecret: string;
@@ -160,7 +160,7 @@ export default class FacebookAuthentication<State = Mixed> {
    *
    * This function constructs a normalized profile
    */
-  private async userProfile(accessToken: string, options: CallbackOptions) {
+  async getUserProfile(accessToken: string, options: CallbackOptions) {
     const permissions = await this.getPermissions(accessToken);
     const url = new URL(userProfileURL.href);
 
@@ -290,7 +290,10 @@ export default class FacebookAuthentication<State = Mixed> {
       refreshToken,
       state,
     } = await this._oauth.completeAuthentication(req, res);
-    const {profile, rawProfile} = await this.userProfile(accessToken, options);
+    const {profile, rawProfile} = await this.getUserProfile(
+      accessToken,
+      options,
+    );
     return {accessToken, refreshToken, profile, rawProfile, state};
   }
 }
