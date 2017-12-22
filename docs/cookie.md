@@ -14,7 +14,7 @@ yarn add @authentication/cookie
 
 ## Usage
 
-Set the `SECURE_KEY` environment variable to a comma-separated list of random strings. (see `keys` option).
+In production, you will need to specify the `SECURE_KEY` environment variable, see [Signing](#signing). If `process.env.NODE_ENV === 'development'`, signing is not required.
 
 ```typescript
 import Cookie from '@authentication/cookie';
@@ -73,6 +73,8 @@ app.get('/get-cookie', (req, res, next) => {
 ```
 
 ## Signing
+
+> If your app is running on heroku, you can just enable the [secure key](https://elements.heroku.com/addons/securekey) addon for free, which will automatically provide the value of `SECURE_KEY` that `@authentication/cookie` needs, and will automatically handle key rotation for you.
 
 If cookies are not signed, users can maliciously send your application arbitrary data in the cookie. For most uses of cookies, that would be problematic. For this reason, `@authentication/cookie` requires you to sign your cookies by default. The easiest way to do this is to set the `SECURE_KEY` environment variable to a secret, random string. The other option is to pass an array containing a secret, random string as the `keys` option. Enviornment variables are the recommended approach as it is generally easier to keep them secret.
 

@@ -1,20 +1,23 @@
 import FacebookAuthentication from '@authentication/facebook';
 import GitHubAuthentication from '@authentication/github';
 import GoogleAuthentication from '@authentication/google';
+import getTransport from '@authentication/send-message';
 import TwitterAuthentication from '@authentication/twitter';
 import express = require('express');
 const app: express.Express = express();
 
-const facebookAuthentication = new FacebookAuthentication({
+const transport = getTransport();
+
+const facebookAuthentication = new FacebookAuthentication<string>({
   callbackURL: '/__/auth/facebook',
 });
-const gitHubAuthentication = new GitHubAuthentication({
+const gitHubAuthentication = new GitHubAuthentication<string>({
   callbackURL: '/__/auth/github',
 });
-const googleAuthentication = new GoogleAuthentication({
+const googleAuthentication = new GoogleAuthentication<string>({
   callbackURL: '/__/auth/google',
 });
-const twitterAuthentication = new TwitterAuthentication({
+const twitterAuthentication = new TwitterAuthentication<string>({
   callbackURL: '/__/auth/twitter',
 });
 
@@ -99,7 +102,7 @@ app.get(googleAuthentication.callbackPath, async (req, res, next) => {
     next(ex);
   }
 });
-app.get('/__/auth/twitter', async (req, res, next) => {
+app.get(twitterAuthentication.callbackPath, async (req, res, next) => {
   try {
     if (!twitterAuthentication.isCallbackRequest(req)) {
       twitterAuthentication.redirectToProvider(req, res, next, {
@@ -124,4 +127,19 @@ app.get('/__/auth/twitter', async (req, res, next) => {
   }
 });
 
+app.get('/__/email', async (req, res, next) => {
+  try {
+    res.json(
+      await transport.sendMail({
+        from: 'me@example.com',
+        to: 'them@example.com',
+        subject: 'An awesome message',
+        text: 'You are awesome!',
+        html: '<p>You are <strong>awesome</strong>!',
+      }),
+    );
+  } catch (ex) {
+    next(ex);
+  }
+});
 export default app;

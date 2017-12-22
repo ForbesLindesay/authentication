@@ -1,11 +1,37 @@
 import {
   createTestAccount,
   createTransport,
-  Transporter,
   SendMailOptions,
+  getTestMessageUrl,
 } from 'nodemailer';
 
-export interface AsyncTransporter {
+export interface MailInfo {
+  /**
+   * most transports should return the final Message-Id value used with this property
+   */
+  messageId?: string | number;
+  /**
+   * includes the envelope object for the message
+   */
+  envelope?: {};
+  /**
+   * an array returned by SMTP transports (includes recipient addresses that were accepted by the server)
+   */
+  accepted?: string[];
+  /**
+   * an array returned by SMTP transports (includes recipient addresses that were rejected by the server)
+   */
+  rejected?: string[];
+  /**
+   * an array returned by Direct SMTP transport. Includes recipient addresses that were temporarily rejected together with the server response
+   */
+  pending?: string[];
+  /**
+   * a string returned by SMTP transports and includes the last SMTP response from the server
+   */
+  response: string;
+}
+export interface Transport {
   /** Closes all connections in the pool. If there is a message being sent, the connection is closed later */
   close(): void;
 
@@ -13,30 +39,30 @@ export interface AsyncTransporter {
   verify(): Promise<true>;
 
   /** Sends an email using the preselected transport object */
-  sendMail(mailOptions: SendMailOptions): Promise<{} | void | null>;
+  sendMail(mailOptions: SendMailOptions): Promise<MailInfo>;
 }
 
-export enum MessagingProviderKind {
-  MailGun = 'mailgun',
+export enum Provider {
+  Mailgun = 'mailgun',
   Postmark = 'postmark',
   SendGrid = 'sendgrid',
   SMTP = 'smtp',
-  Test = 'ethereal',
+  Ethereal = 'ethereal',
 }
-export interface MailGunProvider {
-  kind: MessagingProviderKind.MailGun;
+export interface MailgunProvider {
+  kind: Provider.Mailgun;
   account?: {apiKey: string; domain: string};
 }
 export interface PostmarkProvider {
-  kind: MessagingProviderKind.Postmark;
+  kind: Provider.Postmark;
   apiKey?: string;
 }
 export interface SendGridProvider {
-  kind: MessagingProviderKind.SendGrid;
+  kind: Provider.SendGrid;
   account?: {username: string; password: string};
 }
 export interface SmtpProvider {
-  kind: MessagingProviderKind.SMTP;
+  kind: Provider.SMTP;
   url?: string;
   config?: {
     port?: number;
@@ -46,45 +72,45 @@ export interface SmtpProvider {
     secure?: boolean;
   };
 }
-export interface TestProvider {
-  kind: MessagingProviderKind.Test;
+export interface EtherealProvider {
+  kind: Provider.Ethereal;
   account?: {username: string; password: string};
 }
 
-export type Provider =
-  | MailGunProvider
+export type ProviderConfig =
+  | MailgunProvider
   | PostmarkProvider
   | SendGridProvider
   | SmtpProvider
-  | TestProvider;
+  | EtherealProvider;
 
-function getDefaultProvider(): Provider {
+function getDefaultProvider(): ProviderConfig {
   if (process.env.SMTP_URL) {
-    return {kind: MessagingProviderKind.SMTP};
+    return {kind: Provider.SMTP};
   }
   if (
     process.env.SMTP_HOST ||
     (process.env.SMTP_USERNAME && process.env.SMTP_PASSWORD)
   ) {
-    return {kind: MessagingProviderKind.SMTP};
+    return {kind: Provider.SMTP};
   }
   if (process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN) {
-    return {kind: MessagingProviderKind.MailGun};
+    return {kind: Provider.Mailgun};
   }
   if (process.env.POSTMARK_API_KEY) {
-    return {kind: MessagingProviderKind.Postmark};
+    return {kind: Provider.Postmark};
   }
   if (process.env.SENDGRID_USERNAME && process.env.SENDGRID_PASSWORD) {
-    return {kind: MessagingProviderKind.SendGrid};
+    return {kind: Provider.SendGrid};
   }
   if (process.env.ETHEREAL_USERNAME && process.env.ETHEREAL_PASSWORD) {
-    return {kind: MessagingProviderKind.Test};
+    return {kind: Provider.Ethereal};
   }
   if (process.env.NODE_ENV === 'development') {
-    return {kind: MessagingProviderKind.Test};
+    return {kind: Provider.Ethereal};
   }
   throw new Error(
-    'You must specify an email provider. @authentication supports SMTP, MailGun, Postmark, SendGrid and Ethereal out of the box.',
+    'You must specify an email provider. This can be done by setting environment variables, or from within the code. See https://www.atauthentication.com/docs/send-message.html for more information.',
   );
 }
 
@@ -104,75 +130,184 @@ function getValue<TParsed = TRaw, TRaw = string>(
   }
   throw new Error(message);
 }
-async function getTransport(provider: Provider): Promise<Transporter> {
-  switch (provider.kind) {
-    case MessagingProviderKind.MailGun:
+
+function toProvider(kind: Provider): ProviderConfig {
+  switch (kind) {
+    case Provider.Mailgun:
+      return {kind};
+    case Provider.Postmark:
+      return {kind};
+    case Provider.SendGrid:
+      return {kind};
+    case Provider.SMTP:
+      return {kind};
+    case Provider.Ethereal:
+      return {kind};
+    default:
+      throw new Error('Unrecognised messaging provider kind');
+  }
+}
+
+function getEtherealTransportUnCached() {
+  return createTestAccount().then(auth =>
+    createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth,
+    }),
+  );
+}
+let testTransport: null | Promise<Transport> = null;
+function getEtherealTransport(provider: EtherealProvider) {
+  if (
+    provider.account ||
+    (process.env.ETHEREAL_USERNAME && process.env.ETHEREAL_PASSWORD)
+  ) {
+    const t = createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: provider.account
+        ? {user: provider.account.username, pass: provider.account.password}
+        : process.env.ETHEREAL_USERNAME && process.env.ETHEREAL_PASSWORD
+          ? {
+              user: process.env.ETHEREAL_USERNAME!,
+              pass: process.env.ETHEREAL_PASSWORD!,
+            }
+          : (() => {
+              throw new Error('Missing test account');
+            })(),
+    });
+    return {
+      /** Closes all connections in the pool. If there is a message being sent, the connection is closed later */
+      close() {
+        t.close();
+      },
+
+      /** Verifies SMTP configuration */
+      verify() {
+        return t.verify();
+      },
+
+      /** Sends an email using the preselected transport object */
+      sendMail(mailOptions: SendMailOptions) {
+        return t.sendMail(mailOptions).then(info => {
+          console.log('Test message sent: %s', info.messageId);
+          // Preview only available when sending through an Ethereal account
+          console.log('Preview URL: %s', getTestMessageUrl(info as any));
+          return info;
+        });
+      },
+    };
+  }
+  if (!testTransport) {
+    testTransport = getEtherealTransportUnCached();
+  }
+  let t = testTransport;
+  return {
+    /** Closes all connections in the pool. If there is a message being sent, the connection is closed later */
+    close() {
+      t.then(
+        t => t.close(),
+        err => {
+          t = testTransport = getEtherealTransportUnCached();
+          throw err;
+        },
+      );
+    },
+
+    /** Verifies SMTP configuration */
+    verify() {
+      return t.then(
+        t => t.verify(),
+        err => {
+          t = testTransport = getEtherealTransportUnCached();
+          throw err;
+        },
+      );
+    },
+
+    /** Sends an email using the preselected transport object */
+    sendMail(mailOptions: SendMailOptions) {
+      return t
+        .then(
+          t => t.sendMail(mailOptions),
+          err => {
+            t = testTransport = getEtherealTransportUnCached();
+            throw err;
+          },
+        )
+        .then(info => {
+          console.log('Test message sent: %s', info.messageId);
+          // Preview only available when sending through an Ethereal account
+          console.log('Preview URL: %s', getTestMessageUrl(info as any));
+          return info;
+        });
+    },
+  };
+}
+
+export default function getTransport(
+  provider: ProviderConfig | Provider = getDefaultProvider(),
+): Transport {
+  const p = typeof provider === 'string' ? toProvider(provider) : provider;
+  switch (p.kind) {
+    case Provider.Mailgun:
       return createTransport(
         require('nodemailer-mailgun-transport')({
           auth: {
             api_key: getValue<string>(
-              [
-                provider.account && provider.account.apiKey,
-                process.env.MAILGUN_API_KEY,
-              ],
+              [p.account && p.account.apiKey, process.env.MAILGUN_API_KEY],
               v => (typeof v === 'string' ? v : undefined),
               'You must either provide account.apiKey or specify the MAILGUN_API_KEY environment variable.',
             ),
             domain: getValue<string>(
-              [
-                provider.account && provider.account.domain,
-                process.env.MAILGUN_DOMAIN,
-              ],
+              [p.account && p.account.domain, process.env.MAILGUN_DOMAIN],
               v => (typeof v === 'string' ? v : undefined),
               'You must either provide account.domain or specify the MAILGUN_DOMAIN environment variable.',
             ),
           },
         }),
       );
-    case MessagingProviderKind.Postmark:
+    case Provider.Postmark:
       return createTransport(
         require('nodemailer-postmark-transport')({
           auth: {
             apiKey: getValue<string>(
-              [provider.apiKey, process.env.POSTMARK_API_KEY],
+              [p.apiKey, process.env.POSTMARK_API_KEY],
               v => (typeof v === 'string' ? v : undefined),
               'You must either provide apiKey or specify the POSTMARK_API_KEY environment variable.',
             ),
           },
         }),
       );
-    case MessagingProviderKind.SendGrid:
+    case Provider.SendGrid:
       return createTransport(
         require('nodemailer-sendgrid-transport')({
           auth: {
             api_user: getValue<string>(
-              [
-                provider.account && provider.account.username,
-                process.env.SENDGRID_USERNAME,
-              ],
+              [p.account && p.account.username, process.env.SENDGRID_USERNAME],
               v => (typeof v === 'string' ? v : undefined),
               'You must either provide account.username or specify the SENDGRID_USERNAME environment variable.',
             ),
             api_key: getValue<string>(
-              [
-                provider.account && provider.account.password,
-                process.env.SENDGRID_PASSWORD,
-              ],
+              [p.account && p.account.password, process.env.SENDGRID_PASSWORD],
               v => (typeof v === 'string' ? v : undefined),
               'You must either provide account.username or specify the SENDGRID_USERNAME environment variable.',
             ),
           },
         }),
       );
-    case MessagingProviderKind.SMTP:
-      if (provider.url) {
-        if (typeof provider.url !== 'string') {
+    case Provider.SMTP:
+      if (p.url) {
+        if (typeof p.url !== 'string') {
           throw new Error('The SMTP URL must be a string');
         }
-        createTransport(provider.url);
+        createTransport(p.url);
       }
-      if (provider.config) {
-        createTransport(provider.config);
+      if (p.config) {
+        createTransport(p.config);
       }
       if (process.env.SMTP_URL) {
         return createTransport(
@@ -197,60 +332,10 @@ async function getTransport(provider: Provider): Promise<Transporter> {
             : undefined,
         secure: process.env.SMTP_SECURE === 'true',
       });
-    case MessagingProviderKind.Test:
-      return createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: provider.account
-          ? {user: provider.account.username, pass: provider.account.password}
-          : process.env.ETHEREAL_USERNAME && process.env.ETHEREAL_PASSWORD
-            ? {
-                user: process.env.ETHEREAL_USERNAME!,
-                pass: process.env.ETHEREAL_PASSWORD!,
-              }
-            : await createTestAccount(),
-      });
+    case Provider.Ethereal:
+      return getEtherealTransport(p);
   }
 }
-
-function toProvider(kind: MessagingProviderKind): Provider {
-  switch (kind) {
-    case MessagingProviderKind.MailGun:
-      return {kind};
-    case MessagingProviderKind.Postmark:
-      return {kind};
-    case MessagingProviderKind.SendGrid:
-      return {kind};
-    case MessagingProviderKind.SMTP:
-      return {kind};
-    case MessagingProviderKind.Test:
-      return {kind};
-    default:
-      throw new Error('Unrecognised messaging provider kind');
-  }
-}
-
-export default function getTransportSync(
-  provider: Provider | MessagingProviderKind = getDefaultProvider(),
-): AsyncTransporter {
-  const transport = getTransport(
-    typeof provider === 'string' ? toProvider(provider) : provider,
-  );
-  return {
-    /** Closes all connections in the pool. If there is a message being sent, the connection is closed later */
-    close() {
-      transport.then(t => t.close());
-    },
-
-    /** Verifies SMTP configuration */
-    verify() {
-      return transport.then(t => t.verify());
-    },
-
-    /** Sends an email using the preselected transport object */
-    sendMail(mailOptions: SendMailOptions) {
-      return transport.then(t => t.sendMail(mailOptions));
-    },
-  };
-}
+module.exports = getTransport;
+module.exports.default = getTransport;
+module.exports.Provider = Provider;
