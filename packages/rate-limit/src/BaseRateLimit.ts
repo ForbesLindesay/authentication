@@ -1,6 +1,6 @@
+import LockByID from '@authentication/lock-by-id';
 import parseMs from './parseMs';
 import RateLimit, {ConsumeOptions} from './RateLimit';
-import LockByID from './LockByID';
 
 export interface RateLimitState {
   value: number;

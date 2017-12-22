@@ -59,9 +59,9 @@ export default class TwitterAuthentication<State = Mixed>
   private readonly _includeEntities: boolean;
   public readonly callbackPath: string;
   constructor(options: Options) {
-    if (!options.cookieKeys && !process.env.COOKIE_SECRETS) {
+    if (!options.cookieKeys && !process.env.SECURE_KEY) {
       throw new Error(
-        'You must either pass in `cookieKeys` or set COOKIE_SECRETS to use twitter authentication',
+        'You must either pass in `cookieKeys` or set SECURE_KEY to use twitter authentication',
       );
     }
     const consumerKey =

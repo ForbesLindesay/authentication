@@ -84,9 +84,9 @@ export default class OAuth1Authentication<State = Mixed> {
   private readonly _userAuthorizationURL: URL;
   public readonly callbackPath: string;
   constructor(options: Options) {
-    if (!options.cookieKeys && !process.env.COOKIE_SECRETS) {
+    if (!options.cookieKeys && !process.env.SECURE_KEY) {
       throw new Error(
-        'You must either pass in `cookieKeys` or set COOKIE_SECRETS to use oauth1',
+        'You must either pass in `cookieKeys` or set SECURE_KEY to use oauth1',
       );
     }
     this._cookie = new Cookie(options.cookieName || 'authentication_oauth1', {

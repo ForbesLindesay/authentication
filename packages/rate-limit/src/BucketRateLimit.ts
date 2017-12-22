@@ -27,6 +27,7 @@ export interface BucketOptions {
   /**
    * The maximum number of request tokens in the bucket. This is effectively
    * the starting number for how many tokens you can use.
+   * Defaults to 10
    */
   maxSize?: number;
 }
@@ -34,7 +35,7 @@ interface ParsedOptions {
   interval: number;
   maxSize: number;
 }
-function parseOptions(options: BucketOptions): ParsedOptions {
+function parseOptions(options: BucketOptions = {}): ParsedOptions {
   const interval = parseMs(options.interval, 1000, 'options.interval');
   const maxSize = options.maxSize || 10;
   return {interval, maxSize};
@@ -76,7 +77,7 @@ export default class BucketRateLimit<
   ID extends string | number
 > extends BaseRateLimit<ID> {
   private readonly _options: ParsedOptions;
-  constructor(store: Store<ID>, options: BucketOptions) {
+  constructor(store: Store<ID>, options: BucketOptions = {}) {
     super(store);
     this._options = parseOptions(options);
   }

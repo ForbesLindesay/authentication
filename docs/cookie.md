@@ -14,7 +14,7 @@ yarn add @authentication/cookie
 
 ## Usage
 
-Set the `COOKIE_SECRETS` environment variable to a comma-separated list of random strings. (see `keys` option).
+Set the `SECURE_KEY` environment variable to a comma-separated list of random strings. (see `keys` option).
 
 ```typescript
 import Cookie from '@authentication/cookie';
@@ -74,13 +74,13 @@ app.get('/get-cookie', (req, res, next) => {
 
 ## Signing
 
-If cookies are not signed, users can maliciously send your application arbitrary data in the cookie. For most uses of cookies, that would be problematic. For this reason, `@authentication/cookie` requires you to sign your cookies by default. The easiest way to do this is to set the `COOKIE_SECRETS` environment variable to a secret, random string. The other option is to pass an array containing a secret, random string as the `keys` option. Enviornment variables are the recommended approach as it is generally easier to keep them secret.
+If cookies are not signed, users can maliciously send your application arbitrary data in the cookie. For most uses of cookies, that would be problematic. For this reason, `@authentication/cookie` requires you to sign your cookies by default. The easiest way to do this is to set the `SECURE_KEY` environment variable to a secret, random string. The other option is to pass an array containing a secret, random string as the `keys` option. Enviornment variables are the recommended approach as it is generally easier to keep them secret.
 
 ### Key Rotation
 
 It is a good idea to rotate the keys on a regular basis. This way if an old key is compromised, it will not affect the security of the current application.
 
-To enable this, `@authentication/cookie` lets you pass an array of keys (separate keys with a `,` if using `COOKIE_SECRETS`). The first key is always used whenever creating cookies, subsequent keys are accepted when reading cookies. Once `maxAge` has expired, you can safely delete old keys.
+To enable this, `@authentication/cookie` lets you pass an array of keys (separate keys with a `,` if using `SECURE_KEY`). The first key is always used whenever creating cookies, subsequent keys are accepted when reading cookies. Once `maxAge` has expired, you can safely delete old keys.
 
 ### Signing Policy
 
@@ -131,13 +131,13 @@ const cookie = new Cookie('session_id', {
 });
 ```
 
-* `Required` - This is the default in production. The cookie **must** be signed. If no keys are provided and `COOKIE_SECRETS` is empty, an error will be thrown.
+* `Required` - This is the default in production. The cookie **must** be signed. If no keys are provided and `SECURE_KEY` is empty, an error will be thrown.
 
   If this option is selected, you can trist that any value in a cookie was set by the server.
 
-* `Optional` - This can be used in libraries where you do not expect the server to need to trust data sent in cookies, but you wish to enable signing if the `COOKIE_SECRETS` environment variable is set.
+* `Optional` - This can be used in libraries where you do not expect the server to need to trust data sent in cookies, but you wish to enable signing if the `SECURE_KEY` environment variable is set.
 
-  Note that if `COOKIE_SECRETS` is not set, this is equivalent to `Disabled`.
+  Note that if `SECURE_KEY` is not set, this is equivalent to `Disabled`.
 
 * `Disabled` - Use this if you know that you will not need to trust the data stored in the cookie. For example, you could use this for something like a user preference for font-size.
 
@@ -217,7 +217,7 @@ You must also pass in `options`:
 * `baseURL` (optional, `string | URL`) - A base url used to check the sameSite policy. If this is not set, we will attempt to infer the baseURL from the request's headers. You can also specify this via the `BASE_URL` environment variable.
 * `domain` (optional, `string`) - a string indicating the domain of the cookie (no default).
 * `serverSideOnly` (optional, `boolean`) - a boolean indicating whether the cookie is only to be sent over HTTP(S), and not made available to client JavaScript (`true` by default).
-* `keys` (optionalish, `string[]`) - Defaults to `process.env.COOKIE_SECRETS.split(',')`. Required by default. See [Signing](#signing) for more info.
+* `keys` (optionalish, `string[]`) - Defaults to `process.env.SECURE_KEY.split(',')`. Required by default. See [Signing](#signing) for more info.
 * `maxAge` (required, `number | string | CookieSession`) - The max age of the cookie. Set this to `Cookie.Session` if you want the cookie to expire when the user closes their browser. You can set this to a number in milliseconds, or a string that gets interpreted by the [ms](https://www.npmjs.com/package/ms#examples) library.
 * `overwrite` (optional, `boolean`) - a boolean indicating whether to overwrite previously set cookies of the same name (true by default). If this is true, all cookies set during the same request with the same name (regardless of path or domain) are filtered out of the Set-Cookie header when setting this cookie.
 * `path` (optional, `string`) - a string indicating the path of the cookie (/ by default).

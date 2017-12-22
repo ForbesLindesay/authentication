@@ -27,7 +27,7 @@ export enum SameSitePolicy {
 export enum SigningPolicy {
   /**
    * This is the default.  The cookie **must** be signed. If no
-   * keys are provided and `COOKIE_SECRETS` is empty, an error
+   * keys are provided and `SECURE_KEY` is empty, an error
    * will be thrown.
    *
    * If this option is selected, you can trist that any value in
@@ -37,10 +37,10 @@ export enum SigningPolicy {
   /**
    * This can be used in libraries where you do not expect the
    * server to need to trust data sent in cookies, but you wish
-   * to enable signing if the `COOKIE_SECRETS` environment variable
+   * to enable signing if the `SECURE_KEY` environment variable
    * is set.
    *
-   * Note that if `COOKIE_SECRETS` is not set, this is equivalent to
+   * Note that if `SECURE_KEY` is not set, this is equivalent to
    * `Disabled`.
    */
   Optional,
@@ -123,10 +123,10 @@ export default class Cookie<T> {
 
     // signing
 
-    const COOKIE_SECRETS = process.env.COOKIE_SECRETS;
+    const SECURE_KEY = process.env.SECURE_KEY;
     const keys = options.keys
       ? options.keys
-      : COOKIE_SECRETS ? COOKIE_SECRETS.split(',') : undefined;
+      : SECURE_KEY ? SECURE_KEY.split(',') : undefined;
     if (
       keys &&
       !(Array.isArray(keys) && keys.every(k => typeof k === 'string'))
@@ -154,7 +154,7 @@ export default class Cookie<T> {
     }
     if (signed && !keys) {
       throw new Error(
-        'You must either pass in `keys` as an option or set the `COOKIE_SECRETS` environment variable to use signed cookies.',
+        'You must either pass in `keys` as an option or set the `SECURE_KEY` environment variable to use signed cookies.',
       );
     }
 

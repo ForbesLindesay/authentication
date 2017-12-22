@@ -1,0 +1,23 @@
+{
+  "name": "@authentication/passwordless",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@authentication/cookie": "^0.7.1",
+    "@authentication/generate-passcode": "^0.0.0",
+    "@authentication/is-email": "^0.0.0",
+    "@authentication/lock-by-id": "^0.0.0",
+    "@types/node": "^8.0.33"
+  },
+  "scripts": {
+    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare passwordless"
+  },
+  "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/passwordless",
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}

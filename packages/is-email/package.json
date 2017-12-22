@@ -1,0 +1,19 @@
+{
+  "name": "@authentication/is-email",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@types/node": "^8.0.33"
+  },
+  "scripts": {
+    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare is-email"
+  },
+  "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/is-email",
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}
