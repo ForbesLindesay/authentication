@@ -4,36 +4,66 @@ import isEmail from '@authentication/is-email';
 import LockByID from '@authentication/lock-by-id';
 import {
   RateLimit,
+  RateLimitState,
   ExponentialRateLimit,
   ExponentialOptions,
   BucketRateLimit,
   BucketOptions,
   TransactionalStoreAPI as RateLimitStoreAPI,
+  isRateLimitExceededError,
+  RateLimitExceededError,
 } from '@authentication/rate-limit';
 import {hash, verify} from '@authentication/secure-hash';
 import {URL} from 'url';
 import {Request, Response} from 'express';
 import ms = require('ms');
 import Store, {StoreAPI, TransactionalStoreAPI} from './Store';
+import Token from './Token';
 import originalURL from './originalURL';
 
-export interface InvalidEmailError {
-  code: 'INVALID_EMAIL';
-  message: string;
-  email: string;
-}
-export function isInvalidEmailError(err: any): err is InvalidEmailError {
-  return err && err.code === 'INVALID_EMAIL';
-}
-export interface ExpiredOrInvalidTokenError {
-  code: 'EXPIRED_TOKEN';
-  message: string;
-}
-export function isExpiredOrInvalidTokenError(
-  err: any,
-): err is ExpiredOrInvalidTokenError {
-  return err && err.code === 'EXPIRED_TOKEN';
-}
+import {
+  CreateTokenStatusKind,
+  CreateTokenError,
+  CreatedToken,
+  CreateTokenStatus,
+} from './CreateTokenStatus';
+import {
+  CorrectPassCode,
+  VerifyPassCodeError,
+  VerifyPassCodeStatusKind,
+} from './VerifyPassCodeStatus';
+
+export {CreateTokenStatusKind, CreateTokenStatus};
+export {VerifyPassCodeStatusKind, VerifyPassCodeError};
+export type CreateTokenResult =
+  | {
+      created: false;
+      status: CreateTokenError;
+      magicLink: void;
+      passCode: void;
+    }
+  | {
+      created: true;
+      status: CreatedToken;
+      magicLink: URL;
+      passCode: string;
+    };
+export type VerifyPassCodeResult<State> =
+  | {
+      verified: true;
+      status: CorrectPassCode<State>;
+      userID: string;
+      state: State;
+    }
+  | {verified: false; status: VerifyPassCodeError};
+
+export {
+  RateLimitExceededError,
+  RateLimitState,
+  Token,
+  isRateLimitExceededError,
+};
+
 export interface IncorrectDosCodeError {
   code: 'INCORRECT_DOS_CODE';
   message: string;
@@ -42,17 +72,6 @@ export function isIncorrectDosCodeError(
   err: any,
 ): err is IncorrectDosCodeError {
   return err && err.code === 'INCORRECT_DOS_CODE';
-}
-export interface IncorrectPassCodeError {
-  code: 'INCORRECT_PASS_CODE';
-  message: string;
-  attemptsRemaining: number;
-  expiresAt: number;
-}
-export function isIncorrectPassCodeError(
-  err: any,
-): err is IncorrectPassCodeError {
-  return err && err.code === 'INCORRECT_PASS_CODE';
 }
 
 export enum UserKind {
@@ -97,10 +116,10 @@ export interface VerifyPassCodeOptions {
 export default class PasswordlessAuthentication<State> {
   static readonly Encoding = Encoding;
   static readonly UserKind = UserKind;
-  static readonly isInvalidEmailError = isInvalidEmailError;
-  static readonly isExpiredOrInvalidTokenError = isExpiredOrInvalidTokenError;
+  static readonly CreateTokenStatusKind = CreateTokenStatusKind;
+  static readonly VerifyPassCodeStatusKind = VerifyPassCodeStatusKind;
+
   static readonly isIncorrectDosCodeError = isIncorrectDosCodeError;
-  static readonly isIncorrectPassCodeError = isIncorrectPassCodeError;
 
   private readonly _store: Store<State>;
   private readonly _maxAge: number;
@@ -240,17 +259,42 @@ export default class PasswordlessAuthentication<State> {
         ),
     };
   }
-  async createToken(req: Request, res: Response, userID: string, state: State) {
+  async createToken(
+    req: Request,
+    res: Response,
+    userID: string,
+    state: State,
+  ): Promise<CreateTokenResult> {
     if (this._userKind === UserKind.EMail && !isEmail(userID)) {
-      const err: InvalidEmailError = new Error(
-        'Please enter a valid e-mail address',
-      ) as any;
-      err.code = 'INVALID_EMAIL';
-      err.email = userID;
-      throw err;
+      return {
+        created: false,
+        status: {
+          kind: CreateTokenStatusKind.InvalidEmail,
+          message: 'Please enter a valid e-mail address',
+          email: userID,
+        },
+        magicLink: undefined,
+        passCode: undefined,
+      };
     }
-    await this._createTokenByIpRateLimit.consume(req.ip);
-    await this._createTokenByUserRateLimit.consume(userID);
+    try {
+      await this._createTokenByIpRateLimit.consume(req.ip);
+      await this._createTokenByUserRateLimit.consume(userID);
+    } catch (ex) {
+      if (!isRateLimitExceededError(ex)) {
+        throw ex;
+      }
+      return {
+        created: false,
+        status: {
+          kind: CreateTokenStatusKind.RateLimitExceeded,
+          message: ex.message,
+          nextTokenTimestamp: ex.nextTokenTimestamp,
+        },
+        magicLink: undefined,
+        passCode: undefined,
+      };
+    }
     const [passCode, dosCode] = await Promise.all([
       generatePassCode(6, Encoding.decimal),
       generatePassCode(10, Encoding.base64),
@@ -270,12 +314,20 @@ export default class PasswordlessAuthentication<State> {
       }),
     );
     this._cookie.set(req, res, {i: tokenID, d: dosCode});
-    // TODO: send the e-mail, passing in userID, extraData, magicLink (as a fully qualified link) and passCode
     const magicLink = this.getCallbackURL(req);
     magicLink.searchParams.set('token_id', tokenID);
     magicLink.searchParams.set('dos', dosCode);
     magicLink.searchParams.set('code', passCode);
-    return {passCode, magicLink};
+    return {
+      created: true,
+      status: {
+        kind: CreateTokenStatusKind.CreatedToken,
+        tokenID,
+        dos: dosCode,
+      },
+      magicLink,
+      passCode,
+    };
   }
 
   isCallbackRequest(req: Request): boolean {
@@ -285,68 +337,85 @@ export default class PasswordlessAuthentication<State> {
     req: Request,
     res: Response,
     options: VerifyPassCodeOptions = {},
-  ): Promise<{userID: string; state: State}> {
-    await this._validatePassCodeByIpRateLimit.consume(req.ip);
-    const cookieData: {i?: string; d?: string} =
-      this._cookie.get(req, res) || {};
+  ): Promise<VerifyPassCodeResult<State>> {
+    try {
+      await this._validatePassCodeByIpRateLimit.consume(req.ip);
+    } catch (ex) {
+      if (!isRateLimitExceededError(ex)) {
+        throw ex;
+      }
+      return {
+        verified: false,
+        status: {
+          kind: VerifyPassCodeStatusKind.RateLimitExceeded,
+          message: ex.message,
+          nextTokenTimestamp: ex.nextTokenTimestamp,
+        },
+      };
+    }
+    const cookieData: null | {i: string; d: string} = this._cookie.get(
+      req,
+      res,
+    );
     const query: {[key: string]: string | void} = req.query || {};
-    const tokenID = options.tokenID || query.token_id || cookieData.i;
+    const tokenID =
+      options.tokenID || query.token_id || (cookieData && cookieData.i);
     if (!tokenID) {
-      throw new Error('Missing token_id parameter');
+      return {
+        verified: false,
+        status: {
+          kind: VerifyPassCodeStatusKind.ExpiredToken,
+          message: 'Missing token_id parameter',
+        },
+      };
     }
     if (typeof tokenID !== 'string') {
       throw new Error('Expected token id to be a string');
     }
-    const dos = options.dos || query.dos || cookieData.d;
+    const dos = options.dos || query.dos || (cookieData && cookieData.d);
     if (!dos) {
-      throw new Error('Missing dos parameter');
+      return {
+        verified: false,
+        status: {
+          kind: VerifyPassCodeStatusKind.ExpiredToken,
+          message: 'Missing dos parameter',
+        },
+      };
     }
     if (typeof dos !== 'string') {
       throw new Error('Expected dos to be a string');
     }
     const passCode = options.passCode || query.code;
-    if (passCode == null) {
-      throw new Error('Missing code parameter');
-    }
-    if (typeof passCode !== 'string') {
+    if (passCode != null && typeof passCode !== 'string') {
       throw new Error('Expected passCode to be a string');
     }
-    let success = false;
-    let error:
-      | ExpiredOrInvalidTokenError
-      | IncorrectDosCodeError
-      | IncorrectPassCodeError
-      | void = undefined;
-    const token = await this._tx(tokenID, async store => {
+    return await this._tx(tokenID, async (store): Promise<
+      VerifyPassCodeResult<State>
+    > => {
       const token = await store.loadToken(tokenID);
-      if (token == null) {
-        const err: ExpiredOrInvalidTokenError = new Error(
-          'This token has expired, please generate a new one.',
-        ) as any;
-        err.code = 'EXPIRED_TOKEN';
-        error = err;
-        return;
-      }
-      if (token.expiry < Date.now()) {
-        await store.removeToken(tokenID);
-        const err: ExpiredOrInvalidTokenError = new Error(
-          'This token has expired, please generate a new one.',
-        ) as any;
-        err.code = 'EXPIRED_TOKEN';
-        error = err;
-        return;
+      if (token == null || token.expiry < Date.now()) {
+        if (token) {
+          await store.removeToken(tokenID);
+        }
+        return {
+          verified: false,
+          status: {
+            kind: VerifyPassCodeStatusKind.ExpiredToken,
+            message:
+              'This token has expired, please generate a new one and try again.',
+          },
+        };
       }
       // dos is only to make it hard to take down your system by hitting every
       // token and using up all the attempts before users can do so. This is why
       // it is not heavily rate limited
-      if (token.dos === dos) {
+      if (token.dos !== dos) {
         const err: IncorrectDosCodeError = new Error('Invalid token') as any;
         err.code = 'INCORRECT_DOS_CODE';
-        error = err;
-        return;
+        throw err;
       }
       let deleted = false;
-      // pass code attempts including this one
+      // pass code attempts remaining, after this one
       const attemptsRemaining = token.attemptsRemaining - 1;
       if (attemptsRemaining <= 0) {
         store.removeToken(tokenID);
@@ -358,6 +427,7 @@ export default class PasswordlessAuthentication<State> {
         });
       }
       if (
+        passCode &&
         (await verify(
           passCode,
           token.passCodeHash,
@@ -370,22 +440,38 @@ export default class PasswordlessAuthentication<State> {
         if (!deleted) {
           await store.removeToken(tokenID);
         }
+        this._cookie.remove(req, res);
         await this._createTokenByUserRateLimit.reset(token.userID);
-        success = true;
-        return token;
+        return {
+          verified: true,
+          state: token.state,
+          userID: token.userID,
+          status: {
+            kind: VerifyPassCodeStatusKind.CorrectPassCode,
+            state: token.state,
+            userID: token.userID,
+          },
+        };
       }
-      const err: IncorrectPassCodeError = new Error(
-        'Incorrect Pass Code',
-      ) as any;
-      err.code = 'INCORRECT_PASS_CODE';
-      error = err;
-      return;
+      if (deleted) {
+        return {
+          verified: false,
+          status: {
+            kind: VerifyPassCodeStatusKind.ExpiredToken,
+            message:
+              'The pass code was incorrect and you have no more attempts available, please generate a new token and try again.',
+          },
+        };
+      }
+      return {
+        verified: false,
+        status: {
+          kind: VerifyPassCodeStatusKind.IncorrectPassCode,
+          message: 'Incorrect pass code, please try again.',
+          attemptsRemaining,
+        },
+      };
     });
-    if (success && token !== undefined) {
-      // TODO: suggest a good way to handle mismatch of user-agent browser name
-      return {userID: token.userID, state: token.state};
-    }
-    throw error;
   }
 }
 

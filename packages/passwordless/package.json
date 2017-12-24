@@ -12,12 +12,13 @@
     "@types/node": "^8.0.33"
   },
   "scripts": {
-    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare passwordless"
+    "prepublish": "node ../../prebuild passwordless&& tsc -p tsconfig.build.json && node ../../prepare passwordless"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/passwordless",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
   "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "homepage": "https://www.atauthentication.com/docs/passwordless.html"
 }

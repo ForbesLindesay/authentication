@@ -54,7 +54,7 @@ export default abstract class BaseRateLimit<ID extends string | number>
    * If consuming would take more than `options.timeout` milliseconds,
    * a `RateLimitExceededError` is thrown.
    */
-  async consume(id: ID, options: ConsumeOptions) {
+  async consume(id: ID, options: ConsumeOptions = {}) {
     const timeout = parseMs(options.timeout, 4000, 'options.timeout');
     const {delay, nextTokenTimestamp} = await this._tx(id, async store => {
       const now = Date.now();

@@ -12,7 +12,7 @@
     "ms": "^2.1.1"
   },
   "scripts": {
-    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare cookie"
+    "prepublish": "node ../../prebuild cookie&& tsc -p tsconfig.build.json && node ../../prepare cookie"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/cookie",
   "license": "GPL-3.0",

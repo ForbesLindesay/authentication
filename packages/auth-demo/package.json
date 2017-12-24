@@ -8,6 +8,7 @@
   "dependencies": {
     "@authentication/github": "^0.0.2",
     "@authentication/google": "^0.0.4",
+    "@authentication/passwordless": "^0.0.0",
     "@authentication/send-message": "^0.0.0",
     "@authentication/twitter": "^0.0.3",
     "@moped/scripts": "^0.0.11",

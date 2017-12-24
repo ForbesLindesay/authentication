@@ -5,6 +5,9 @@ const localAddr = /^[a-z0-9.!#$%&'*+\/=?^_`{|}~-]+$/i;
 const domain = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i;
 
 export function isEmail(str: string): boolean {
+  if (typeof str !== 'string') {
+    return false;
+  }
   var parts = str.split('@');
   if (parts.length !== 2) {
     return false;

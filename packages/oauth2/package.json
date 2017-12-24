@@ -13,7 +13,7 @@
     "oauth": "^0.9.15"
   },
   "scripts": {
-    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare oauth2"
+    "prepublish": "node ../../prebuild oauth2&& tsc -p tsconfig.build.json && node ../../prepare oauth2"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/oauth2",
   "license": "GPL-3.0",

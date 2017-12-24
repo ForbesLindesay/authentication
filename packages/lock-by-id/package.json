@@ -8,7 +8,7 @@
     "@types/node": "^8.0.33"
   },
   "scripts": {
-    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare lock-by-id"
+    "prepublish": "node ../../prebuild lock-by-id&& tsc -p tsconfig.build.json && node ../../prepare lock-by-id"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/lock-by-id",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",

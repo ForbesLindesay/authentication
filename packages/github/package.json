@@ -11,7 +11,7 @@
     "@types/node": "^8.0.33"
   },
   "scripts": {
-    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare github"
+    "prepublish": "node ../../prebuild github&& tsc -p tsconfig.build.json && node ../../prepare github"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/github",
   "license": "GPL-3.0",

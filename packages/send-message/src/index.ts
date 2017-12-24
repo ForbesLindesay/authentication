@@ -4,6 +4,9 @@ import {
   SendMailOptions,
   getTestMessageUrl,
 } from 'nodemailer';
+const openBrowser: (
+  url: string,
+) => void = require('react-dev-utils/openBrowser');
 
 export interface MailInfo {
   /**
@@ -195,7 +198,11 @@ function getEtherealTransport(provider: EtherealProvider) {
         return t.sendMail(mailOptions).then(info => {
           console.log('Test message sent: %s', info.messageId);
           // Preview only available when sending through an Ethereal account
-          console.log('Preview URL: %s', getTestMessageUrl(info as any));
+          const url = getTestMessageUrl(info as any) as string;
+          console.log('Preview URL: %s', url);
+          if (process.stdin.isTTY) {
+            openBrowser(url);
+          }
           return info;
         });
       },
@@ -241,7 +248,11 @@ function getEtherealTransport(provider: EtherealProvider) {
         .then(info => {
           console.log('Test message sent: %s', info.messageId);
           // Preview only available when sending through an Ethereal account
-          console.log('Preview URL: %s', getTestMessageUrl(info as any));
+          const url = getTestMessageUrl(info as any) as string;
+          console.log('Preview URL: %s', url);
+          if (process.stdin.isTTY) {
+            openBrowser(url);
+          }
           return info;
         });
     },

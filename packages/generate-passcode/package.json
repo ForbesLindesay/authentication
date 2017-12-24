@@ -9,7 +9,7 @@
     "base32": "^0.0.6"
   },
   "scripts": {
-    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare generate-passcode"
+    "prepublish": "node ../../prebuild generate-passcode&& tsc -p tsconfig.build.json && node ../../prepare generate-passcode"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/generate-passcode",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",

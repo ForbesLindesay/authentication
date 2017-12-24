@@ -41,7 +41,6 @@ export default class SecureHash {
   private _sp: SecurePasswordType;
   private _opslimit: number;
   private _memlimit: number;
-  private _memlimitNext: boolean = true;
   private _minimumHashTime: number;
   private _throttle: <TResult>(fn: () => Promise<TResult>) => Promise<TResult>;
   constructor(options: Options = {}) {
@@ -138,22 +137,34 @@ export default class SecureHash {
   }
   private async _hash(password: string): Promise<string> {
     if (!password || typeof password !== 'string') {
-      throw new TypeError('password should be a string');
+      throw new TypeError('password should be a, non-empty, string');
     }
     const passwordBuffer = new Buffer(password);
     while (true) {
       const start = Date.now();
       const hash = await this._hashBuffer(passwordBuffer);
       const end = Date.now();
-      if (end - start >= this._minimumHashTime) {
+      const duration = end - start;
+      if (duration >= this._minimumHashTime) {
         return hash.toString('base64');
       }
-      if (this._memlimitNext) {
+
+      // attempt to increase hash time by the right factor
+      const factor = this._minimumHashTime / duration;
+      const factorPart = Math.sqrt(factor);
+      const newMemLimit = Math.ceil(this._memlimit * factorPart);
+      if (newMemLimit - this._memlimit < bytes('1MB')) {
         this._memlimit += bytes('1MB');
       } else {
-        this._opslimit++;
+        this._memlimit = newMemLimit;
       }
-      this._memlimitNext = !this._memlimitNext;
+      const newOpsLimit = Math.ceil(this._opslimit * factorPart);
+      if (newOpsLimit - this._opslimit < 1) {
+        this._opslimit += 1;
+      } else {
+        this._opslimit = newOpsLimit;
+      }
+
       this._sp = new SecurePassword({
         opslimit: this._opslimit,
         memlimit: this._memlimit,

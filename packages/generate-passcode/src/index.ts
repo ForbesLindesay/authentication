@@ -1,13 +1,9 @@
 import assert = require('assert');
 import {randomBytes} from 'crypto';
+import Encoding from './Encoding';
 const base32 = require('base32');
 
-export enum Encoding {
-  base64 = 'base64',
-  base32 = 'base32',
-  hex = 'hex',
-  decimal = 'decimal',
-}
+export {Encoding};
 
 export default function generatePassword(
   length: number,

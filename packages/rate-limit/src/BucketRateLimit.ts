@@ -53,7 +53,7 @@ function updateBucketState(
   }
   let {value, timestamp} = state;
   const increase = Math.floor((now - timestamp) / interval);
-  value = Math.min(increase, maxSize);
+  value = Math.min(value + increase, maxSize);
   timestamp += value < maxSize ? interval * increase : now;
   return {value, timestamp};
 }

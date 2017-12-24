@@ -71,7 +71,10 @@ readdirSync(__dirname + '/packages').forEach(directory => {
   pkg.dependencies['@types/node'] = dependencies['@types/node'];
   if (!/\-demo$/.test(directory)) {
     pkg.scripts.prepublish =
-      'tsc -p tsconfig.build.json && node ../../prepare ' + directory;
+      'node ../../prebuild ' +
+      directory +
+      '&& tsc -p tsconfig.build.json && node ../../prepare ' +
+      directory;
   }
 
   pkg.repository =

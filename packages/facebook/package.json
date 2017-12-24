@@ -11,7 +11,7 @@
     "@types/node": "^8.0.33"
   },
   "scripts": {
-    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare facebook"
+    "prepublish": "node ../../prebuild facebook&& tsc -p tsconfig.build.json && node ../../prepare facebook"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/facebook",
   "license": "GPL-3.0",

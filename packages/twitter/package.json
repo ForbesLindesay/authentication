@@ -11,7 +11,7 @@
     "@types/node": "^8.0.33"
   },
   "scripts": {
-    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare twitter"
+    "prepublish": "node ../../prebuild twitter&& tsc -p tsconfig.build.json && node ../../prepare twitter"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/twitter",
   "license": "GPL-3.0",

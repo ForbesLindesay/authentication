@@ -11,7 +11,7 @@
     "@types/node": "^8.0.33"
   },
   "scripts": {
-    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare google"
+    "prepublish": "node ../../prebuild google&& tsc -p tsconfig.build.json && node ../../prepare google"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/google",
   "license": "GPL-3.0",

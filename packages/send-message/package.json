@@ -10,10 +10,11 @@
     "nodemailer": "^4.4.1",
     "nodemailer-mailgun-transport": "^1.3.6",
     "nodemailer-postmark-transport": "^1.3.0",
-    "nodemailer-sendgrid-transport": "^0.2.0"
+    "nodemailer-sendgrid-transport": "^0.2.0",
+    "react-dev-utils": "^4.2.1"
   },
   "scripts": {
-    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare send-message"
+    "prepublish": "node ../../prebuild send-message&& tsc -p tsconfig.build.json && node ../../prepare send-message"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/send-message",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",

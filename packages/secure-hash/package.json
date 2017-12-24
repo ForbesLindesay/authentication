@@ -14,7 +14,7 @@
     "throat": "^4.1.0"
   },
   "scripts": {
-    "prepublish": "tsc -p tsconfig.build.json && node ../../prepare secure-hash"
+    "prepublish": "node ../../prebuild secure-hash&& tsc -p tsconfig.build.json && node ../../prepare secure-hash"
   },
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/secure-hash",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
