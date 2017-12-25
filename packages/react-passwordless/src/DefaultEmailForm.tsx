@@ -21,11 +21,15 @@ export default function DefaultEmailForm(props: EmailFormProps) {
         {props.touched && !props.isEmailValid ? (
           'Please enter a valid e-mail address'
         ) : props.rateLimitUntil ? (
-          <p>
+          <span>
             You have exceeded the rate limit. You need to wait{' '}
             <CountdownTimer time={props.rateLimitUntil} /> before you can try
             again.
-          </p>
+          </span>
+        ) : props.expiredToken ? (
+          'Your token expired, please enter your e-mail and click login again to retry.'
+        ) : props.error ? (
+          props.error.message
         ) : null}
       </p>
       <button

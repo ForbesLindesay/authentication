@@ -9,5 +9,5 @@ export enum Encoding {
 export default Encoding;
 
 module.exports = Encoding;
-module.exports.defualt = Encoding;
+module.exports.default = Encoding;
 module.exports.Encoding = Encoding;

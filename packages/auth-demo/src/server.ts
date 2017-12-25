@@ -4,12 +4,11 @@ import GoogleAuthentication from '@authentication/google';
 import PasswordlessAuthentication, {
   RateLimitState,
   Token,
-  CreateTokenStatusKind,
   VerifyPassCodeStatusKind,
 } from '@authentication/passwordless';
 import getTransport from '@authentication/send-message';
 import TwitterAuthentication from '@authentication/twitter';
-import ms = require('ms');
+import {json} from 'body-parser';
 import express = require('express');
 
 const app: express.Express = express();
@@ -166,69 +165,32 @@ app.get(twitterAuthentication.callbackPath, async (req, res, next) => {
   }
 });
 
-app.get('/__/auth/passwordless', (req, res, next) => {
-  res.send(
-    `
-      <form action="/__/auth/passwordless/create-token">
-        ${
-          req.query.err === 'INVALID_EMAIL'
-            ? `<p style="color: red">Please check you have entered a valid e-mail</p>`
-            : req.query.err === 'EXPIRED_TOKEN'
-              ? `<p style="color: red">This token has expired, please enter your e-mail and try again.</p>`
-              : req.query.err === 'RATE_LIMIT'
-                ? `<p style="color: red">Rate limit exceeded. You can try again in ${ms(
-                    parseInt(req.query.timestamp, 10) - Date.now(),
-                    {long: true},
-                  )}.</p>`
-                : ``
-        }
-        <label>Email:<input type="email" name="email" value="${req.query
-          .email || ''}"></label>
-        <button type="submit">Login</button>
-      </form>
-    `,
-  );
-});
-app.get('/__/auth/passwordless/code', (req, res, next) => {
-  res.send(
-    `
-      <form action="/__/auth/passwordless/verify">
-        <h1>Check your e-mail</h1>
-        ${
-          req.query.err === 'INCORRECT_CODE'
-            ? `<p style="color: red">Please double check the code you entered and try again. You have ${
-                req.query.attemptsRemaining
-              } attempts remaining.</p>`
-            : ``
-        }
-        <label>Enter the 6-digit pass code:<input type="tel" name="code"></label>
-        <button type="submit">Login</button>
-      </form>
-    `,
-  );
-});
-app.get('/__/auth/passwordless/create-token', async (req, res, next) => {
-  try {
-    const result = await passwordlessAuthentication.createToken(
-      req,
-      res,
-      req.query.email,
-      'Hello World',
-    );
-    if (result.created) {
-      const {magicLink, passCode} = result;
-      await mailTransport.sendMail({
-        from: 'noreply@example.com',
-        to: req.query.email,
-        subject: 'Confirm your e-mail',
-        text:
-          'Thank your for signing in to ' +
-          magicLink.hostname +
-          '. Please enter the following code into the box provided:\n\n  ' +
-          passCode +
-          '\n\nor click this "magic" link:\n\n  ' +
-          magicLink.href,
-        html: `
+app.post(
+  '/__/auth/passwordless/create-token',
+  json(),
+  async (req, res, next) => {
+    try {
+      const userID = req.body.email;
+      const result = await passwordlessAuthentication.createToken(
+        req,
+        res,
+        userID,
+        'Hello World',
+      );
+      if (result.created) {
+        const {magicLink, passCode} = result;
+        await mailTransport.sendMail({
+          from: 'noreply@example.com',
+          to: userID,
+          subject: 'Confirm your e-mail',
+          text:
+            'Thank your for signing in to ' +
+            magicLink.hostname +
+            '. Please enter the following code into the box provided:\n\n  ' +
+            passCode +
+            '\n\nor click this "magic" link:\n\n  ' +
+            magicLink.href,
+          html: `
           <p>
             Thank your for signing in to
             <a href="${magicLink.href}">${magicLink.hostname}</a>.
@@ -245,58 +207,32 @@ app.get('/__/auth/passwordless/create-token', async (req, res, next) => {
             Magic Link
           </a>
         `,
+        });
+      }
+      res.json(result.status);
+    } catch (ex) {
+      next(ex);
+    }
+  },
+);
+app.post(
+  '/__/auth/passwordless/verify-pass-code',
+  json(),
+  async (req, res, next) => {
+    try {
+      const result = await passwordlessAuthentication.verifyPassCode(req, res, {
+        passCode: req.body.passCode,
       });
-      res.redirect('/__/auth/passwordless/code');
-    } else {
-      const {status} = result;
-      switch (status.kind) {
-        case CreateTokenStatusKind.InvalidEmail:
-          res.redirect(
-            '/__/auth/passwordless?err=INVALID_EMAIL&email=' +
-              encodeURIComponent(req.query.email),
-          );
-          break;
-        case CreateTokenStatusKind.RateLimitExceeded:
-          res.redirect(
-            '/__/auth/passwordless?err=RATE_LIMIT&email=' +
-              encodeURIComponent(req.query.email) +
-              '&timestamp=' +
-              encodeURIComponent('' + status.nextTokenTimestamp),
-          );
+      if (result.verified) {
+        const {userID, state} = result;
+        console.log({userID, state});
       }
+      res.json(result.status);
+    } catch (ex) {
+      next(ex);
     }
-  } catch (ex) {
-    next(ex);
-  }
-});
-app.get('/__/auth/passwordless/verify', async (req, res, next) => {
-  try {
-    const result = await passwordlessAuthentication.verifyPassCode(req, res, {
-      passCode: req.query.code,
-    });
-    if (result.verified) {
-      const {userID, state} = result;
-      res.json({userID, state});
-    } else {
-      const {status} = result;
-      switch (status.kind) {
-        case VerifyPassCodeStatusKind.ExpiredToken:
-          res.redirect('/__/auth/passwordless?err=EXPIRED_TOKEN');
-          break;
-        case VerifyPassCodeStatusKind.IncorrectPassCode:
-          res.redirect(
-            '/__/auth/passwordless/code?err=INCORRECT_CODE&attemptsRemaining=' +
-              status.attemptsRemaining,
-          );
-          break;
-        default:
-          throw new Error(status.message);
-      }
-    }
-  } catch (ex) {
-    next(ex);
-  }
-});
+  },
+);
 app.get(passwordlessAuthentication.callbackPath, async (req, res, next) => {
   try {
     const result = await passwordlessAuthentication.verifyPassCode(req, res);
@@ -307,7 +243,7 @@ app.get(passwordlessAuthentication.callbackPath, async (req, res, next) => {
       const {status} = result;
       switch (status.kind) {
         case VerifyPassCodeStatusKind.ExpiredToken:
-          res.redirect('/__/auth/passwordless?err=EXPIRED_TOKEN');
+          res.redirect('/?err=EXPIRED_TOKEN');
           break;
         default:
           throw new Error(status.message);

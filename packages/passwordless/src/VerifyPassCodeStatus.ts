@@ -4,10 +4,9 @@ export enum VerifyPassCodeStatusKind {
   IncorrectPassCode,
   RateLimitExceeded,
 }
-export interface CorrectPassCode<State> {
+export interface CorrectPassCode {
   kind: VerifyPassCodeStatusKind.CorrectPassCode;
   userID: string;
-  state: State;
 }
 export interface ExpiredTokenError {
   kind: VerifyPassCodeStatusKind.ExpiredToken;
@@ -28,8 +27,8 @@ export type VerifyPassCodeError =
   | IncorrectPassCodeError
   | RateLimitExceededError;
 
-export type VerifyPassCodeStatus<State> =
-  | CorrectPassCode<State>
+export type VerifyPassCodeStatus =
+  | CorrectPassCode
   | ExpiredTokenError
   | IncorrectPassCodeError
   | RateLimitExceededError;

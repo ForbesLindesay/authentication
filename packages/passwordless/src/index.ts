@@ -51,7 +51,7 @@ export type CreateTokenResult =
 export type VerifyPassCodeResult<State> =
   | {
       verified: true;
-      status: CorrectPassCode<State>;
+      status: CorrectPassCode;
       userID: string;
       state: State;
     }
@@ -448,7 +448,6 @@ export default class PasswordlessAuthentication<State> {
           userID: token.userID,
           status: {
             kind: VerifyPassCodeStatusKind.CorrectPassCode,
-            state: token.state,
             userID: token.userID,
           },
         };
