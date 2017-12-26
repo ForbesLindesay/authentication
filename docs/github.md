@@ -19,7 +19,7 @@ Register an application with GitHub. You can create a new application at [develo
 The `__` prefix is a convention to mean "do not cache these requests in a
 service worker" it is supported out of the box by moped/create-react-app/etc.
 You can choose any URL to be the `callbackURL` as long as it matches the URL you
-gave to Google.
+gave to GitHub.
 
 When the user posts to http://localhost:3000/__/auth/github they will be
 re-directed to GitHub to complete the sign in. GitHub will then redirect them
@@ -51,7 +51,7 @@ app.get('/', (req, res, next) => {
 });
 
 app.post(gitHubAuthentication.callbackPath, async (req, res, next) => {
-  googleAuthentication.redirectToProvider(req, res, next, {
+  gitHubAuthentication.redirectToProvider(req, res, next, {
     // you can pass some abritrary state through to the callback here
     state: {message: 'Hello world'}
   });
@@ -62,7 +62,7 @@ app.get(gitHubAuthentication.callbackPath, async (req, res, next) => {
       return res.redirect('/');
     }
     const {
-      accessToken, // use this to make requests to the Google API on behalf of the user
+      accessToken, // use this to make requests to the GitHub API on behalf of the user
       refreshToken,
       profile,
       state // => {message: 'Hello world'}
@@ -106,7 +106,7 @@ app.get(gitHubAuthentication.callbackPath, async (req, res, next) => {
       return res.redirect('/');
     }
     const {
-      accessToken, // use this to make requests to the Google API on behalf of the user
+      accessToken, // use this to make requests to the GitHub API on behalf of the user
       refreshToken,
       profile,
       state // => {message: 'Hello world'}
@@ -162,7 +162,7 @@ const userCancelledLogin = gitHubAuthentication.userCancelledLogin(req);
 ```
 
 Returns `true` if the user clicked "Cancel" at some point in the login process
-and google redirected them back to your app. You should probably return the user
+and gitHub redirected them back to your app. You should probably return the user
 to the login page at this point, instead of displaying an error.
 
 ### redirectToProvider
@@ -171,7 +171,7 @@ to the login page at this point, instead of displaying an error.
 gitHubAuthentication.redirectToProvider(req, res, next, options);
 ```
 
-Redirect the user to google with the appropriate parameters to request access to their profile.
+Redirect the user to gitHub with the appropriate parameters to request access to their profile.
 
 Options:
 
@@ -186,10 +186,10 @@ const {
   refreshToken,
   profile,
   state,
-} = await googleAuthentication.completeAuthentication(req, res);
+} = await gitHubAuthentication.completeAuthentication(req, res);
 ```
 
-Verifies the supplied authentication info with google and returns an
+Verifies the supplied authentication info with gitHub and returns an
 `accessToken` and a `profile`. It also returns the `state` that you passed in
 when calling `redirectToProvider`. See [Profile](./profile.md) for more info on the fields available in the `profile` object.
 
