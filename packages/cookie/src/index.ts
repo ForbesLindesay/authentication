@@ -167,9 +167,9 @@ export default class Cookie<T> {
       Number.isNaN(maxAge)
     ) {
       throw new Error(
-        'options.maxAge must be an integer. ' +
+        'options.maxAge must be an integer or a number understood by the ms library. ' +
           (JSON.stringify(options.maxAge) || 'undefined') +
-          ' is not a vlaid number of milliseconds.',
+          ' is not a valid number of milliseconds.',
       );
     }
 
