@@ -14,14 +14,16 @@ const memlimitMin = Math.max(SecurePassword.MEMLIMIT_DEFAULT, bytes('50MB'));
 if (
   Number.isNaN(opslimitMin) ||
   typeof opslimitMin !== 'number' ||
-  opslimitMin !== (opslimitMin | 0)
+  opslimitMin !== Math.round(opslimitMin) ||
+  opslimitMin >= Number.MAX_SAFE_INTEGER
 ) {
   throw new TypeError('Invalid opslimitMin');
 }
 if (
   Number.isNaN(memlimitMin) ||
   typeof memlimitMin !== 'number' ||
-  memlimitMin !== (memlimitMin | 0)
+  memlimitMin !== Math.round(memlimitMin) ||
+  memlimitMin >= Number.MAX_SAFE_INTEGER
 ) {
   throw new TypeError('Invalid memlimitMin');
 }
@@ -52,7 +54,8 @@ export default class SecureHash {
       parallelLimit < 1 ||
       Number.isNaN(parallelLimit) ||
       typeof parallelLimit !== 'number' ||
-      parallelLimit !== (parallelLimit | 0)
+      parallelLimit !== Math.round(parallelLimit) ||
+      parallelLimit >= Number.MAX_SAFE_INTEGER
     ) {
       throw new Error(
         'Invalid HASH_PARALLEL_LIMIT, expected an integer greater than or equal to 1.',
@@ -67,13 +70,16 @@ export default class SecureHash {
           : ms(options.minimumHashTime);
     if (
       this._minimumHashTime < 500 ||
+      this._minimumHashTime > 120000 ||
       Number.isNaN(this._minimumHashTime) ||
       typeof this._minimumHashTime !== 'number' ||
       this._minimumHashTime !== (this._minimumHashTime | 0)
     ) {
       throw new Error(
-        'Invalid MINIMUM_HASH_TIME, expected an integer number of milliseconds greater than or equal to ' +
-          ms(500),
+        'Invalid MINIMUM_HASH_TIME, expected an integer number of milliseconds greater than ' +
+          ms(500, {long: true}) +
+          ' and less than ' +
+          ms(120000, {long: true}),
       );
     }
     const opslimit =
@@ -91,7 +97,8 @@ export default class SecureHash {
       opslimit < opslimitMin ||
       Number.isNaN(opslimit) ||
       typeof opslimit !== 'number' ||
-      opslimit !== (opslimit | 0)
+      opslimit !== Math.round(opslimit) ||
+      opslimit >= Number.MAX_SAFE_INTEGER
     ) {
       throw new Error(
         'Invalid HASH_OPS_LIMIT, expected an integer greater than or equal to ' +
@@ -102,7 +109,8 @@ export default class SecureHash {
       memlimit < memlimitMin ||
       Number.isNaN(memlimit) ||
       typeof memlimit !== 'number' ||
-      memlimit !== (memlimit | 0)
+      memlimit !== Math.round(memlimit) ||
+      memlimit >= Number.MAX_SAFE_INTEGER
     ) {
       throw new Error(
         'Invalid HASH_MEM_LIMIT, expected an integer number of bytes greater than or equal to ' +

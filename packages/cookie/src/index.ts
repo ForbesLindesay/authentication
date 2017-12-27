@@ -163,7 +163,8 @@ export default class Cookie<T> {
       typeof options.maxAge === 'string' ? ms(options.maxAge) : options.maxAge;
     if (
       typeof maxAge !== 'number' ||
-      maxAge !== (maxAge | 0) ||
+      maxAge !== Math.round(maxAge) ||
+      maxAge >= Number.MAX_SAFE_INTEGER ||
       Number.isNaN(maxAge)
     ) {
       throw new Error(
