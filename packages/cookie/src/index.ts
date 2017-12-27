@@ -144,7 +144,7 @@ export default class Cookie<T> {
       default:
         if (
           options.signingPolicy === undefined &&
-          process.env.NODE_ENV === 'undefined'
+          process.env.NODE_ENV === 'development'
         ) {
           signed = !!keys;
         } else {
