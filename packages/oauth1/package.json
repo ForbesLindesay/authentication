@@ -1,12 +1,12 @@
 {
   "name": "@authentication/oauth1",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@authentication/base-error": "^0.0.3",
-    "@authentication/cookie": "^0.0.4",
+    "@authentication/cookie": "^0.0.5",
     "@authentication/types": "^0.0.5",
     "@types/express": "^4.0.39",
     "@types/node": "^8.0.33",
