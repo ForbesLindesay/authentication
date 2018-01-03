@@ -1,12 +1,12 @@
 {
   "name": "@authentication/twitter",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@authentication/base-error": "^0.0.3",
-    "@authentication/oauth1": "^0.0.6",
+    "@authentication/oauth1": "^0.0.7",
     "@authentication/types": "^0.0.5",
     "@types/node": "^8.0.33"
   },
