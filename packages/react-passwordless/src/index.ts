@@ -156,6 +156,7 @@ export default class Passwordless extends React.Component<Props, State> {
             return true;
           case VerifyPassCodeStatusKind.ExpiredToken:
             this.setState({
+              passCode: '',
               verifyingPassCode: false,
               createdToken: false,
               expiredToken: true,
@@ -164,6 +165,7 @@ export default class Passwordless extends React.Component<Props, State> {
             return true;
           case VerifyPassCodeStatusKind.IncorrectPassCode:
             this.setState({
+              passCode: '',
               verifyingPassCode: false,
               attemptsRemaining: status.attemptsRemaining,
             });

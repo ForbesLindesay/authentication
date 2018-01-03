@@ -58,7 +58,7 @@ export default function DefaultPassCodeForm(props: PassCodeFormProps) {
                   : inputProps.length % 2 === 0 ? 2 : 0;
             inputProps.forEach((p, i) => {
               if (interval !== 0 && i !== 0 && i % interval === 0) {
-                inputs.push(<Hyphen key={i} />);
+                inputs.push(<Hyphen key={i + '_hyphen'} />);
               }
               inputs.push(
                 <CharacterInput
