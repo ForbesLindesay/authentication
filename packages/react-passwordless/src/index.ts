@@ -72,8 +72,10 @@ export default class Passwordless extends React.Component<Props, State> {
     verifyingPassCode: false,
     rateLimitUntil: null,
     attemptsRemaining: null,
-    // TODO: check for things like ?err=EXPIRED_TOKEN
-    expiredToken: false,
+    expiredToken:
+      typeof location !== 'undefined' && typeof location.search === 'string'
+        ? /err\=EXPIRED_TOKEN/.test(location.search)
+        : false,
   };
   _onEmailBlur = () => {
     this.setState({emailTouched: true});

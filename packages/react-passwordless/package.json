@@ -9,7 +9,7 @@
     "@authentication/passwordless": "^0.0.7",
     "@types/node": "^8.0.33",
     "react": "^16.2.0",
-    "react-digit-input": "^1.0.0"
+    "react-digit-input": "^1.0.1"
   },
   "scripts": {
     "prepublish": "node ../../prebuild react-passwordless&& tsc -p tsconfig.build.json && node ../../prepare react-passwordless"
