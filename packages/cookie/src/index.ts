@@ -118,8 +118,10 @@ export default class Cookie<T> {
   private readonly _getOption: Cookies.GetOption = {signed: true};
   private readonly _setOption: Cookies.SetOption = {};
   private readonly _baseURL: void | URL;
+  private readonly _cacheSymbol: symbol;
   constructor(name: string, options: Options) {
     this._name = name;
+    this._cacheSymbol = Symbol('Cookie Value Cache: ' + name);
 
     // signing
 
@@ -226,7 +228,9 @@ export default class Cookie<T> {
       return null;
     }
     const cookies = new Cookies(req, res, this._constructorOptions);
-    const str = cookies.get(this._name, this._getOption);
+    const str: string = (req as any)[this._cacheSymbol]
+      ? (req as any)[this._cacheSymbol].value
+      : cookies.get(this._name, this._getOption);
     try {
       if (str) {
         return JSON.parse(str);
@@ -239,7 +243,9 @@ export default class Cookie<T> {
       return;
     }
     const cookies = new Cookies(req, res, this._constructorOptions);
-    cookies.set(this._name, JSON.stringify(value), this._setOption);
+    const str = JSON.stringify(value);
+    cookies.set(this._name, str, this._setOption);
+    (req as any)[this._cacheSymbol] = {value: str};
   }
   remove(req: IncomingMessage, res: ServerResponse) {
     if (!this._checkCSRF(req, 'set')) {
@@ -250,6 +256,7 @@ export default class Cookie<T> {
       ...this._setOption,
       maxAge: 0,
     });
+    (req as any)[this._cacheSymbol] = {value: ''};
   }
   refresh(req: IncomingMessage, res: ServerResponse) {
     const cookies = new Cookies(req, res, this._constructorOptions);
