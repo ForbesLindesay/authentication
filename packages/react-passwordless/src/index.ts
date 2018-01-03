@@ -177,7 +177,7 @@ export default class Passwordless extends React.Component<Props, State> {
         }
       },
       error => {
-        this.setState({creatingToken: false, error});
+        this.setState({verifyingPassCode: false, error});
         setTimeout(() => {
           throw error;
         }, 0);
