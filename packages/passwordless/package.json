@@ -9,6 +9,7 @@
     "@authentication/generate-passcode": "^0.0.1",
     "@authentication/is-email": "^0.0.1",
     "@authentication/lock-by-id": "^0.0.1",
+    "@authentication/rate-limit": "^0.0.3",
     "@types/node": "^8.0.33"
   },
   "scripts": {
