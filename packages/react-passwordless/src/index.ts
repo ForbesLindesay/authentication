@@ -122,7 +122,7 @@ export default class Passwordless extends React.Component<Props, State> {
 
             timeout(() => {
               this.setState({rateLimitUntil: null});
-            }, status.nextTokenTimestamp - Date.now());
+            }, status.nextTokenTimestamp);
             return true;
         }
       },

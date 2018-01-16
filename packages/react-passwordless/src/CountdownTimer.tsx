@@ -52,6 +52,9 @@ export default class CountdownTimer extends React.Component<Props, State> {
     if (delta < 90 * 60 * 1000) {
       return Math.round(delta / (60 * 1000)) + ' minutes';
     }
-    return Math.round(delta / (60 * 60 * 1000)) + ' hours';
+    if (delta < 72 * 60 * 60 * 1000) {
+      return Math.round(delta / (60 * 60 * 1000)) + ' hours';
+    }
+    return Math.round(delta / (24 * 60 * 60 * 1000)) + ' days';
   }
 }
