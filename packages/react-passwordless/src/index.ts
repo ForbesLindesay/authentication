@@ -26,6 +26,14 @@ export {
   InputAttributes,
 };
 
+function timeout(fn: () => void, end: number) {
+  if (end - Date.now() > 60 * 60 * 1000) {
+    setTimeout(() => timeout(fn, end), 60 * 60 * 1000);
+  } else {
+    setTimeout(fn, end - Date.now());
+  }
+}
+
 function isPassCodeValid(
   passCode: string,
   props: {passCodeLength?: number; passCodeEncoding?: Encoding},
@@ -111,7 +119,8 @@ export default class Passwordless extends React.Component<Props, State> {
               creatingToken: false,
               rateLimitUntil: status.nextTokenTimestamp,
             });
-            setTimeout(() => {
+
+            timeout(() => {
               this.setState({rateLimitUntil: null});
             }, status.nextTokenTimestamp - Date.now());
             return true;
