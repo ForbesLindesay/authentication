@@ -1,0 +1,23 @@
+{
+  "name": "@authentication/stripe",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@authentication/oauth2": "^0.0.8",
+    "@authentication/types": "^0.0.5",
+    "@types/node": "^8.0.33",
+    "@types/stripe": "^5.0.1",
+    "stripe": "^5.4.0"
+  },
+  "scripts": {
+    "prepublish": "node ../../prebuild stripe&& tsc -p tsconfig.build.json && node ../../prepare stripe"
+  },
+  "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/stripe",
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}
