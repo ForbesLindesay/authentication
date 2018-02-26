@@ -33,6 +33,7 @@ import {
   VerifyPassCodeStatusKind,
 } from './VerifyPassCodeStatus';
 
+export {Store, StoreAPI, TransactionalStoreAPI};
 export {CreateTokenStatusKind, CreateTokenStatus};
 export {VerifyPassCodeStatusKind, VerifyPassCodeError};
 export type CreateTokenResult =
