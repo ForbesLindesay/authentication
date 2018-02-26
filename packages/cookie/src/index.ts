@@ -89,12 +89,14 @@ export interface Options {
   path?: string;
   /**
    * This prevents CSRF by only allowing cookies for requests from the same
-   * site.  This defaults to `lax` whcih is what you typically want for
+   * site.  This defaults to `lax` which is what you typically want for
    * authentication cookies, but you can also set it to `Strict` to prevent
    * sending cross site cookies even with get requests, or `AnySite` to allow
    * requests from any site.
    */
-  sameSitePolicy?: SameSitePolicy;
+  sameSitePolicy?:
+    | SameSitePolicy
+    | {read: SameSitePolicy; write: SameSitePolicy};
   /**
    * a boolean indicating whether the cookie is only to be sent
    * over HTTPS (false by default for HTTP, true by default for HTTPS).
@@ -113,7 +115,8 @@ export default class Cookie<T> {
   static readonly SigningPolicy = SigningPolicy;
 
   private readonly _name: string;
-  private readonly _sameSitePolicy: SameSitePolicy;
+  private readonly _writeSameSitePolicy: SameSitePolicy;
+  private readonly _readSameSitePolicy: SameSitePolicy;
   private readonly _constructorOptions: Cookies.Option = {};
   private readonly _getOption: Cookies.GetOption = {signed: true};
   private readonly _setOption: Cookies.SetOption = {};
@@ -177,10 +180,44 @@ export default class Cookie<T> {
     }
 
     // same site
-
-    this._sameSitePolicy = (
-      options.sameSitePolicy || SameSitePolicy.Lax
-    ).toLowerCase() as SameSitePolicy;
+    const sameSitePolicy = options.sameSitePolicy || SameSitePolicy.Lax;
+    if (typeof sameSitePolicy === 'object') {
+      const writePolicy = sameSitePolicy.write.toLowerCase() as SameSitePolicy;
+      if (
+        writePolicy !== SameSitePolicy.AnySite &&
+        writePolicy !== SameSitePolicy.Lax &&
+        writePolicy !== SameSitePolicy.Strict
+      ) {
+        throw new Error(
+          'Invalid write same site policy, should be Strict, Lax or AnySite',
+        );
+      }
+      const readPolicy = sameSitePolicy.read.toLowerCase() as SameSitePolicy;
+      if (
+        readPolicy !== SameSitePolicy.AnySite &&
+        readPolicy !== SameSitePolicy.Lax &&
+        readPolicy !== SameSitePolicy.Strict
+      ) {
+        throw new Error(
+          'Invalid read same site policy, should be Strict, Lax or AnySite',
+        );
+      }
+      this._writeSameSitePolicy = writePolicy;
+      this._readSameSitePolicy = readPolicy;
+    } else {
+      const policy = sameSitePolicy.toLowerCase() as SameSitePolicy;
+      if (
+        policy !== SameSitePolicy.AnySite &&
+        policy !== SameSitePolicy.Lax &&
+        policy !== SameSitePolicy.Strict
+      ) {
+        throw new Error(
+          'Invalid same site policy, should be Strict, Lax or AnySite',
+        );
+      }
+      this._writeSameSitePolicy = policy;
+      this._readSameSitePolicy = policy;
+    }
     this._baseURL = parseBaseURL(options.baseURL);
 
     // optiohttpsOnly  this._constructorOptions = {};
@@ -198,17 +235,19 @@ export default class Cookie<T> {
       overwrite: options.overwrite !== false,
       path: options.path || '/',
       sameSite:
-        this._sameSitePolicy === SameSitePolicy.AnySite
+        this._readSameSitePolicy === SameSitePolicy.AnySite
           ? false
-          : this._sameSitePolicy,
+          : this._readSameSitePolicy,
       signed,
     };
   }
   private _checkCSRF(req: IncomingMessage, method: 'get' | 'set'): boolean {
-    if (this._sameSitePolicy === SameSitePolicy.AnySite) {
+    const sameSitePolicy =
+      method === 'get' ? this._readSameSitePolicy : this._writeSameSitePolicy;
+    if (sameSitePolicy === SameSitePolicy.AnySite) {
       return true;
     }
-    if (req.method === 'GET' && this._sameSitePolicy === SameSitePolicy.Lax) {
+    if (req.method === 'GET' && sameSitePolicy === SameSitePolicy.Lax) {
       return true;
     }
     if (!isSameOrigin(req, this._baseURL)) {
