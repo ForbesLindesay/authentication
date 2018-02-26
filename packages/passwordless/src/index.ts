@@ -173,7 +173,8 @@ export default class PasswordlessAuthentication<State> {
     if (
       typeof this._maxAge !== 'number' ||
       isNaN(this._maxAge) ||
-      this._maxAge !== (this._maxAge | 0)
+      this._maxAge >= Number.MAX_SAFE_INTEGER ||
+      this._maxAge !== Math.floor(this._maxAge)
     ) {
       throw new Error('maxAge is not a valid number of milliseconds.');
     }
