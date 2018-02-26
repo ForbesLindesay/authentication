@@ -21,6 +21,7 @@ export {
   DefaultEmailForm,
   DefaultPassCodeForm,
   EmailFormProps,
+  PassCodeFormProps,
   Encoding,
   getRegExForEncoding,
   InputAttributes,
