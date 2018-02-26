@@ -214,6 +214,7 @@ export default class Passwordless extends React.Component<Props, State> {
       });
     }
     return (this.props.renderPassCodeForm || DefaultPassCodeForm)({
+      email: this.state.email,
       error: this.state.error,
       passCode: this.state.passCode,
       passCodeEncoding:

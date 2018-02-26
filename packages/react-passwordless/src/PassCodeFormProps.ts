@@ -2,6 +2,7 @@ import * as React from 'react';
 import {Encoding} from '@authentication/passwordless/types';
 
 export default interface EmailFormProps {
+  email: string;
   error: null | Error;
   passCode: string;
   passCodeEncoding: Encoding;
