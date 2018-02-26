@@ -1,11 +1,11 @@
 {
   "name": "@authentication/stripe",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@authentication/oauth2": "^0.0.8",
+    "@authentication/oauth2": "^0.0.9",
     "@authentication/types": "^0.0.5",
     "@types/node": "^8.0.33",
     "@types/stripe": "^5.0.1",
