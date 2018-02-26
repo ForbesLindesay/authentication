@@ -132,6 +132,9 @@ export default class PasswordlessAuthentication<State> {
 
   static readonly isIncorrectDosCodeError = isIncorrectDosCodeError;
 
+  private readonly _passCodeLength: number;
+  private readonly _passCodeEncoding: Encoding;
+
   private readonly _store: Store<State>;
   private readonly _maxAge: number;
   private readonly _maxAttempts: number;
@@ -151,6 +154,14 @@ export default class PasswordlessAuthentication<State> {
   private readonly _userKind: UserKind;
 
   constructor(options: Options<State>) {
+    this._passCodeLength = options.passCodeLength || 6;
+    if (
+      typeof this._passCodeLength !== 'number' ||
+      this._passCodeLength !== (this._passCodeLength | 0)
+    ) {
+      throw new Error('Invalid pass code length, expected an integer');
+    }
+    this._passCodeEncoding = options.passCodeEncoding || Encoding.decimal;
     this._userKind = options.userKind || UserKind.EMail;
     this._store = options.store;
     this._maxAge =
@@ -311,7 +322,7 @@ export default class PasswordlessAuthentication<State> {
       };
     }
     const [passCode, dosCode] = await Promise.all([
-      generatePassCode(6, Encoding.decimal),
+      generatePassCode(this._passCodeLength, this._passCodeEncoding),
       generatePassCode(10, Encoding.base64),
     ]);
     const passCodeHash = await hash(passCode);
