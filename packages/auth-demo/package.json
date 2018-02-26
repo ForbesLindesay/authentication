@@ -1,14 +1,14 @@
 {
   "name": "@authentication/auth-demo",
   "private": true,
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@authentication/github": "^0.0.6",
     "@authentication/google": "^0.0.8",
-    "@authentication/passwordless": "^0.0.9",
+    "@authentication/passwordless": "^0.0.10",
     "@authentication/send-message": "^0.0.1",
     "@authentication/twitter": "^0.0.7",
     "@moped/scripts": "^0.0.11",
