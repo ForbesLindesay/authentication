@@ -84,6 +84,12 @@ export {Encoding};
 export interface Options<State = void> {
   callbackURL: string | URL;
   cookieName?: string;
+  /**
+   * By default the tokenID and dosCode is stored in a cookie. This is not
+   * necessary if users will be using the magic link, but is needed if
+   * they want to use the short code.
+   */
+  disableCookie?: boolean;
   userKind?: UserKind;
   /**
    * Max age of tokens sent in e-mails before they expire.
@@ -94,6 +100,10 @@ export interface Options<State = void> {
    * Maximum number of attempts before the token is destoryed.
    */
   maxAttempts?: number;
+  /**
+   * Allow the same token to be used to login multiple times.
+   */
+  multiUse?: boolean;
   /**
    * Length of pass codes, defaults to 6.
    */
@@ -132,7 +142,9 @@ export default class PasswordlessAuthentication<State> {
   private readonly _createTokenByUserRateLimit: RateLimit<string>;
   private readonly _validatePassCodeByIpRateLimit: RateLimit<string>;
 
-  private readonly _trustProxy: void | boolean;
+  private readonly _disableCookie: boolean;
+  private readonly _multiUse: boolean;
+  private readonly _trustProxy: undefined | boolean;
   private readonly _callbackURL: string | URL;
   public readonly callbackPath: string;
 
@@ -162,6 +174,8 @@ export default class PasswordlessAuthentication<State> {
     ) {
       throw new Error('maxAttempts is not a valid integer.');
     }
+    this._disableCookie = options.disableCookie || false;
+    this._multiUse = options.multiUse || false;
     this._cookie = new Cookie(
       options.cookieName || 'authentication_passwordless',
       {
@@ -314,7 +328,9 @@ export default class PasswordlessAuthentication<State> {
         userAgent: '' + (req.headers['user-agent'] || ''),
       }),
     );
-    this._cookie.set(req, res, {i: tokenID, d: dosCode});
+    if (!this._disableCookie) {
+      this._cookie.set(req, res, {i: tokenID, d: dosCode});
+    }
     const magicLink = this.getCallbackURL(req);
     magicLink.searchParams.set('token_id', tokenID);
     magicLink.searchParams.set('dos', dosCode);
@@ -354,10 +370,7 @@ export default class PasswordlessAuthentication<State> {
         },
       };
     }
-    const cookieData: null | {i: string; d: string} = this._cookie.get(
-      req,
-      res,
-    );
+    const cookieData = this._disableCookie ? null : this._cookie.get(req, res);
     const query: {[key: string]: string | void} = req.query || {};
     const tokenID =
       options.tokenID || query.token_id || (cookieData && cookieData.i);
@@ -415,18 +428,11 @@ export default class PasswordlessAuthentication<State> {
         err.code = 'INCORRECT_DOS_CODE';
         throw err;
       }
-      let deleted = false;
       // pass code attempts remaining, after this one
-      const attemptsRemaining = token.attemptsRemaining - 1;
-      if (attemptsRemaining <= 0) {
-        store.removeToken(tokenID);
-        deleted = true;
-      } else {
-        store.updateToken(tokenID, {
-          ...token,
-          attemptsRemaining,
-        });
-      }
+      await store.updateToken(tokenID, {
+        ...token,
+        attemptsRemaining: token.attemptsRemaining - 1,
+      });
       if (
         passCode &&
         (await verify(
@@ -438,10 +444,17 @@ export default class PasswordlessAuthentication<State> {
           },
         )) === true
       ) {
-        if (!deleted) {
+        if (this._multiUse) {
+          await store.updateToken(tokenID, {
+            ...token,
+            attemptsRemaining: this._maxAttempts,
+          });
+        } else {
           await store.removeToken(tokenID);
+          if (!this._disableCookie) {
+            this._cookie.remove(req, res);
+          }
         }
-        this._cookie.remove(req, res);
         await this._createTokenByUserRateLimit.reset(token.userID);
         return {
           verified: true,
@@ -453,7 +466,9 @@ export default class PasswordlessAuthentication<State> {
           },
         };
       }
-      if (deleted) {
+      // this was the last attempt
+      if (token.attemptsRemaining <= 1) {
+        await store.removeToken(tokenID);
         return {
           verified: false,
           status: {
@@ -468,7 +483,7 @@ export default class PasswordlessAuthentication<State> {
         status: {
           kind: VerifyPassCodeStatusKind.IncorrectPassCode,
           message: 'Incorrect pass code, please try again.',
-          attemptsRemaining,
+          attemptsRemaining: token.attemptsRemaining - 1,
         },
       };
     });
