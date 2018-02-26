@@ -446,6 +446,7 @@ export default class PasswordlessAuthentication<State> {
       });
       if (
         passCode &&
+        passCode.length === this._passCodeLength &&
         (await verify(
           passCode,
           token.passCodeHash,
