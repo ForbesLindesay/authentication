@@ -154,6 +154,15 @@ export default class Passwordless extends React.Component<Props, State> {
       this.setState({passCodeTouched: true});
     }
   };
+  _onPassCodeCancel = () => {
+    this.setState({
+      passCode: '',
+      verifyingPassCode: false,
+      createdToken: false,
+      expiredToken: false,
+      attemptsRemaining: null,
+    });
+  };
   _verifyPassCode(passCode: string) {
     this.setState({
       verifyingPassCode: true,
@@ -230,6 +239,7 @@ export default class Passwordless extends React.Component<Props, State> {
       onBlur: this._onPassCodeBlur,
       onChange: this._onPassCodeChange,
       onSubmit: this._onPassCodeSubmit,
+      onCancel: this._onPassCodeCancel,
     });
   }
 }

@@ -15,4 +15,5 @@ export default interface EmailFormProps {
   onBlur: React.FocusEventHandler<HTMLInputElement>;
   onChange: (e: React.ChangeEvent<HTMLInputElement> | string) => void;
   onSubmit: React.FormEventHandler<HTMLFormElement>;
+  onCancel: () => void;
 };
