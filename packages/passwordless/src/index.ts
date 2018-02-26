@@ -286,12 +286,12 @@ export default class PasswordlessAuthentication<State> {
         ),
     };
   }
-  async createToken(
+  createToken = async (
     req: Request,
     res: Response,
     userID: string,
     state: State,
-  ): Promise<CreateTokenResult> {
+  ): Promise<CreateTokenResult> => {
     if (this._userKind === UserKind.EMail && !isEmail(userID)) {
       return {
         created: false,
@@ -357,16 +357,16 @@ export default class PasswordlessAuthentication<State> {
       magicLink,
       passCode,
     };
-  }
+  };
 
-  isCallbackRequest(req: Request): boolean {
+  isCallbackRequest = (req: Request): boolean => {
     return !!(req.query && req.query.token_id);
-  }
-  async verifyPassCode(
+  };
+  verifyPassCode = async (
     req: Request,
     res: Response,
     options: VerifyPassCodeOptions = {},
-  ): Promise<VerifyPassCodeResult<State>> {
+  ): Promise<VerifyPassCodeResult<State>> => {
     try {
       await this._validatePassCodeByIpRateLimit.consume(req.ip);
     } catch (ex) {
@@ -500,7 +500,7 @@ export default class PasswordlessAuthentication<State> {
         },
       };
     });
-  }
+  };
 }
 
 module.exports = PasswordlessAuthentication;
