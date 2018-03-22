@@ -1,4 +1,5 @@
 import {IncomingMessage, ServerResponse} from 'http';
+import {URL} from 'url';
 
 export type ErrorHandler<
   TRequest extends IncomingMessage = IncomingMessage,
