@@ -1,16 +1,16 @@
 {
   "name": "@authentication/passwordless",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@authentication/cookie": "^0.0.8",
-    "@authentication/generate-passcode": "^0.0.1",
+    "@authentication/cookie": "^0.0.9",
+    "@authentication/generate-passcode": "^0.0.2",
     "@authentication/is-email": "^0.0.1",
     "@authentication/lock-by-id": "^0.0.1",
-    "@authentication/rate-limit": "^0.0.4",
-    "@authentication/secure-hash": "^0.0.2",
+    "@authentication/rate-limit": "^0.0.5",
+    "@authentication/secure-hash": "^0.0.3",
     "@types/ms": "^0.7.30",
     "@types/node": "^8.0.33",
     "ms": "^2.1.1"
