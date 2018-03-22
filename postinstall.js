@@ -84,6 +84,16 @@ readdirSync(__dirname + '/packages').forEach(directory => {
   if (existsSync(__dirname + '/docs/' + directory + '.md')) {
     pkg.homepage =
       'https://www.atauthentication.com/docs/' + directory + '.html';
+    writeFileSync(
+      __dirname + '/packages/' + directory + '/README.md',
+      '# ' +
+        pkg.name +
+        '\n\n' +
+        'For documentation, see ' +
+        'https://www.atauthentication.com/docs/' +
+        directory +
+        '.html',
+    );
   }
   pkg.license = 'GPL-3.0';
   if (!pkg.private) {
