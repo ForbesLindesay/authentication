@@ -94,6 +94,9 @@ export default class Passwordless extends React.Component<Props, State> {
   };
   _onEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (this.state.creatingToken || this.state.createdToken) {
+      return;
+    }
     if (!isEmail(this.state.email)) {
       this.setState({emailTouched: true});
       return;
@@ -164,6 +167,9 @@ export default class Passwordless extends React.Component<Props, State> {
     });
   };
   _verifyPassCode(passCode: string) {
+    if (this.state.verifyingPassCode || !this.state.createdToken) {
+      return;
+    }
     this.setState({
       verifyingPassCode: true,
       passCode,
