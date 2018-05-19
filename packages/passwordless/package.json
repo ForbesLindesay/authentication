@@ -1,11 +1,11 @@
 {
   "name": "@authentication/passwordless",
-  "version": "0.0.15",
+  "version": "0.1.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@authentication/cookie": "^0.0.9",
+    "@authentication/cookie": "^0.1.0",
     "@authentication/generate-passcode": "^0.0.2",
     "@authentication/is-email": "^0.0.1",
     "@authentication/lock-by-id": "^0.0.1",
