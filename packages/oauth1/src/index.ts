@@ -310,7 +310,6 @@ export default class OAuth1Authentication<State = Mixed> {
         'The cookie used to verify state in the oauth transaction was not set.',
       );
     }
-    this._cookie.remove(req, res);
     const {d: state, t: oauthTokenSecret} = cookie;
     if (!oauthTokenSecret) {
       throw new StateVerificationFailure(

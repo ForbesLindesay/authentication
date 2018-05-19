@@ -352,7 +352,6 @@ export default class OAuth2Authentication<State = Mixed, Results = Mixed> {
         'The cookie used to verify state in the oauth transaction was not set.',
       );
     }
-    this._cookie.remove(req, res);
     const {k: stateID, d: state} = cookie;
     if (stateID !== (req.query && req.query.state)) {
       throw new StateVerificationFailure(
