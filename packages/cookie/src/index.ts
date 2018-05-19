@@ -1,7 +1,18 @@
 import {URL} from 'url';
 import {IncomingMessage, ServerResponse} from 'http';
-import Cookies = require('cookies');
 import ms = require('ms');
+import {
+  KeygripSecret,
+  KeygripPublic,
+  KeygripPassThrough,
+  Keygrip,
+} from '@authentication/keygrip';
+import {
+  setCookie,
+  getCookie,
+  removeCookie,
+  Options as RawCookieOptions,
+} from '@authentication/raw-cookie';
 import isSameOrigin from './isSameOrigin';
 import parseBaseURL from './parseBaseURL';
 
@@ -26,11 +37,11 @@ export enum SameSitePolicy {
 }
 export enum SigningPolicy {
   /**
-   * This is the default.  The cookie **must** be signed. If no
+   * This is the default in production.  The cookie **must** be signed. If no
    * keys are provided and `SECURE_KEY` is empty, an error
    * will be thrown.
    *
-   * If this option is selected, you can trist that any value in
+   * If this option is selected, you can trust that any value in
    * a cookie was set by the server.
    */
   Required,
@@ -46,6 +57,33 @@ export enum SigningPolicy {
   Optional,
   /**
    * Use this if you know that you will not need to trust the data
+   * stored in the cookie.  For example, you could use this for
+   * something like a user preference for font-size.
+   */
+  Disabled,
+}
+export enum EncryptionPolicy {
+  /**
+   * This is the default in production. The cookie **must**
+   * be encrypted. If no keys are provided and `SECURE_KEY`
+   * is empty, an error will be thrown.
+   *
+   * If this option is selected, you can trust that any value in
+   * a cookie will be kept secret
+   */
+  Required,
+  /**
+   * This can be used in libraries where you do not expect
+   * secret data to be sent in cookies, but you wish
+   * to enable encryption if the `SECURE_KEY` environment variable
+   * is set.
+   *
+   * Note that if `SECURE_KEY` is not set, this is equivalent to
+   * `Disabled`.
+   */
+  Optional,
+  /**
+   * Use this if you know that you will not have secret data
    * stored in the cookie.  For example, you could use this for
    * something like a user preference for font-size.
    */
@@ -105,6 +143,7 @@ export interface Options {
    */
   httpsOnly?: boolean;
   signingPolicy?: SigningPolicy;
+  encryptionPolicy?: EncryptionPolicy;
 }
 
 export const Session: MaxAgeKind.Session = MaxAgeKind.Session;
@@ -113,15 +152,17 @@ export default class Cookie<T> {
   static readonly SameSitePolicy = SameSitePolicy;
   static readonly Session: MaxAgeKind.Session = MaxAgeKind.Session;
   static readonly SigningPolicy = SigningPolicy;
+  static readonly EncryptionPolicy = EncryptionPolicy;
 
   private readonly _name: string;
   private readonly _writeSameSitePolicy: SameSitePolicy;
   private readonly _readSameSitePolicy: SameSitePolicy;
-  private readonly _constructorOptions: Cookies.Option = {};
-  private readonly _getOption: Cookies.GetOption = {signed: true};
-  private readonly _setOption: Cookies.SetOption = {};
   private readonly _baseURL: void | URL;
   private readonly _cacheSymbol: symbol;
+
+  private readonly _rawOptions: RawCookieOptions;
+  private readonly _keygrip: Keygrip;
+
   constructor(name: string, options: Options) {
     this._name = name;
     this._cacheSymbol = Symbol('Cookie Value Cache: ' + name);
@@ -139,9 +180,33 @@ export default class Cookie<T> {
       throw new Error('If provided, options.keys must be an array of strings.');
     }
     let signed = true;
+    let encrypted = true;
+    switch (options.encryptionPolicy) {
+      case EncryptionPolicy.Disabled:
+        encrypted = false;
+        break;
+      case EncryptionPolicy.Optional:
+        encrypted = !!keys;
+        break;
+      default:
+        if (
+          options.encryptionPolicy === undefined &&
+          process.env.NODE_ENV === 'development'
+        ) {
+          encrypted = !!keys;
+        } else {
+          encrypted = true;
+        }
+        break;
+    }
     switch (options.signingPolicy) {
       case SigningPolicy.Disabled:
         signed = false;
+        if (encrypted) {
+          throw new Error(
+            'Enabling encryption implicitly enables signing. If you want to disable both, you must pass {encryptionPolicy: EncryptionPolicy.Disabled, signingPolicy: SigningPolicy.Disabled}',
+          );
+        }
         break;
       case SigningPolicy.Optional:
         signed = !!keys;
@@ -157,20 +222,27 @@ export default class Cookie<T> {
         }
         break;
     }
-    if (signed && !keys) {
+    if ((signed || encrypted) && !keys) {
       throw new Error(
-        'You must either pass in `keys` as an option or set the `SECURE_KEY` environment variable to use signed cookies.',
+        'You must either pass in `keys` as an option or set the `SECURE_KEY` environment variable to use signed or encrypted cookies.',
       );
+    }
+    if (encrypted) {
+      this._keygrip = new KeygripSecret(keys!);
+    } else if (signed) {
+      this._keygrip = new KeygripPublic(keys!);
+    } else {
+      this._keygrip = new KeygripPassThrough();
     }
 
     // max age
-    const maxAge =
+    const maxAgeMilliseconds =
       typeof options.maxAge === 'string' ? ms(options.maxAge) : options.maxAge;
     if (
-      typeof maxAge !== 'number' ||
-      maxAge !== Math.round(maxAge) ||
-      maxAge >= Number.MAX_SAFE_INTEGER ||
-      Number.isNaN(maxAge)
+      typeof maxAgeMilliseconds !== 'number' ||
+      maxAgeMilliseconds !== Math.round(maxAgeMilliseconds) ||
+      maxAgeMilliseconds >= Number.MAX_SAFE_INTEGER ||
+      Number.isNaN(maxAgeMilliseconds)
     ) {
       throw new Error(
         'options.maxAge must be an integer or a number understood by the ms library. ' +
@@ -220,25 +292,16 @@ export default class Cookie<T> {
     }
     this._baseURL = parseBaseURL(options.baseURL);
 
-    // optiohttpsOnly  this._constructorOptions = {};
-    if (keys) {
-      this._constructorOptions.keys = keys;
-    }
-    if (typeof options.httpsOnly === 'boolean') {
-      this._constructorOptions.secure = options.httpsOnly;
-    }
-    this._getOption.signed = signed;
-    this._setOption = {
+    this._rawOptions = {
       domain: options.domain || undefined,
-      httpOnly: options.serverSideOnly !== false,
-      maxAge,
+      serverSideOnly: options.serverSideOnly !== false,
+      maxAgeMilliseconds,
       overwrite: options.overwrite !== false,
       path: options.path || '/',
       sameSite:
         this._readSameSitePolicy === SameSitePolicy.AnySite
           ? false
           : this._readSameSitePolicy,
-      signed,
     };
   }
   private _checkCSRF(req: IncomingMessage, method: 'get' | 'set'): boolean {
@@ -269,11 +332,20 @@ export default class Cookie<T> {
     if ((req as any)[this._cacheSymbol]) {
       return (req as any)[this._cacheSymbol].value;
     }
-    const cookies = new Cookies(req, res, this._constructorOptions);
-    const str = cookies.get(this._name, this._getOption);
+    const ciphertext = getCookie(req, res, this._name);
+    const result = ciphertext ? this._keygrip.unpackString(ciphertext) : null;
     try {
-      if (str) {
-        const value = JSON.parse(str);
+      if (result) {
+        if (result.outdated) {
+          setCookie(
+            req,
+            res,
+            this._name,
+            this._keygrip.packString(result.payload),
+            this._rawOptions,
+          );
+        }
+        const value = JSON.parse(result.payload);
         (req as any)[this._cacheSymbol] = {value};
         return value;
       }
@@ -285,27 +357,35 @@ export default class Cookie<T> {
     if (!this._checkCSRF(req, 'set')) {
       return;
     }
-    const cookies = new Cookies(req, res, this._constructorOptions);
     const str = JSON.stringify(value);
-    cookies.set(this._name, str, this._setOption);
+    const ciphertext = this._keygrip.packString(str);
+    setCookie(req, res, this._name, ciphertext, this._rawOptions);
     (req as any)[this._cacheSymbol] = {value};
   }
   remove(req: IncomingMessage, res: ServerResponse) {
     if (!this._checkCSRF(req, 'set')) {
       return;
     }
-    const cookies = new Cookies(req, res, this._constructorOptions);
-    cookies.set(this._name, undefined, {
-      ...this._setOption,
-      maxAge: 0,
-    });
+    removeCookie(req, res, this._name, this._rawOptions);
     (req as any)[this._cacheSymbol] = {value: null};
   }
   refresh(req: IncomingMessage, res: ServerResponse) {
-    const cookies = new Cookies(req, res, this._constructorOptions);
-    const str = cookies.get(this._name, this._getOption);
-    if (str) {
-      cookies.set(this._name, str, this._setOption);
+    const ciphertext = getCookie(req, res, name);
+    if (ciphertext) {
+      const result = this._keygrip.unpackString(ciphertext);
+      if (result) {
+        setCookie(
+          req,
+          res,
+          this._name,
+          result.outdated
+            ? this._keygrip.packString(result.payload)
+            : ciphertext,
+          this._rawOptions,
+        );
+      } else {
+        removeCookie(req, res, this._name, this._rawOptions);
+      }
     }
   }
 }

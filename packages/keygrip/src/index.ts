@@ -28,16 +28,23 @@ interface Key {
   hmac: Buffer;
 }
 
+export interface Result<T = Buffer> {
+  payload: T;
+  outdated: boolean;
+}
 export abstract class Keygrip {
   abstract pack(payload: Buffer): Buffer;
-  abstract unpack(data: Buffer): Buffer | null;
+  abstract unpack(data: Buffer): Result | null;
   packString(payload: string): string {
     return this.pack(new Buffer(payload, 'utf8')).toString('base64');
   }
-  unpackString(data: string): string | null {
-    const payload = this.unpack(new Buffer(data, 'base64'));
-    if (payload == null) return null;
-    return payload.toString('utf8');
+  unpackString(data: string): Result<string> | null {
+    const result = this.unpack(new Buffer(data, 'base64'));
+    if (result == null) return null;
+    return {
+      payload: result.payload.toString('utf8'),
+      outdated: result.outdated,
+    };
   }
 }
 
@@ -108,7 +115,7 @@ export class KeygripSecret extends Keygrip {
     return Buffer.concat([mac, iv, ciphertext]);
   }
 
-  tryDecrypt(data: Buffer, keyIndex?: number): Buffer | null {
+  tryDecrypt(data: Buffer, keyIndex?: number): Result | null {
     if (keyIndex === undefined) {
       for (let i = 0; i < this._keys.length; i++) {
         const message = this.tryDecrypt(data, i);
@@ -144,7 +151,7 @@ export class KeygripSecret extends Keygrip {
   pack(payload: Buffer): Buffer {
     return this.encrypt(payload);
   }
-  unpack(data: Buffer): Buffer | null {
+  unpack(data: Buffer): Result | null {
     return this.tryDecrypt(data);
   }
 }
@@ -195,7 +202,7 @@ export class KeygripPublic extends Keygrip {
     return Buffer.concat([mac, payload]);
   }
 
-  tryVerify(data: Buffer, keyIndex?: number): Buffer | null {
+  tryVerify(data: Buffer, keyIndex?: number): Result | null {
     if (keyIndex === undefined) {
       for (let i = 0; i < this._keys.length; i++) {
         const message = this.tryDecrypt(data, i);
@@ -227,7 +234,7 @@ export class KeygripPublic extends Keygrip {
   pack(payload: Buffer): Buffer {
     return this.sign(payload);
   }
-  unpack(data: Buffer): Buffer | null {
+  unpack(data: Buffer): Result | null {
     return this.tryVerify(data);
   }
 }
@@ -236,7 +243,7 @@ export class KeygripPassThrough extends Keygrip {
   pack(payload: Buffer): Buffer {
     return payload;
   }
-  unpack(data: Buffer): Buffer {
-    return data;
+  unpack(data: Buffer): Result {
+    return {payload: data, outdated: false};
   }
 }

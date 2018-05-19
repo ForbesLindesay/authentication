@@ -5,10 +5,10 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@types/cookies": "^0.7.1",
+    "@authentication/keygrip": "^0.0.0",
+    "@authentication/raw-cookie": "^0.0.0",
     "@types/ms": "^0.7.30",
     "@types/node": "^8.0.33",
-    "cookies": "^0.7.1",
     "ms": "^2.1.1"
   },
   "scripts": {
