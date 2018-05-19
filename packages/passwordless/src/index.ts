@@ -193,6 +193,7 @@ export default class PasswordlessAuthentication<State> {
       {
         sameSitePolicy: Cookie.SameSitePolicy.AnySite,
         maxAge: this._maxAge,
+        encryptionPolicy: Cookie.EncryptionPolicy.Optional,
         signingPolicy: Cookie.SigningPolicy.Optional,
       },
     );

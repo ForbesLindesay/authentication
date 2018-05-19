@@ -88,6 +88,7 @@ export default class OAuth1Authentication<State = Mixed> {
       keys: options.cookieKeys,
       maxAge: Cookie.Session,
       sameSitePolicy: Cookie.SameSitePolicy.AnySite,
+      encryptionPolicy: Cookie.EncryptionPolicy.Optional,
       signingPolicy: Cookie.SigningPolicy.Optional,
     });
     const requestTokenURL = parseURL(
@@ -108,6 +109,7 @@ export default class OAuth1Authentication<State = Mixed> {
     if (options.consumerSecret === undefined) {
       throw new TypeError('OAuthStrategy requires a consumerSecret option');
     }
+    this._callbackURL = options.callbackURL;
     this.callbackPath = (typeof options.callbackURL === 'string'
       ? new URL(options.callbackURL, 'http://example.com')
       : options.callbackURL

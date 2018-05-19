@@ -152,6 +152,7 @@ export default class OAuth2Authentication<State = Mixed, Results = Mixed> {
       keys: options.cookieKeys,
       maxAge: Cookie.Session,
       sameSitePolicy: Cookie.SameSitePolicy.AnySite,
+      encryptionPolicy: Cookie.EncryptionPolicy.Optional,
       signingPolicy: Cookie.SigningPolicy.Optional,
     });
   }
