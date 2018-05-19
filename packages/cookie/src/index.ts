@@ -266,15 +266,19 @@ export default class Cookie<T> {
     if (!this._checkCSRF(req, 'get')) {
       return null;
     }
+    if ((req as any)[this._cacheSymbol]) {
+      return (req as any)[this._cacheSymbol].value;
+    }
     const cookies = new Cookies(req, res, this._constructorOptions);
-    const str: string = (req as any)[this._cacheSymbol]
-      ? (req as any)[this._cacheSymbol].value
-      : cookies.get(this._name, this._getOption);
+    const str = cookies.get(this._name, this._getOption);
     try {
       if (str) {
-        return JSON.parse(str);
+        const value = JSON.parse(str);
+        (req as any)[this._cacheSymbol] = {value};
+        return value;
       }
     } catch (ex) {}
+    (req as any)[this._cacheSymbol] = {value: null};
     return null;
   }
   set(req: IncomingMessage, res: ServerResponse, value: T) {
@@ -284,7 +288,7 @@ export default class Cookie<T> {
     const cookies = new Cookies(req, res, this._constructorOptions);
     const str = JSON.stringify(value);
     cookies.set(this._name, str, this._setOption);
-    (req as any)[this._cacheSymbol] = {value: str};
+    (req as any)[this._cacheSymbol] = {value};
   }
   remove(req: IncomingMessage, res: ServerResponse) {
     if (!this._checkCSRF(req, 'set')) {
@@ -295,7 +299,7 @@ export default class Cookie<T> {
       ...this._setOption,
       maxAge: 0,
     });
-    (req as any)[this._cacheSymbol] = {value: ''};
+    (req as any)[this._cacheSymbol] = {value: null};
   }
   refresh(req: IncomingMessage, res: ServerResponse) {
     const cookies = new Cookies(req, res, this._constructorOptions);
