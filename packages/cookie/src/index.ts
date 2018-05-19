@@ -17,7 +17,7 @@ import isSameOrigin from './isSameOrigin';
 import parseBaseURL from './parseBaseURL';
 
 export enum MaxAgeKind {
-  Session = 0,
+  Session = 'session',
 }
 export enum SameSitePolicy {
   /**
@@ -237,12 +237,18 @@ export default class Cookie<T> {
 
     // max age
     const maxAgeMilliseconds =
-      typeof options.maxAge === 'string' ? ms(options.maxAge) : options.maxAge;
+      options.maxAge === Session
+        ? undefined
+        : typeof options.maxAge === 'string'
+          ? ms(options.maxAge)
+          : options.maxAge;
+
     if (
-      typeof maxAgeMilliseconds !== 'number' ||
-      maxAgeMilliseconds !== Math.round(maxAgeMilliseconds) ||
-      maxAgeMilliseconds >= Number.MAX_SAFE_INTEGER ||
-      Number.isNaN(maxAgeMilliseconds)
+      maxAgeMilliseconds !== undefined &&
+      (typeof maxAgeMilliseconds !== 'number' ||
+        maxAgeMilliseconds !== Math.round(maxAgeMilliseconds) ||
+        maxAgeMilliseconds >= Number.MAX_SAFE_INTEGER ||
+        Number.isNaN(maxAgeMilliseconds))
     ) {
       throw new Error(
         'options.maxAge must be an integer or a number understood by the ms library. ' +
@@ -369,7 +375,7 @@ export default class Cookie<T> {
     removeCookie(req, res, this._name, this._rawOptions);
     (req as any)[this._cacheSymbol] = {value: null};
   }
-  refresh(req: IncomingMessage, res: ServerResponse) {
+  refresh(req: IncomingMessage, res: ServerResponse, next?: () => any) {
     const ciphertext = getCookie(req, res, name);
     if (ciphertext) {
       const result = this._keygrip.unpackString(ciphertext);
@@ -386,6 +392,9 @@ export default class Cookie<T> {
       } else {
         removeCookie(req, res, this._name, this._rawOptions);
       }
+    }
+    if (next) {
+      next();
     }
   }
 }

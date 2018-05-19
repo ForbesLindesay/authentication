@@ -1,7 +1,7 @@
 {
   "docs": {
     "Guides": ["getting-started", "profile"],
-    "Packages": ["csrf-protection", "cookie", "send-message", "generate-passcode", "rate-limit", "secure-hash"],
+    "Packages": ["csrf-protection", "cookie", "cookie-session", "send-message", "generate-passcode", "rate-limit", "secure-hash"],
     "Common Providers": ["facebook", "github", "google", "stripe", "tumblr"]
   }
 }

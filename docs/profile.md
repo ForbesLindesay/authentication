@@ -30,7 +30,7 @@ import {Profile} from '@authentication/types';
 An image has a `url` for the original image, and may also have either a `size` or a `sizeParameter`.
 
 * `url` (required, `string`) - the fully qualified URL of the image.
-* `size` (optioanl, `numnber`) - the width/height of the image in pixels. This can be used tos elect an appropriate image from the `images` array. If possible, a `sizeParameter` gives greater control, but not all providers offer this feature.
+* `size` (optional, `numnber`) - the width/height of the image in pixels. This can be used tos elect an appropriate image from the `images` array. If possible, a `sizeParameter` gives greater control, but not all providers offer this feature.
 * `sizeParameter` (optional, `string`) - If there is a size parameter, it can be provided as a query string argument to request the image at a specific size.
 
 Example Usage:

@@ -3,6 +3,7 @@ import {
   createCipheriv,
   createHmac,
   pbkdf2Sync,
+  pbkdf2,
   randomBytes,
   timingSafeEqual,
   createDecipheriv,
@@ -10,17 +11,12 @@ import {
 
 const KEY_SIZE = 32;
 
-const MINIMUM_SECRET_KEY_LENGTH = 8;
-const MINIMUM_PUBLIC_KEY_LENGTH = 8;
-const RECOMMENDED_SECRET_KEY_LENGTH = KEY_SIZE * 2;
-const RECOMMENDED_PUBLIC_KEY_LENGTH = KEY_SIZE;
-
 const KDF_SALT = 'Keygrip';
 const KDF_ITERATIONS = 100;
-const HASH = 'sha';
-const CIPHER = 'aes-256-cbc';
+const HMAC_ALGORITHM = 'sha512';
+const ENCRYPTION_ALGORITHM = 'aes-256-cbc';
 
-const HMAC_LENGTH = 32;
+const HMAC_LENGTH = 64;
 const IV_LENGTH = 16;
 
 interface Key {
@@ -48,57 +44,110 @@ export abstract class Keygrip {
   }
 }
 
+function getKey(
+  rawKey: string | Buffer,
+  length: number,
+  minimumInputLength: number,
+): Buffer {
+  if (typeof rawKey === 'string' && /^[0-9A-F]+$/i.test(rawKey)) {
+    rawKey = Buffer.from(rawKey.toUpperCase(), 'hex');
+  }
+  if (rawKey.length < minimumInputLength) {
+    throw new Error(
+      `You cannot use keygrip with a key shorter than ` +
+        `${minimumInputLength} bytes (i.e. ${minimumInputLength *
+          2} hex encoded characters). ` +
+        `We recommend a key length of ${length} bytes. ` +
+        `You can generate a secure key using the command: ` +
+        `node -e "console.log(require('crypto').randomBytes(${length}).toString('hex'))"`,
+    );
+  }
+  // Derive context-specific keys out of raw key inputs. The user is expected to provide
+  // cryptographically secure keys, so a static salt and low iteration count are
+  // sufficient.
+  return Buffer.isBuffer(rawKey) && rawKey.length === length
+    ? rawKey
+    : pbkdf2Sync(rawKey, KDF_SALT, KDF_ITERATIONS, length, 'sha512');
+}
+async function getKeyAsync(
+  rawKey: string | Buffer,
+  length: number,
+  minimumInputLength: number,
+): Promise<Buffer> {
+  if (typeof rawKey === 'string' && /^[0-9A-F]+$/i.test(rawKey)) {
+    rawKey = Buffer.from(rawKey.toUpperCase(), 'hex');
+  }
+  if (rawKey.length < minimumInputLength) {
+    throw new Error(
+      `You cannot use keygrip with a key shorter than ` +
+        `${minimumInputLength} bytes (i.e. ${minimumInputLength *
+          2} hex encoded characters). ` +
+        `We recommend a key length of ${length} bytes. ` +
+        `You can generate a secure key using the command: ` +
+        `node -e "console.log(require('crypto').randomBytes(${length}).toString('hex'))"`,
+    );
+  }
+  // Derive context-specific keys out of raw key inputs. The user is expected to provide
+  // cryptographically secure keys, so a static salt and low iteration count are
+  // sufficient.
+  return Buffer.isBuffer(rawKey) && rawKey.length === length
+    ? rawKey
+    : await new Promise<Buffer>((resolve, reject) => {
+        pbkdf2(
+          rawKey,
+          KDF_SALT,
+          KDF_ITERATIONS,
+          length,
+          'sha512',
+          (err, derivedkey) => {
+            if (err) reject(err);
+            else resolve(derivedkey);
+          },
+        );
+      });
+}
+
 export class KeygripSecret extends Keygrip {
   private readonly _keys: Key[];
+  static readonly RECOMMENDED_KEY_LENGTH = KEY_SIZE * 2;
+  static readonly MINIMUM_KEY_LENGTH = 8;
+  static createAsync(keys: ReadonlyArray<string | Buffer>) {
+    return Promise.all(
+      keys.map(key =>
+        getKeyAsync(
+          key,
+          KeygripSecret.RECOMMENDED_KEY_LENGTH,
+          KeygripSecret.MINIMUM_KEY_LENGTH,
+        ),
+      ),
+    ).then(keys => new KeygripSecret(keys));
+  }
   constructor(keys: ReadonlyArray<string | Buffer>) {
     super();
-    this._keys = keys
-      .map(key => {
-        if (typeof key === 'string' && /^[0-9A-F]+$/i.test(key)) {
-          return Buffer.from(key.toUpperCase(), 'hex');
-        }
-        return key;
-      })
-      .map((rawKey): Key => {
-        if (rawKey.length < MINIMUM_SECRET_KEY_LENGTH) {
-          throw new Error(
-            `You cannot use keygrip with a key shorter than ` +
-              `${MINIMUM_SECRET_KEY_LENGTH} bytes (which is ${MINIMUM_SECRET_KEY_LENGTH *
-                2} ` +
-              `hexidecimal characters). ` +
-              `We recommend a key length of ${RECOMMENDED_SECRET_KEY_LENGTH} bytes. ` +
-              `You can generate a secure key using the command: ` +
-              `node -e "console.log(require('crypto').randomBytes(${RECOMMENDED_SECRET_KEY_LENGTH}).toString('hex'))"`,
-          );
-        }
-        // Derive context-specific keys out of raw key inputs. The user is expected to provide
-        // cryptographically secure keys, so a static salt and low iteration count are
-        // sufficient.
-        const key =
-          Buffer.isBuffer(rawKey) && rawKey.length === KEY_SIZE * 2
-            ? rawKey
-            : pbkdf2Sync(
-                rawKey,
-                KDF_SALT,
-                KDF_ITERATIONS,
-                KEY_SIZE * 2,
-                'sha512',
-              );
+    this._keys = keys.map((rawKey): Key => {
+      // Derive context-specific keys out of raw key inputs. The user is expected to provide
+      // cryptographically secure keys, so a static salt and low iteration count are
+      // sufficient.
+      const key = getKey(
+        rawKey,
+        KeygripSecret.RECOMMENDED_KEY_LENGTH,
+        KeygripSecret.MINIMUM_KEY_LENGTH,
+      );
 
-        return {
-          encrypt: key.slice(0, KEY_SIZE),
-          hmac: key.slice(KEY_SIZE, KEY_SIZE * 2),
-        };
-      });
+      return {
+        encrypt: key.slice(0, KEY_SIZE),
+        hmac: key.slice(KEY_SIZE, KEY_SIZE * 2),
+      };
+    });
   }
 
   encrypt(payload: Buffer): Buffer {
     const key = this._keys[0];
     const iv = randomBytes(16);
-    const cipher = createCipheriv(CIPHER, key.encrypt, iv);
+    const cipher = createCipheriv(ENCRYPTION_ALGORITHM, key.encrypt, iv);
     const ciphertext = Buffer.concat([cipher.update(payload), cipher.final()]);
 
-    const mac = createHmac(HASH, key.hmac)
+    const mac = createHmac(HMAC_ALGORITHM, key.hmac)
       .update(iv)
       .update(ciphertext)
       .digest();
@@ -129,13 +178,12 @@ export class KeygripSecret extends Keygrip {
       throw new Error('Invalid key index ' + keyIndex);
     }
 
-    // 32 byte hmac + 16 iv + at least one 16 block
-    if (data.length < HMAC_LENGTH + IV_LENGTH + 16) return null;
+    if (data.length < HMAC_LENGTH + IV_LENGTH) return null;
     const mac = data.slice(0, HMAC_LENGTH);
     const iv = data.slice(HMAC_LENGTH, HMAC_LENGTH + IV_LENGTH);
     const ciphertext = data.slice(HMAC_LENGTH + IV_LENGTH, data.length);
 
-    const actualMac = createHmac(HASH, key.hmac)
+    const actualMac = createHmac(HMAC_ALGORITHM, key.hmac)
       .update(iv)
       .update(ciphertext)
       .digest();
@@ -144,8 +192,11 @@ export class KeygripSecret extends Keygrip {
       return null;
     }
 
-    const cipher = createDecipheriv(CIPHER, key.encrypt, iv);
-    return Buffer.concat([cipher.update(ciphertext), cipher.final()]);
+    const cipher = createDecipheriv(ENCRYPTION_ALGORITHM, key.encrypt, iv);
+    return {
+      payload: Buffer.concat([cipher.update(ciphertext), cipher.final()]),
+      outdated: keyIndex !== 0,
+    };
   }
 
   pack(payload: Buffer): Buffer {
@@ -158,40 +209,37 @@ export class KeygripSecret extends Keygrip {
 
 export class KeygripPublic extends Keygrip {
   private readonly _keys: Buffer[];
+  static readonly RECOMMENDED_KEY_LENGTH = KEY_SIZE;
+  static readonly MINIMUM_KEY_LENGTH = 8;
+  static createAsync(keys: ReadonlyArray<string | Buffer>) {
+    return Promise.all(
+      keys.map(key =>
+        getKeyAsync(
+          key,
+          KeygripPublic.RECOMMENDED_KEY_LENGTH,
+          KeygripPublic.MINIMUM_KEY_LENGTH,
+        ),
+      ),
+    ).then(keys => new KeygripPublic(keys));
+  }
   constructor(keys: ReadonlyArray<string | Buffer>) {
     super();
-    this._keys = keys
-      .map(key => {
-        if (typeof key === 'string' && /^[0-9A-F]+$/i.test(key)) {
-          return Buffer.from(key.toUpperCase(), 'hex');
-        }
-        return key;
-      })
-      .map(rawKey => {
-        if (rawKey.length < MINIMUM_PUBLIC_KEY_LENGTH) {
-          throw new Error(
-            `You cannot use keygrip with a key shorter than ` +
-              `${MINIMUM_PUBLIC_KEY_LENGTH} bytes (which is ${MINIMUM_PUBLIC_KEY_LENGTH *
-                2} ` +
-              `hexidecimal characters). ` +
-              `We recommend a key length of ${RECOMMENDED_PUBLIC_KEY_LENGTH} bytes. ` +
-              `You can generate a secure key using the command: ` +
-              `node -e "console.log(require('crypto').randomBytes(${RECOMMENDED_PUBLIC_KEY_LENGTH}).toString('hex'))"`,
-          );
-        }
-        // Derive context-specific keys out of raw key inputs. The user is expected to provide
-        // cryptographically secure keys, so a static salt and low iteration count are
-        // sufficient.
-        return Buffer.isBuffer(rawKey) && rawKey.length === KEY_SIZE
-          ? rawKey
-          : pbkdf2Sync(rawKey, KDF_SALT, KDF_ITERATIONS, KEY_SIZE, 'sha512');
-      });
+    this._keys = keys.map(rawKey => {
+      // Derive context-specific keys out of raw key inputs. The user is expected to provide
+      // cryptographically secure keys, so a static salt and low iteration count are
+      // sufficient.
+      return getKey(
+        rawKey,
+        KeygripPublic.RECOMMENDED_KEY_LENGTH,
+        KeygripPublic.MINIMUM_KEY_LENGTH,
+      );
+    });
   }
 
   sign(payload: Buffer): Buffer {
     const key = this._keys[0];
 
-    const mac = createHmac(HASH, key)
+    const mac = createHmac(HMAC_ALGORITHM, key)
       .update(payload)
       .digest();
 
@@ -205,7 +253,7 @@ export class KeygripPublic extends Keygrip {
   tryVerify(data: Buffer, keyIndex?: number): Result | null {
     if (keyIndex === undefined) {
       for (let i = 0; i < this._keys.length; i++) {
-        const message = this.tryDecrypt(data, i);
+        const message = this.tryVerify(data, i);
         if (message !== null) return message;
       }
 
@@ -220,7 +268,7 @@ export class KeygripPublic extends Keygrip {
     const mac = data.slice(0, HMAC_LENGTH);
     const payload = data.slice(HMAC_LENGTH, data.length);
 
-    const actualMac = createHmac(HASH, key)
+    const actualMac = createHmac(HMAC_ALGORITHM, key)
       .update(data)
       .digest();
 
@@ -228,7 +276,7 @@ export class KeygripPublic extends Keygrip {
       return null;
     }
 
-    return payload;
+    return {payload, outdated: keyIndex !== 0};
   }
 
   pack(payload: Buffer): Buffer {

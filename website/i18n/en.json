@@ -4,6 +4,7 @@
     "next": "Next",
     "previous": "Previous",
     "tagline": "Secure, Modular Authentication for Node.js",
+    "cookie-session": "Cookie Session",
     "cookie": "Cookie",
     "csrf-protection": "CSRF Protection",
     "doc1": "document number 2",
