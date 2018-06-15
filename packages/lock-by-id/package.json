@@ -1,10 +1,9 @@
 {
   "name": "@authentication/lock-by-id",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {},
   "scripts": {
     "prepublish": "node ../../prebuild lock-by-id&& tsc -p tsconfig.build.json && node ../../prepare lock-by-id"
   },

@@ -1,10 +1,9 @@
 {
   "name": "@authentication/base-error",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {},
   "scripts": {
     "prepublish": "node ../../prebuild base-error&& tsc -p tsconfig.build.json && node ../../prepare base-error"
   },

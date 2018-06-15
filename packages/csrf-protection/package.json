@@ -1,10 +1,9 @@
 {
   "name": "@authentication/csrf-protection",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {},
   "scripts": {
     "prepublish": "node ../../prebuild csrf-protection&& tsc -p tsconfig.build.json && node ../../prepare csrf-protection"
   },

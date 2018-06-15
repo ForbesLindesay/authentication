@@ -1,12 +1,12 @@
 {
   "name": "@authentication/react-passwordless",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@authentication/is-email": "^0.0.1",
-    "@authentication/passwordless": "^0.1.0",
+    "@authentication/is-email": "^0.0.2",
+    "@authentication/passwordless": "^0.1.1",
     "react": "^16.2.0",
     "react-digit-input": "^1.0.1"
   },

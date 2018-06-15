@@ -1,13 +1,13 @@
 {
   "name": "@authentication/twitter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@authentication/base-error": "^0.0.3",
-    "@authentication/oauth1": "^0.1.0",
-    "@authentication/types": "^0.0.5"
+    "@authentication/base-error": "^0.0.4",
+    "@authentication/oauth1": "^0.1.1",
+    "@authentication/types": "^0.0.6"
   },
   "scripts": {
     "prepublish": "node ../../prebuild twitter&& tsc -p tsconfig.build.json && node ../../prepare twitter"

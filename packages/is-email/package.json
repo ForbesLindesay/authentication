@@ -1,10 +1,9 @@
 {
   "name": "@authentication/is-email",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {},
   "scripts": {
     "prepublish": "node ../../prebuild is-email&& tsc -p tsconfig.build.json && node ../../prepare is-email"
   },

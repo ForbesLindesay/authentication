@@ -1,11 +1,11 @@
 {
   "name": "@authentication/tumblr",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@authentication/oauth1": "^0.1.0"
+    "@authentication/oauth1": "^0.1.1"
   },
   "scripts": {
     "prepublish": "node ../../prebuild tumblr&& tsc -p tsconfig.build.json && node ../../prepare tumblr"

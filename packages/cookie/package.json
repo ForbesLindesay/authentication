@@ -1,12 +1,12 @@
 {
   "name": "@authentication/cookie",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@authentication/keygrip": "^0.0.1",
-    "@authentication/raw-cookie": "^0.0.1",
+    "@authentication/keygrip": "^0.0.2",
+    "@authentication/raw-cookie": "^0.0.2",
     "@types/ms": "^0.7.30",
     "ms": "^2.1.1"
   },

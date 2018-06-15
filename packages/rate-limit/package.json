@@ -1,11 +1,11 @@
 {
   "name": "@authentication/rate-limit",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@authentication/lock-by-id": "^0.0.1",
+    "@authentication/lock-by-id": "^0.0.2",
     "@types/ms": "^0.7.30",
     "ms": "^2.1.1"
   },
