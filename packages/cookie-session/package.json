@@ -4,7 +4,9 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {},
+  "dependencies": {
+    "@authentication/cookie": "0.1.0"
+  },
   "scripts": {
     "prepublish": "node ../../prebuild cookie-session&& tsc -p tsconfig.build.json && node ../../prepare cookie-session"
   },
