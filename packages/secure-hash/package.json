@@ -7,7 +7,6 @@
   "dependencies": {
     "@types/bytes": "^2.5.1",
     "@types/ms": "^0.7.30",
-    "@types/node": "^8.0.33",
     "bytes": "^3.0.0",
     "ms": "^2.1.1",
     "secure-password": "^2.1.2",

@@ -7,7 +7,6 @@
   "dependencies": {
     "@authentication/is-email": "^0.0.1",
     "@authentication/passwordless": "^0.1.0",
-    "@types/node": "^8.0.33",
     "react": "^16.2.0",
     "react-digit-input": "^1.0.1"
   },

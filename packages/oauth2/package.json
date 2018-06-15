@@ -9,7 +9,6 @@
     "@authentication/cookie": "^0.1.0",
     "@authentication/types": "^0.0.5",
     "@types/express": "^4.0.39",
-    "@types/node": "^8.0.33",
     "oauth": "^0.9.15"
   },
   "scripts": {

@@ -68,7 +68,9 @@ readdirSync(__dirname + '/packages').forEach(directory => {
   if (!pkg.scripts) {
     pkg.scripts = {};
   }
-  pkg.dependencies['@types/node'] = dependencies['@types/node'];
+  if (pkg.dependencies['@types/node']) {
+    delete pkg.dependencies['@types/node'];
+  }
   if (!/\-demo$/.test(directory)) {
     pkg.scripts.prepublish =
       'node ../../prebuild ' +

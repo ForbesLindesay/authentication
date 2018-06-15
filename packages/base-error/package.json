@@ -4,9 +4,7 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {
-    "@types/node": "^8.0.33"
-  },
+  "dependencies": {},
   "scripts": {
     "prepublish": "node ../../prebuild base-error&& tsc -p tsconfig.build.json && node ../../prepare base-error"
   },
