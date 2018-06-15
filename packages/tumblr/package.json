@@ -4,7 +4,9 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "dependencies": {},
+  "dependencies": {
+    "@authentication/oauth1": "^0.1.0"
+  },
   "scripts": {
     "prepublish": "node ../../prebuild tumblr&& tsc -p tsconfig.build.json && node ../../prepare tumblr"
   },
