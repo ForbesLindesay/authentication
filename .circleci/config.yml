@@ -1,0 +1,73 @@
+version: 2
+
+refs:
+  - &container
+    docker:
+      - image: node:8.11
+    working_directory: ~/repo
+  - &restore_cache
+    restore_cache:
+      keys:
+        - v1-dependencies-{{ checksum "yarn.lock" }}
+        - v1-dependencies-
+  - &save_cache
+    save_cache:
+      paths:
+        - node_modules
+      key: v1-dependencies-{{ checksum "yarn.lock" }}
+  - &npm_auth
+    run:
+      name: NPM Auth
+      command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+  - &bolt_install
+    run:
+      name: bolt install
+      command: yarn global add bolt && bolt
+  - &build
+    run:
+      name: build
+      command: bolt build:
+  - &test
+    run:
+      name: test
+      command: bolt test
+
+jobs:
+  all:
+    <<: *container
+    steps:
+      - checkout
+      - *restore_cache
+      - *npm_auth
+      - *bolt_install
+      - *save_cache
+      - *build
+      - *test
+
+  master:
+    <<: *container
+    steps:
+      - checkout
+      - *restore_cache
+      - *npm_auth
+      - *bolt_install
+      - *save_cache
+      - *build
+      - *test
+      # TODO: release
+
+workflows:
+  version: 2
+  all:
+    jobs:
+      - all:
+          filters:
+            branches:
+              ignore:
+                - master
+  master:
+    jobs:
+      - master:
+          filters:
+            branches:
+              only: master
