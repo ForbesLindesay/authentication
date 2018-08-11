@@ -1,5 +1,7 @@
 // build the package in the current working directory
 
+process.env.NODE_ENV = 'production';
+
 const {createHash} = require('crypto');
 const readFileSync = require('fs').readFileSync;
 const readdirSync = require('fs').readdirSync;

@@ -29,7 +29,6 @@
     "babel-core": "^6.26.0",
     "cross-spawn": "^6.0.5",
     "jest": "^21.2.1",
-    "lerna": "^2.4.0",
     "lsr": "^2.0.0",
     "prettier": "^1.8.2",
     "rimraf": "^2.6.2",
