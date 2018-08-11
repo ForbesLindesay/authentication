@@ -4,13 +4,12 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "scripts": {
-    "prepublish": "node ../../prebuild keygrip&& tsc -p tsconfig.build.json && node ../../prepare keygrip"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/keygrip",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
   "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "dependencies": {}
 }

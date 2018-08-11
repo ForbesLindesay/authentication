@@ -9,9 +9,7 @@
     "@authentication/oauth2": "^0.1.1",
     "@authentication/types": "^0.0.6"
   },
-  "scripts": {
-    "prepublish": "node ../../prebuild google&& tsc -p tsconfig.build.json && node ../../prepare google"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/google",
   "license": "GPL-3.0",
   "publishConfig": {

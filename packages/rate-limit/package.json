@@ -9,9 +9,7 @@
     "@types/ms": "^0.7.30",
     "ms": "^2.1.1"
   },
-  "scripts": {
-    "prepublish": "node ../../prebuild rate-limit&& tsc -p tsconfig.build.json && node ../../prepare rate-limit"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/rate-limit",
   "license": "GPL-3.0",
   "publishConfig": {

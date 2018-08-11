@@ -5,11 +5,10 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@authentication/oauth1": "^0.1.1"
+    "@authentication/oauth1": "^0.1.1",
+    "@authentication/types": "^0.0.6"
   },
-  "scripts": {
-    "prepublish": "node ../../prebuild tumblr&& tsc -p tsconfig.build.json && node ../../prepare tumblr"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/tumblr",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
   "license": "GPL-3.0",

@@ -7,12 +7,11 @@
   "dependencies": {
     "@authentication/oauth2": "^0.1.1",
     "@authentication/types": "^0.0.6",
-    "@types/stripe": "^5.0.1",
-    "stripe": "^5.4.0"
+    "@types/express": "^4.16.0",
+    "@types/stripe": "^5.0.21",
+    "stripe": "^6.7.0"
   },
-  "scripts": {
-    "prepublish": "node ../../prebuild stripe&& tsc -p tsconfig.build.json && node ../../prepare stripe"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/stripe",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
   "license": "GPL-3.0",

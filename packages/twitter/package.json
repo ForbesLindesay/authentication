@@ -9,9 +9,7 @@
     "@authentication/oauth1": "^0.1.1",
     "@authentication/types": "^0.0.6"
   },
-  "scripts": {
-    "prepublish": "node ../../prebuild twitter&& tsc -p tsconfig.build.json && node ../../prepare twitter"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/twitter",
   "license": "GPL-3.0",
   "publishConfig": {

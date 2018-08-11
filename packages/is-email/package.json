@@ -4,14 +4,13 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "scripts": {
-    "prepublish": "node ../../prebuild is-email&& tsc -p tsconfig.build.json && node ../../prepare is-email"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/is-email",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
   "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
   },
-  "@authentication/target": "browser"
+  "@authentication/target": "browser",
+  "dependencies": {}
 }

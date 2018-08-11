@@ -7,9 +7,7 @@
   "dependencies": {
     "base32": "^0.0.6"
   },
-  "scripts": {
-    "prepublish": "node ../../prebuild generate-passcode&& tsc -p tsconfig.build.json && node ../../prepare generate-passcode"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/generate-passcode",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
   "license": "GPL-3.0",

@@ -7,12 +7,12 @@
   "dependencies": {
     "@authentication/keygrip": "^0.0.2",
     "@authentication/raw-cookie": "^0.0.2",
-    "@types/ms": "^0.7.30",
     "ms": "^2.1.1"
   },
-  "scripts": {
-    "prepublish": "node ../../prebuild cookie&& tsc -p tsconfig.build.json && node ../../prepare cookie"
+  "devDependencies": {
+    "@types/ms": "^0.7.30"
   },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/cookie",
   "license": "GPL-3.0",
   "publishConfig": {

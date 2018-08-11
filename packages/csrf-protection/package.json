@@ -4,14 +4,13 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "scripts": {
-    "prepublish": "node ../../prebuild csrf-protection&& tsc -p tsconfig.build.json && node ../../prepare csrf-protection"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/csrf-protection",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
   "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://www.atauthentication.com/docs/csrf-protection.html"
+  "homepage": "https://www.atauthentication.com/docs/csrf-protection.html",
+  "dependencies": {}
 }

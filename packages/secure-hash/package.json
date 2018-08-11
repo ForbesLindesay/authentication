@@ -5,21 +5,21 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@types/bytes": "^2.5.1",
-    "@types/ms": "^0.7.30",
     "bytes": "^3.0.0",
     "ms": "^2.1.1",
-    "secure-password": "^2.1.2",
+    "secure-password": "^3.0.0",
     "throat": "^4.1.0"
   },
-  "scripts": {
-    "prepublish": "node ../../prebuild secure-hash&& tsc -p tsconfig.build.json && node ../../prepare secure-hash"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/secure-hash",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
   "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://www.atauthentication.com/docs/secure-hash.html"
+  "homepage": "https://www.atauthentication.com/docs/secure-hash.html",
+  "devDependencies": {
+    "@types/bytes": "^3.0.0",
+    "@types/ms": "^0.7.30"
+  }
 }

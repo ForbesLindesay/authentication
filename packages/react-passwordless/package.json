@@ -7,20 +7,21 @@
   "dependencies": {
     "@authentication/is-email": "^0.0.2",
     "@authentication/passwordless": "^0.1.1",
-    "react": "^16.2.0",
-    "react-digit-input": "^1.0.1"
+    "react-digit-input": "^1.1.0"
   },
-  "scripts": {
-    "prepublish": "node ../../prebuild react-passwordless&& tsc -p tsconfig.build.json && node ../../prepare react-passwordless"
+  "devDependencies": {
+    "@types/react": "*",
+    "react": "^16.4.2"
   },
+  "peerDependencies": {
+    "react": "*"
+  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/react-passwordless",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
   "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  },
-  "devDependencies": {
-    "@types/react": "*"
   },
   "@authentication/target": "browser"
 }

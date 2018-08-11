@@ -147,7 +147,7 @@ export default class SecureHash {
     if (!password || typeof password !== 'string') {
       throw new TypeError('password should be a, non-empty, string');
     }
-    const passwordBuffer = new Buffer(password);
+    const passwordBuffer = Buffer.from(password);
     while (true) {
       const start = Date.now();
       const hash = await this._hashBuffer(passwordBuffer);
@@ -193,11 +193,11 @@ export default class SecureHash {
     if (typeof onUpdate !== 'function') {
       throw new TypeError('onUpdate should be a function');
     }
-    const passwordBuffer = new Buffer(password);
+    const passwordBuffer = Buffer.from(password);
     const start = Date.now();
     const result = await this._verifyBuffer(
       passwordBuffer,
-      new Buffer(passwordHash, 'base64'),
+      Buffer.from(passwordHash, 'base64'),
     );
     const end = Date.now();
     switch (result) {

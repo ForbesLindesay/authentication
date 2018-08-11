@@ -1,6 +1,6 @@
 export default class Queue<T> {
-  private s1: void | T[];
-  private s2: void | T[];
+  private s1: undefined | T[];
+  private s2: undefined | T[];
   push(value: T) {
     if (!this.s1) {
       this.s1 = [];

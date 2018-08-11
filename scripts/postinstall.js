@@ -6,7 +6,7 @@ const {
   existsSync,
 } = require('fs');
 
-const LICENSE = readFileSync(__dirname + '/LICENSE.md');
+const LICENSE = readFileSync(__dirname + '/../LICENSE.md');
 
 const tsconfigBuild = `{
   "extends": "../../tsconfig.base.json",
@@ -19,25 +19,28 @@ const tsconfig = `{
   "extends": "../../tsconfig.json"
 }`;
 
-const dependencies = require('./package.json').devDependencies;
-readdirSync(__dirname + '/packages').forEach(directory => {
-  if (!statSync(__dirname + '/packages/' + directory).isDirectory()) {
+const dependencies = require('../package.json').devDependencies;
+readdirSync(__dirname + '/../packages').forEach(directory => {
+  if (!statSync(__dirname + '/../packages/' + directory).isDirectory()) {
     return;
   }
-  writeFileSync(__dirname + '/packages/' + directory + '/LICENSE.md', LICENSE);
   writeFileSync(
-    __dirname + '/packages/' + directory + '/tsconfig.json',
+    __dirname + '/../packages/' + directory + '/LICENSE.md',
+    LICENSE,
+  );
+  writeFileSync(
+    __dirname + '/../packages/' + directory + '/tsconfig.json',
     tsconfig,
   );
   writeFileSync(
-    __dirname + '/packages/' + directory + '/tsconfig.build.json',
+    __dirname + '/../packages/' + directory + '/tsconfig.build.json',
     tsconfigBuild,
   );
   let pkg = {};
   try {
     pkg = JSON.parse(
       readFileSync(
-        __dirname + '/packages/' + directory + '/package.json',
+        __dirname + '/../packages/' + directory + '/package.json',
         'utf8',
       ),
     );
@@ -68,26 +71,16 @@ readdirSync(__dirname + '/packages').forEach(directory => {
   if (!pkg.scripts) {
     pkg.scripts = {};
   }
-  if (pkg.dependencies['@types/node']) {
-    delete pkg.dependencies['@types/node'];
-  }
-  if (!/\-demo$/.test(directory)) {
-    pkg.scripts.prepublish =
-      'node ../../prebuild ' +
-      directory +
-      '&& tsc -p tsconfig.build.json && node ../../prepare ' +
-      directory;
-  }
 
   pkg.repository =
     'https://github.com/ForbesLindesay/authentication/tree/master/packages/' +
     directory;
   pkg.bugs = 'https://github.com/ForbesLindesay/authentication/issues';
-  if (existsSync(__dirname + '/docs/' + directory + '.md')) {
+  if (existsSync(__dirname + '/../docs/' + directory + '.md')) {
     pkg.homepage =
       'https://www.atauthentication.com/docs/' + directory + '.html';
     writeFileSync(
-      __dirname + '/packages/' + directory + '/README.md',
+      __dirname + '/../packages/' + directory + '/README.md',
       '# ' +
         pkg.name +
         '\n\n' +
@@ -108,7 +101,7 @@ readdirSync(__dirname + '/packages').forEach(directory => {
     return;
   }
   writeFileSync(
-    __dirname + '/packages/' + directory + '/package.json',
+    __dirname + '/../packages/' + directory + '/package.json',
     JSON.stringify(pkg, null, '  ') + '\n',
   );
 });

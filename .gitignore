@@ -30,3 +30,5 @@ packages/*/.cache
 
 .DS_Store
 .env
+
+.last_build

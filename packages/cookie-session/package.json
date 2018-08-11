@@ -7,9 +7,7 @@
   "dependencies": {
     "@authentication/cookie": "^0.1.1"
   },
-  "scripts": {
-    "prepublish": "node ../../prebuild cookie-session&& tsc -p tsconfig.build.json && node ../../prepare cookie-session"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/cookie-session",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
   "license": "GPL-3.0",

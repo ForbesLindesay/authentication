@@ -4,13 +4,12 @@
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-  "scripts": {
-    "prepublish": "node ../../prebuild lock-by-id&& tsc -p tsconfig.build.json && node ../../prepare lock-by-id"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/lock-by-id",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
   "license": "GPL-3.0",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "dependencies": {}
 }

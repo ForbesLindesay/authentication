@@ -14,9 +14,7 @@
     "@types/ms": "^0.7.30",
     "ms": "^2.1.1"
   },
-  "scripts": {
-    "prepublish": "node ../../prebuild passwordless&& tsc -p tsconfig.build.json && node ../../prepare passwordless"
-  },
+  "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/passwordless",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
   "license": "GPL-3.0",
