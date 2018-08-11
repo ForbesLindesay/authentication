@@ -7,7 +7,7 @@
     ]
   },
   "scripts": {
-    "postinstall": "node scripts/postinstall && bolt build",
+    "postinstall": "node scripts/postinstall",
     "build": "node scripts/build-all --only-changed",
     "build:all": "node scripts/build-all",
     "prerelease": "yarn build:all",
