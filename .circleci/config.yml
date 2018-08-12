@@ -21,16 +21,16 @@ refs:
       command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
   - &bolt_install
     run:
-      name: bolt install
+      name: Bolt Install
       command: yarn global add bolt && bolt
   - &build
     run:
-      name: build
-      command: bolt build:all
+      name: Build
+      command: bolt run build:all
   - &test
     run:
-      name: test
-      command: bolt test
+      name: Test
+      command: bolt run test
 
 jobs:
   all:
@@ -54,7 +54,9 @@ jobs:
       - *save_cache
       - *build
       - *test
-      # TODO: release
+      - run:
+          name: Release
+          command: bolt publish
 
 workflows:
   version: 2
