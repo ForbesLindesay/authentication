@@ -15,7 +15,7 @@
     "release": "bolt publish",
     "test": "jest && bolt ws run test",
     "watch:jest": "jest --watch",
-    "clean": "rimraf packages/*/lib && rimraf packages/*/build && rimraf packages/*/node_modules && rimraf node_modules"
+    "clean": "rimraf packages/*/lib && rimraf packages/*/.last_build && rimraf packages/*/.cache && rimraf packages/*/build && rimraf packages/*/node_modules && rimraf node_modules"
   },
   "devDependencies": {
     "@types/bytes": "^3.0.0",
