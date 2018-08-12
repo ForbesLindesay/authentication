@@ -72,7 +72,7 @@ export async function checkPassword(
   const isPasswordCorrect = await verify(
     password,
     passwordHash,
-    async updatedPasswordHah => {
+    async updatedPasswordHash => {
       db.set(userID, updatedPasswordHash);
     }
   );
@@ -129,7 +129,7 @@ export async function checkPassword(userID, password) {
   const isPasswordCorrect = await verify(
     password,
     passwordHash,
-    async updatedPasswordHah => {
+    async updatedPasswordHash => {
       db.set(userID, updatedPasswordHash);
     }
   );
