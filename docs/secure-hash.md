@@ -12,6 +12,15 @@ To install, run the following command in your terminal:
 yarn add @authentication/secure-hash
 ```
 
+## Configuration
+
+The recommended way of configuring secure-hash is using environment variables:
+
+* `MINIMUM_HASH_TIME` (default: `1s`) - the minimum time it should take to hash a password. `HASH_OPS_LIMIT` and `HASH_MEM_LIMIT` are automatically increased if any password hashes take less than this amount of time. You cannot set this less than `500ms`. This automated adjustment will never reduce `HASH_OPS_LIMIT` or `HASH_MEM_LIMIT`.
+* `HASH_OPS_LIMIT` (default: `20`) - The starting ops limit. This controlls how much CPU power is used. It is automatically increased if passwords are being hashed faster than `MINIMUM_HASH_TIME`.
+* `HASH_MEM_LIMIT` (default: `50MB`) - The starting mem limit. This controlls how much memory is used. It is automatically increased if passwords are being hashed faster than `MINIMUM_HASH_TIME`.
+* `HASH_PARALLEL_LIMIT` (default: `3`) - How many passwords can be hashed/verified at a time. This number is intentionally set fairly low, as password hashing is very resource intensive. If you set this number too high, it may be possible to case a "denial of service" by simply attempting to log in many times in parallel. If this is set low, at least the rest of your site should keep working.
+
 ## Usage
 
 This example shows how you would build functions for "create user", "set password" and "check password". It is important to always rate limit any function that is used for checking a password. In addition to the userID based rate limit shown here, you may want to add an IP address based rate limit that covers all these functions.
