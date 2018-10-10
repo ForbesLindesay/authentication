@@ -17,7 +17,12 @@ import {hash, verify} from '@authentication/secure-hash';
 import {URL} from 'url';
 import {Request, Response} from 'express';
 import ms = require('ms');
-import Store, {StoreAPI, TransactionalStoreAPI} from './Store';
+import Store, {
+  StoreConfig,
+  StoreAPI,
+  TransactionalStoreAPI,
+  StoreTransaction,
+} from './Store';
 import Token from './Token';
 import originalURL from './originalURL';
 
@@ -33,7 +38,7 @@ import {
   VerifyPassCodeStatusKind,
 } from './VerifyPassCodeStatus';
 
-export {Store, StoreAPI, TransactionalStoreAPI};
+export {StoreConfig, StoreAPI, TransactionalStoreAPI};
 export {CreateTokenStatusKind, CreateTokenStatus};
 export {VerifyPassCodeStatusKind, VerifyPassCodeError};
 export type CreateTokenResult =
@@ -81,7 +86,7 @@ export enum UserKind {
   PhoneNumber = 'phone',
 }
 export {Encoding};
-export interface Options<State = void> {
+export interface Options<State = undefined> {
   callbackURL: string | URL;
   cookieName?: string;
   /**
@@ -112,7 +117,7 @@ export interface Options<State = void> {
    * The character set of the pass code, defaults to decimal.
    */
   passCodeEncoding?: Encoding;
-  store: Store<State>;
+  store: StoreConfig<State>;
 
   createTokenByIpRateLimit?: BucketOptions;
   createTokenByUserRateLimit?: ExponentialOptions;
@@ -163,7 +168,7 @@ export default class PasswordlessAuthentication<State> {
     }
     this._passCodeEncoding = options.passCodeEncoding || Encoding.decimal;
     this._userKind = options.userKind || UserKind.EMail;
-    this._store = options.store;
+    this._store = new Store(options.store);
     this._maxAge =
       options.maxAge === undefined
         ? ms('1 hour')
@@ -254,25 +259,14 @@ export default class PasswordlessAuthentication<State> {
   }
   private _tx<T>(
     tokenID: string,
-    fn: (store: StoreAPI<State>) => Promise<T>,
+    fn: (store: StoreTransaction<State>) => Promise<T>,
   ): Promise<T> {
-    return this._lock.withLock(tokenID, () => this._txWithoutLock(fn));
-  }
-  private _txWithoutLock<T>(
-    fn: (store: StoreAPI<State>) => Promise<T>,
-  ): Promise<T> {
-    if (
-      typeof (this._store as TransactionalStoreAPI<State>).tx === 'function'
-    ) {
-      return (this._store as TransactionalStoreAPI<State>).tx(fn);
-    } else {
-      return fn(this._store as StoreAPI<State>);
-    }
+    return this._lock.withLock(tokenID, () => this._store.tx(fn));
   }
   private _getStore<T>(idToString: (id: T) => string): RateLimitStoreAPI<T> {
     return {
       tx: fn =>
-        this._txWithoutLock(store =>
+        this._store.tx(store =>
           fn({
             save(id, state) {
               return store.saveRateLimit(idToString(id), state);
@@ -329,7 +323,7 @@ export default class PasswordlessAuthentication<State> {
     ]);
     const passCodeHash = await hash(passCode);
     // store the token
-    const tokenID = await this._txWithoutLock(store =>
+    const tokenID = await this._store.tx(store =>
       store.saveToken({
         userID,
         dos: dosCode,

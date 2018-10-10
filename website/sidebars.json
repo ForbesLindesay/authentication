@@ -2,6 +2,6 @@
   "docs": {
     "Guides": ["getting-started", "profile"],
     "Packages": ["csrf-protection", "cookie", "cookie-session", "send-message", "generate-passcode", "rate-limit", "secure-hash"],
-    "Common Providers": ["facebook", "github", "google", "stripe", "tumblr"]
+    "Common Providers": ["passwordless", "facebook", "github", "google", "stripe", "tumblr"]
   }
 }

@@ -40,28 +40,32 @@ const rateLimit = new Map<string, RateLimitState>();
 const passwordlessAuthentication = new PasswordlessAuthentication<string>({
   callbackURL: '/__/auth/passwordless/callback',
   store: {
-    async saveToken(token: Token<string>) {
-      const tokenID = '' + nextTokenID++;
-      tokens.set(tokenID, token);
-      return tokenID;
+    tokens: {
+      async save(token: Token<string>) {
+        const tokenID = '' + nextTokenID++;
+        tokens.set(tokenID, token);
+        return tokenID;
+      },
+      async load(tokenID: string) {
+        return tokens.get(tokenID) || null;
+      },
+      async update(tokenID: string, token: Token<string>) {
+        tokens.set(tokenID, token);
+      },
+      async remove(tokenID: string) {
+        tokens.delete(tokenID);
+      }
     },
-    async loadToken(tokenID: string) {
-      return tokens.get(tokenID) || null;
-    },
-    async updateToken(tokenID: string, token: Token<string>) {
-      tokens.set(tokenID, token);
-    },
-    async removeToken(tokenID: string) {
-      tokens.delete(tokenID);
-    },
-    async saveRateLimit(id: string, state: RateLimitState) {
-      rateLimit.set(id, state);
-    },
-    async loadRateLimit(id: string) {
-      return rateLimit.get(id) || null;
-    },
-    async removeRateLimit(id: string) {
-      rateLimit.delete(id);
+    rateLimit: {
+      async save(id: string, state: RateLimitState) {
+        rateLimit.set(id, state);
+      },
+      async load(id: string) {
+        return rateLimit.get(id) || null;
+      },
+      async remove(id: string) {
+        rateLimit.delete(id);
+      }
     }
   }
 });
@@ -195,28 +199,32 @@ const rateLimit = new Map();
 const passwordlessAuthentication = new PasswordlessAuthentication({
   callbackURL: '/__/auth/passwordless/callback',
   store: {
-    async saveToken(token) {
-      const tokenID = '' + nextTokenID++;
-      tokens.set(tokenID, token);
-      return tokenID;
+    tokens: {
+      async save(token) {
+        const tokenID = '' + nextTokenID++;
+        tokens.set(tokenID, token);
+        return tokenID;
+      },
+      async load(tokenID) {
+        return tokens.get(tokenID) || null;
+      },
+      async update(tokenID, token) {
+        tokens.set(tokenID, token);
+      },
+      async remove(tokenID) {
+        tokens.delete(tokenID);
+      }
     },
-    async loadToken(tokenID) {
-      return tokens.get(tokenID) || null;
-    },
-    async updateToken(tokenID, token) {
-      tokens.set(tokenID, token);
-    },
-    async removeToken(tokenID) {
-      tokens.delete(tokenID);
-    },
-    async saveRateLimit(id, state) {
-      rateLimit.set(id, state);
-    },
-    async loadRateLimit(id) {
-      return rateLimit.get(id) || null;
-    },
-    async removeRateLimit(id) {
-      rateLimit.delete(id);
+    rateLimit: {
+      async save(id, state) {
+        rateLimit.set(id, state);
+      },
+      async load(id) {
+        return rateLimit.get(id) || null;
+      },
+      async remove(id) {
+        rateLimit.delete(id);
+      }
     }
   }
 });
