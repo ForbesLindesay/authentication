@@ -376,7 +376,7 @@ export default class Cookie<T> {
     (req as any)[this._cacheSymbol] = {value: null};
   }
   refresh(req: IncomingMessage, res: ServerResponse, next?: () => any) {
-    const ciphertext = getCookie(req, res, name);
+    const ciphertext = getCookie(req, res, this._name);
     if (ciphertext) {
       const result = this._keygrip.unpackString(ciphertext);
       if (result) {

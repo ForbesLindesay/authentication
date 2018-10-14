@@ -1,11 +1,11 @@
 {
   "name": "@authentication/cookie-session",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "@authentication/cookie": "^0.1.1"
+    "@authentication/cookie": "^0.1.2"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/cookie-session",
