@@ -59,6 +59,7 @@
     "@types/nodemailer": "^4.6.2",
     "@types/stripe": "^5.0.21",
     "base32": "^0.0.6",
+    "base91": "^0.0.5",
     "body-parser": "^1.18.3",
     "bytes": "^3.0.0",
     "express": "^4.16.3",
