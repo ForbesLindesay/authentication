@@ -1,12 +1,12 @@
 {
   "name": "@authentication/generate-passcode",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
     "base32": "^0.0.6",
-    "base91": "^0.0.5"
+    "node-base91": "^0.3.4"
   },
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/generate-passcode",
