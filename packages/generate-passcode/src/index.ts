@@ -1,7 +1,7 @@
 import assert = require('assert');
 import {randomBytes} from 'crypto';
 import Encoding from './Encoding';
-const base32 = require('base32');
+const base32 = require('base32.js');
 const base91 = require('node-base91');
 
 export {Encoding};

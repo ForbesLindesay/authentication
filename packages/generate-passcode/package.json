@@ -1,11 +1,11 @@
 {
   "name": "@authentication/generate-passcode",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "dependencies": {
-    "base32": "^0.0.6",
+    "base32.js": "^0.1.0",
     "node-base91": "^0.3.4"
   },
   "scripts": {},

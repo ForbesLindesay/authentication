@@ -4,7 +4,7 @@ exports[`everything 1`] = `"P)5dv:9CU\\"(vs?9#$mv~/};9h/T%0P$nX*JjS|rI"`;
 
 exports[`generatePassCode(40) 1`] = `"OxhR9el5IAHiwyAuaoWb9I8pVCu9zE0uE8sR779w"`;
 
-exports[`generatePassCode(40, Encoding.base32) 1`] = `"7cc53xf9f4g03rp340q6n1cvyj7ztymn8axxth6j"`;
+exports[`generatePassCode(40, Encoding.base32) 1`] = `"HMMFD5PJPEQADYWDEAXGVBM36SH7Z6UVIK55ZRGS"`;
 
 exports[`generatePassCode(40, Encoding.base64) 1`] = `"OxhR9el5IAHiwyAuaoWb9I8pVCu9zE0uE8sR779w"`;
 
