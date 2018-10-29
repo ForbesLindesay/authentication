@@ -4,7 +4,7 @@ import CountdownTimer from './CountdownTimer';
 import PassCodeFormProps from './PassCodeFormProps';
 import getRegExForEncoding from './getRegExForEncoding';
 
-const inputStyle = {
+const inputStyle: React.CSSProperties = {
   width: '1em',
   height: '1em',
   font: 'inherit',
