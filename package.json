@@ -29,7 +29,6 @@
     "@types/rimraf": "^2.0.2",
     "babel-core": "^6.26.0",
     "cross-spawn": "^6.0.5",
-    "fsevents": "^1.2.4",
     "jest": "^21.2.1",
     "lsr": "^2.0.0",
     "prettier": "^1.8.2",
