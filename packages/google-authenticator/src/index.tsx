@@ -76,3 +76,16 @@ export function verifyToken(options: VerifyOptions) {
     ...options,
   });
 }
+
+export interface GenerateTokenOptions {
+  /**
+   * base32 encoded secret
+   */
+  secret: string;
+}
+export function generateToken(options: GenerateTokenOptions) {
+  return totp({
+    encoding: 'base32',
+    ...options,
+  });
+}

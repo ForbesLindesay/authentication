@@ -1,5 +1,10 @@
-import {totp} from 'speakeasy';
-import {generateSecret, getQRCodeSVG, getQRCodeURI, verifyToken} from '../';
+import {
+  generateSecret,
+  getQRCodeSVG,
+  getQRCodeURI,
+  verifyToken,
+  generateToken,
+} from '../';
 
 jest.mock('crypto', () => ({
   ...require.requireActual('crypto'),
@@ -43,8 +48,7 @@ test('getQRCodeURI', async () => {
 
 test('verifyToken', () => {
   // generate a valid token and test it
-  const token = totp({
-    encoding: 'base32',
+  const token = generateToken({
     secret: TEST_SECRET,
   });
   expect(
