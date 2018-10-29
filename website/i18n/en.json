@@ -4,28 +4,69 @@
     "next": "Next",
     "previous": "Previous",
     "tagline": "Secure, Modular Authentication for Node.js",
-    "cookie-session": "Cookie Session",
-    "cookie": "Cookie",
-    "csrf-protection": "CSRF Protection",
-    "doc1": "document number 2",
-    "facebook": "Facebook",
-    "generate-passcode": "Generate PassCode",
-    "getting-started": "Getting Started",
-    "github": "GitHub",
-    "google": "Google",
-    "passwordless": "Passwordless",
-    "profile": "Profile",
-    "rate-limit": "Rate Limit",
-    "secure-hash": "Secure Hash",
-    "send-message": "e-mail",
-    "stripe": "Stripe",
-    "tumblr": "Tumblr",
-    "Docs": "Docs",
-    "Help": "Help",
-    "Blog": "Blog",
-    "Guides": "Guides",
-    "Packages": "Packages",
-    "Common Providers": "Common Providers"
+    "docs": {
+      "cookie-session": {
+        "title": "Cookie Session"
+      },
+      "cookie": {
+        "title": "Cookie"
+      },
+      "csrf-protection": {
+        "title": "CSRF Protection"
+      },
+      "doc1": {
+        "title": "doc1"
+      },
+      "facebook": {
+        "title": "Facebook"
+      },
+      "generate-passcode": {
+        "title": "Generate PassCode"
+      },
+      "getting-started": {
+        "title": "Getting Started"
+      },
+      "github": {
+        "title": "GitHub"
+      },
+      "google-authenticator": {
+        "title": "Google Authenticator (2FA)"
+      },
+      "google": {
+        "title": "Google"
+      },
+      "passwordless": {
+        "title": "Passwordless"
+      },
+      "profile": {
+        "title": "Profile"
+      },
+      "rate-limit": {
+        "title": "Rate Limit"
+      },
+      "secure-hash": {
+        "title": "Secure Hash"
+      },
+      "send-message": {
+        "title": "e-mail"
+      },
+      "stripe": {
+        "title": "Stripe"
+      },
+      "tumblr": {
+        "title": "Tumblr"
+      }
+    },
+    "links": {
+      "Docs": "Docs",
+      "Help": "Help",
+      "Blog": "Blog"
+    },
+    "categories": {
+      "Guides": "Guides",
+      "Packages": "Packages",
+      "Common Providers": "Common Providers"
+    }
   },
   "pages-strings": {
     "Help Translate|recruit community translators for your project": "Help Translate",
