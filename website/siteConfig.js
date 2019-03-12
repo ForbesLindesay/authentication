@@ -34,13 +34,13 @@ const siteConfig = {
   ],
   users,
   /* path to images for header/footer */
-  headerIcon: 'img/at.svg',
-  footerIcon: 'img/at.svg',
+  headerIcon: 'img/WhiteShield.svg',
+  footerIcon: 'img/favicon.png',
   favicon: 'img/favicon.png',
   /* colors for website */
   colors: {
-    primaryColor: '#2E8555',
-    secondaryColor: '#205C3B',
+    primaryColor: '#1400FF',
+    secondaryColor: '#0A007C',
   },
   // This copyright info is used in /core/Footer.js and blog rss/atom feeds.
   copyright: 'Copyright © ' + new Date().getFullYear() + ' Forbes Lindesay',
