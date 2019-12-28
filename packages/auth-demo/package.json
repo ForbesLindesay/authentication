@@ -7,7 +7,7 @@
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@authentication/facebook": "^0.1.1",
-    "@authentication/github": "^0.1.1",
+    "@authentication/github": "^0.2.0",
     "@authentication/google": "^0.1.1",
     "@authentication/passwordless": "^1.2.2",
     "@authentication/react-passwordless": "^1.2.2",
