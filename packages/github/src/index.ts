@@ -181,6 +181,14 @@ export default class GitHubAuthentication<State = Mixed>
       state: options.state,
     });
   }
+  async completeAuthenticationWithoutProfile(req: Request, res: Response) {
+    const {
+      accessToken,
+      refreshToken,
+      state,
+    } = await this._oauth.completeAuthentication(req, res);
+    return {accessToken, refreshToken, state};
+  }
   async completeAuthentication(req: Request, res: Response) {
     const {
       accessToken,
