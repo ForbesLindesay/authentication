@@ -9,7 +9,11 @@ export interface RateLimitState {
 export {ConsumeOptions};
 
 export interface StoreAPI<ID> {
-  save(id: ID, state: RateLimitState): Promise<void | null | {}>;
+  save(
+    id: ID,
+    state: RateLimitState,
+    oldState: RateLimitState | null,
+  ): Promise<void | null | {}>;
   load(id: ID): Promise<null | RateLimitState>;
   remove(id: ID): Promise<void | null | {}>;
 }
@@ -29,16 +33,29 @@ export function isRateLimitExceededError(
   return err && typeof err === 'object' && err.code === 'RATE_LIMIT_EXCEEDED';
 }
 
-export default abstract class BaseRateLimit<ID extends string | number>
-  implements RateLimit<ID> {
+class MemoryStore implements StoreAPI<string | number> {
+  private _map = new Map<string | number, RateLimitState>();
+  async save(id: string | number, state: RateLimitState) {
+    this._map.set(id, state);
+  }
+  async load(id: string | number): Promise<null | RateLimitState> {
+    return this._map.get(id) || null;
+  }
+  async remove(id: string | number) {
+    this._map.delete(id);
+  }
+}
+export default abstract class BaseRateLimit<
+  ID extends string | number = string | number
+> implements RateLimit<ID> {
   private readonly _store: Store<ID>;
   private readonly _lock = new LockByID();
   protected abstract _take(
     state: null | RateLimitState,
     now: number,
   ): RateLimitState;
-  constructor(store: Store<ID>) {
-    this._store = store;
+  constructor(store: 'memory' | Store<ID>) {
+    this._store = store === 'memory' ? new MemoryStore() : store;
   }
   private _tx<T>(id: ID, fn: (store: StoreAPI<ID>) => Promise<T>): Promise<T> {
     return this._lock.withLock(id, () => {
@@ -62,7 +79,7 @@ export default abstract class BaseRateLimit<ID extends string | number>
       const newState = this._take(oldState, now);
       const delay = Math.max(newState.timestamp - now, 0);
       if (delay <= timeout) {
-        await store.save(id, newState);
+        await store.save(id, newState, oldState);
       }
       return {delay, nextTokenTimestamp: newState.timestamp};
     });
