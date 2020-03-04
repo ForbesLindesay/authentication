@@ -1,8 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`everything 1`] = `"P)5dv:9CU\\"(vs?9#$mv~/};9h/T%0P$nX*JjS|rI"`;
-
 exports[`generatePassCode(40) 1`] = `"OxhR9el5IAHiwyAuaoWb9I8pVCu9zE0uE8sR779w"`;
+
+exports[`generatePassCode(40, {custom}): everything 1`] = `"P)5dv:9CU\\"(vs?9#$mv~/};9h/T%0P$nX*JjS|rI"`;
+
+exports[`generatePassCode(40, {custom}): no lower case letters 1`] = `"P)5:9CU\\"(?9#$~/};9/T%0P$X*JS|ISBA4>\`QP)5"`;
+
+exports[`generatePassCode(40, {custom}): no numbers 1`] = `"P)dv:CU\\"(vs?#$mv~/};h/T%P$nX*JjS|rISBAe>"`;
+
+exports[`generatePassCode(40, {custom}): no symbols 1`] = `"P5dv9CUvs9mv9hT0PnXJjSrISBAe4dQP5dv9CUvs"`;
+
+exports[`generatePassCode(40, {custom}): no upper case letters 1`] = `")5dv:9\\"(vs?9#$mv~/};9h/%0$n*j|re4>d\`)5dv"`;
 
 exports[`generatePassCode(40, Encoding.base32) 1`] = `"HMMFD5PJPEQADYWDEAXGVBM36SH7Z6UVIK55ZRGS"`;
 
@@ -13,11 +21,3 @@ exports[`generatePassCode(40, Encoding.base91) 1`] = `"P)5dv:9CU\\"(vs?9#$mv~/};
 exports[`generatePassCode(40, Encoding.decimal) 1`] = `"3185159792001232026859489542421311703308"`;
 
 exports[`generatePassCode(40, Encoding.hex) 1`] = `"3b1851f5e9792001e2c3202e6a859bf48ffcfa95"`;
-
-exports[`no lower case letters 1`] = `"P)5:9CU\\"(?9#$~/};9/T%0P$X*JS|ISBA4>\`QP)5"`;
-
-exports[`no numbers 1`] = `"P)dv:CU\\"(vs?#$mv~/};h/T%P$nX*JjS|rISBAe>"`;
-
-exports[`no symbols 1`] = `"P5dv9CUvs9mv9hT0PnXJjSrISBAe4dQP5dv9CUvs"`;
-
-exports[`no upper case letters 1`] = `")5dv:9\\"(vs?9#$mv~/};9h/%0$n*j|re4>d\`)5dv"`;
