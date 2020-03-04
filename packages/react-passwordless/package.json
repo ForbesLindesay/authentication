@@ -6,7 +6,7 @@
   "types": "./lib/index.d.ts",
   "dependencies": {
     "@authentication/is-email": "^0.0.2",
-    "@authentication/passwordless": "^1.2.3",
+    "@authentication/passwordless": "^1.3.0",
     "react-digit-input": "^1.1.0"
   },
   "devDependencies": {

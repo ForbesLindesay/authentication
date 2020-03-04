@@ -20,7 +20,11 @@ export interface UnnamespacedStoreAPI<State = undefined> {
   loadToken(tokenID: string): Promise<Token<State> | null>;
   updateToken(tokenID: string, token: Token<State>): Promise<null | void | {}>;
   removeToken(tokenID: string): Promise<null | void | {}>;
-  saveRateLimit(id: string, state: RateLimitState): Promise<void | null | {}>;
+  saveRateLimit(
+    id: string,
+    state: RateLimitState,
+    oldState: null | RateLimitState,
+  ): Promise<void | null | {}>;
   loadRateLimit(id: string): Promise<null | RateLimitState>;
   removeRateLimit(id: string): Promise<void | null | {}>;
 }
@@ -47,6 +51,7 @@ export class StoreTransaction<State = undefined> {
   readonly saveRateLimit: (
     id: string,
     state: RateLimitState,
+    oldState: null | RateLimitState,
   ) => Promise<void | null | {}>;
   readonly loadRateLimit: (id: string) => Promise<null | RateLimitState>;
   readonly removeRateLimit: (id: string) => Promise<void | null | {}>;
@@ -56,7 +61,7 @@ export class StoreTransaction<State = undefined> {
       this.loadToken = t => config.tokens.load(t);
       this.updateToken = (i, t) => config.tokens.update(i, t);
       this.removeToken = i => config.tokens.remove(i);
-      this.saveRateLimit = (i, s) => config.rateLimit.save(i, s);
+      this.saveRateLimit = (i, s, old) => config.rateLimit.save(i, s, old);
       this.loadRateLimit = i => config.rateLimit.load(i);
       this.removeRateLimit = i => config.rateLimit.remove(i);
     } else {
@@ -64,7 +69,7 @@ export class StoreTransaction<State = undefined> {
       this.loadToken = t => config.loadToken(t);
       this.updateToken = (i, t) => config.updateToken(i, t);
       this.removeToken = i => config.removeToken(i);
-      this.saveRateLimit = (i, s) => config.saveRateLimit(i, s);
+      this.saveRateLimit = (i, s, old) => config.saveRateLimit(i, s, old);
       this.loadRateLimit = i => config.loadRateLimit(i);
       this.removeRateLimit = i => config.removeRateLimit(i);
     }

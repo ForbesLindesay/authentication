@@ -1,6 +1,6 @@
 {
   "name": "@authentication/passwordless",
-  "version": "1.2.3",
+  "version": "1.3.0",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
