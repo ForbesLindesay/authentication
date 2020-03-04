@@ -1,6 +1,6 @@
 {
   "name": "@authentication/passwordless",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -9,7 +9,7 @@
     "@authentication/generate-passcode": "^1.1.0",
     "@authentication/is-email": "^0.0.2",
     "@authentication/lock-by-id": "^0.0.2",
-    "@authentication/rate-limit": "^0.0.6",
+    "@authentication/rate-limit": "^0.0.7",
     "@authentication/secure-hash": "^1.0.0",
     "@types/ms": "^0.7.30",
     "ms": "^2.1.1"
