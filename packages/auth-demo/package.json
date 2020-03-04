@@ -9,7 +9,7 @@
     "@authentication/facebook": "^0.1.1",
     "@authentication/github": "^0.2.0",
     "@authentication/google": "^0.1.1",
-    "@authentication/passwordless": "^1.2.2",
+    "@authentication/passwordless": "^1.3.0",
     "@authentication/react-passwordless": "^1.2.2",
     "@authentication/send-message": "^0.0.3",
     "@authentication/twitter": "^0.1.1",

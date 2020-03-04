@@ -268,8 +268,8 @@ export default class PasswordlessAuthentication<State> {
       tx: fn =>
         this._store.tx(store =>
           fn({
-            save(id, state) {
-              return store.saveRateLimit(idToString(id), state);
+            save(id, state, oldState) {
+              return store.saveRateLimit(idToString(id), state, oldState);
             },
             load(id) {
               return store.loadRateLimit(idToString(id));
@@ -410,91 +410,92 @@ export default class PasswordlessAuthentication<State> {
     if (passCode != null && typeof passCode !== 'string') {
       throw new Error('Expected passCode to be a string');
     }
-    return await this._tx(tokenID, async (store): Promise<
-      VerifyPassCodeResult<State>
-    > => {
-      const token = await store.loadToken(tokenID);
-      if (token == null || token.expiry < Date.now()) {
-        if (token) {
-          await store.removeToken(tokenID);
-        }
-        return {
-          verified: false,
-          status: {
-            kind: VerifyPassCodeStatusKind.ExpiredToken,
-            message:
-              'This token has expired, please generate a new one and try again.',
-          },
-        };
-      }
-      // dos is only to make it hard to take down your system by hitting every
-      // token and using up all the attempts before users can do so. This is why
-      // it is not heavily rate limited
-      if (token.dos !== dos) {
-        const err: IncorrectDosCodeError = new Error('Invalid token') as any;
-        err.code = 'INCORRECT_DOS_CODE';
-        throw err;
-      }
-      // pass code attempts remaining, after this one
-      await store.updateToken(tokenID, {
-        ...token,
-        attemptsRemaining: token.attemptsRemaining - 1,
-      });
-      if (
-        passCode &&
-        passCode.length === this._passCodeLength &&
-        (await verify(
-          passCode,
-          token.passCodeHash,
-          async updatedPassCodeHash => {
-            // we're about to delete the token anyway,
-            // so no need to update it
-          },
-        )) === true
-      ) {
-        if (this._multiUse) {
-          await store.updateToken(tokenID, {
-            ...token,
-            attemptsRemaining: this._maxAttempts,
-          });
-        } else {
-          await store.removeToken(tokenID);
-          if (!this._disableCookie) {
-            this._cookie.remove(req, res);
+    return await this._tx(
+      tokenID,
+      async (store): Promise<VerifyPassCodeResult<State>> => {
+        const token = await store.loadToken(tokenID);
+        if (token == null || token.expiry < Date.now()) {
+          if (token) {
+            await store.removeToken(tokenID);
           }
+          return {
+            verified: false,
+            status: {
+              kind: VerifyPassCodeStatusKind.ExpiredToken,
+              message:
+                'This token has expired, please generate a new one and try again.',
+            },
+          };
         }
-        await this._createTokenByUserRateLimit.reset(token.userID);
-        return {
-          verified: true,
-          state: token.state,
-          userID: token.userID,
-          status: {
-            kind: VerifyPassCodeStatusKind.CorrectPassCode,
+        // dos is only to make it hard to take down your system by hitting every
+        // token and using up all the attempts before users can do so. This is why
+        // it is not heavily rate limited
+        if (token.dos !== dos) {
+          const err: IncorrectDosCodeError = new Error('Invalid token') as any;
+          err.code = 'INCORRECT_DOS_CODE';
+          throw err;
+        }
+        // pass code attempts remaining, after this one
+        await store.updateToken(tokenID, {
+          ...token,
+          attemptsRemaining: token.attemptsRemaining - 1,
+        });
+        if (
+          passCode &&
+          passCode.length === this._passCodeLength &&
+          (await verify(
+            passCode,
+            token.passCodeHash,
+            async updatedPassCodeHash => {
+              // we're about to delete the token anyway,
+              // so no need to update it
+            },
+          )) === true
+        ) {
+          if (this._multiUse) {
+            await store.updateToken(tokenID, {
+              ...token,
+              attemptsRemaining: this._maxAttempts,
+            });
+          } else {
+            await store.removeToken(tokenID);
+            if (!this._disableCookie) {
+              this._cookie.remove(req, res);
+            }
+          }
+          await this._createTokenByUserRateLimit.reset(token.userID);
+          return {
+            verified: true,
+            state: token.state,
             userID: token.userID,
-          },
-        };
-      }
-      // this was the last attempt
-      if (token.attemptsRemaining <= 1) {
-        await store.removeToken(tokenID);
+            status: {
+              kind: VerifyPassCodeStatusKind.CorrectPassCode,
+              userID: token.userID,
+            },
+          };
+        }
+        // this was the last attempt
+        if (token.attemptsRemaining <= 1) {
+          await store.removeToken(tokenID);
+          return {
+            verified: false,
+            status: {
+              kind: VerifyPassCodeStatusKind.ExpiredToken,
+              message:
+                'The pass code was incorrect and you have no more attempts available, please generate a new token and try again.',
+            },
+          };
+        }
         return {
           verified: false,
           status: {
-            kind: VerifyPassCodeStatusKind.ExpiredToken,
-            message:
-              'The pass code was incorrect and you have no more attempts available, please generate a new token and try again.',
+            kind: VerifyPassCodeStatusKind.IncorrectPassCode,
+            message: 'Incorrect pass code, please try again.',
+            attemptsRemaining: token.attemptsRemaining - 1,
           },
         };
-      }
-      return {
-        verified: false,
-        status: {
-          kind: VerifyPassCodeStatusKind.IncorrectPassCode,
-          message: 'Incorrect pass code, please try again.',
-          attemptsRemaining: token.attemptsRemaining - 1,
-        },
-      };
-    });
+      },
+    );
   };
 }
 
