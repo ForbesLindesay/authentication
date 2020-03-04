@@ -3,7 +3,7 @@ version: 2
 refs:
   - &container
     docker:
-      - image: node:8.12
+      - image: node:12
     working_directory: ~/repo
   - &restore_cache
     restore_cache:
