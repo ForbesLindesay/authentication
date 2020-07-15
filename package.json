@@ -34,14 +34,14 @@
     "prettier": "^1.8.2",
     "rimraf": "^2.6.2",
     "ts-jest": "^25.2.1",
-    "typescript": "^3.0.1"
+    "typescript": "^3.9.6"
   },
   "jest": {
     "transformIgnorePatterns": [
       "<rootDir>.*(node_modules)(?!.*authentication.*).*$"
     ],
     "transform": {
-      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      "^.+\\.tsx?$": "ts-jest"
     },
     "testRegex": "/__tests__/.+\\.test\\.(tsx?)$",
     "moduleFileExtensions": [
