@@ -27,6 +27,10 @@ test('argon2id', async () => {
   const end2 = Date.now();
   expect(end2 - start2).toBeGreaterThan(100);
   expect(verified).toBe(true);
+
+  // hashing the same password multiple times should produce different results because passwords are salted
+  const hash2 = await sh.hash('Hello World');
+  expect(hash).not.toEqual(hash2);
 });
 
 test('argon2id update', async () => {

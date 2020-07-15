@@ -1,4 +1,4 @@
-import {pbkdf2, randomBytes, timingSafeEqual, randomFillSync} from 'crypto';
+import {pbkdf2, timingSafeEqual, randomFill} from 'crypto';
 import SecureHashImplementation, {
   Algorithm,
   Pbkdf2Options,
@@ -135,14 +135,22 @@ export default class Pbkdf2Implemenation
     const result = Buffer.alloc(
       CONFIG_BYTE_LENGTH + config.saltLength + config.keyLength,
     );
-    randomFillSync(result);
-    const salt = randomBytes(config.saltLength);
+    const salt = Buffer.from(
+      result.buffer,
+      result.byteOffset + CONFIG_BYTE_LENGTH,
+      config.saltLength,
+    );
+    await new Promise((resolve, reject) => {
+      randomFill(salt, (err, res) => {
+        if (err) reject(err);
+        else resolve(res);
+      });
+    });
     const hash = await this._hash(password, salt, this._config);
     configToBuffer(
       config,
       new Uint32Array(result.buffer, result.byteOffset, CONFIG_BYTE_LENGTH),
     );
-    result.set(salt, CONFIG_BYTE_LENGTH);
     result.set(hash, CONFIG_BYTE_LENGTH + salt.length);
     return result;
   }
