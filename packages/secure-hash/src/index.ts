@@ -4,7 +4,7 @@ import throat = require('throat');
 import SecurePassword, {
   SecurePasswordType,
   VerifyResult,
-} from './secure-password';
+} from './vendor/secure-password';
 
 const ONE_SECOND = ms('1 second');
 
@@ -49,7 +49,9 @@ export default class SecureHash {
     const parallelLimit =
       options.parallelLimit !== undefined
         ? options.parallelLimit
-        : HASH_PARALLEL_LIMIT ? parseInt(HASH_PARALLEL_LIMIT, 10) : 3;
+        : HASH_PARALLEL_LIMIT
+          ? parseInt(HASH_PARALLEL_LIMIT, 10)
+          : 3;
     if (
       parallelLimit < 1 ||
       Number.isNaN(parallelLimit) ||
@@ -64,7 +66,9 @@ export default class SecureHash {
     this._throttle = throat(parallelLimit);
     this._minimumHashTime =
       options.minimumHashTime === undefined
-        ? MINIMUM_HASH_TIME ? ms(MINIMUM_HASH_TIME) : ONE_SECOND
+        ? MINIMUM_HASH_TIME
+          ? ms(MINIMUM_HASH_TIME)
+          : ONE_SECOND
         : typeof options.minimumHashTime === 'number'
           ? options.minimumHashTime
           : ms(options.minimumHashTime);
@@ -84,11 +88,15 @@ export default class SecureHash {
     }
     const opslimit =
       options.opslimit === undefined
-        ? HASH_OPS_LIMIT ? parseInt(HASH_OPS_LIMIT, 10) : opslimitMin
+        ? HASH_OPS_LIMIT
+          ? parseInt(HASH_OPS_LIMIT, 10)
+          : opslimitMin
         : options.opslimit;
     const memlimit =
       options.memlimit === undefined
-        ? HASH_MEM_LIMIT ? bytes(HASH_MEM_LIMIT) : memlimitMin
+        ? HASH_MEM_LIMIT
+          ? bytes(HASH_MEM_LIMIT)
+          : memlimitMin
         : typeof options.memlimit === 'number'
           ? options.memlimit
           : bytes(options.memlimit);
