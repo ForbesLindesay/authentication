@@ -1,6 +1,5 @@
 // backwards compatibility for secure-password ^4.0.0 implementation
 
-import '../argon2id';
 import {verify} from '../';
 
 jest.setTimeout(20_000);

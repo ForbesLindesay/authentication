@@ -1,4 +1,4 @@
-import SecureHash from '../pbkdf2';
+import createPbkdf2Hash from '../';
 
 // Generated with 50,000 iterations
 const OLD_HASH =
@@ -6,8 +6,8 @@ const OLD_HASH =
 
 jest.setTimeout(50000);
 test('pbkdf2', async () => {
-  const sh = new SecureHash({
-    minimumHashTime: '200ms',
+  const sh = createPbkdf2Hash({
+    iterations: 100_000,
   });
 
   const start = Date.now();
@@ -28,9 +28,8 @@ test('pbkdf2', async () => {
 });
 
 test('argon2id update', async () => {
-  const sh = new SecureHash({
+  const sh = createPbkdf2Hash({
     iterations: 100_000,
-    minimumHashTime: '200ms',
   });
   let updated = false;
   const start = Date.now();

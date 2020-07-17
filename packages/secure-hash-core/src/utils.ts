@@ -7,3 +7,10 @@ export function getNameMap<T extends number>(enumObj: {
       .map(([str, alg]) => [alg, str]),
   );
 }
+
+export function isValueInSet<TValue, TSetValue extends TValue>(
+  set: Set<TSetValue>,
+  value: TValue,
+): value is TSetValue {
+  return set.has(value as TSetValue);
+}

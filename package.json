@@ -23,7 +23,7 @@
     "@types/jest": "^25.1.3",
     "@types/mkdirp": "^0.5.1",
     "@types/ms": "^0.7.30",
-    "@types/node": "^8.0.33",
+    "@types/node": "^10.0.0",
     "@types/react": "*",
     "@types/react-dom": "*",
     "@types/rimraf": "^2.0.2",
@@ -35,6 +35,9 @@
     "rimraf": "^2.6.2",
     "ts-jest": "^25.2.1",
     "typescript": "^3.9.6"
+  },
+  "resolutions": {
+    "@types/node": "^10.0.0"
   },
   "jest": {
     "transformIgnorePatterns": [
@@ -65,8 +68,10 @@
     "body-parser": "^1.18.3",
     "bytes": "^3.0.0",
     "express": "^4.16.3",
+    "memoize-one": "^5.1.1",
     "moped": "^0.7.24",
     "ms": "^2.1.1",
+    "nanoassert": "^2.0.0",
     "node-base91": "^0.3.4",
     "nodemailer": "^4.6.7",
     "nodemailer-mailgun-transport": "^1.4.0",
@@ -78,6 +83,7 @@
     "react-digit-input": "^1.1.0",
     "react-dom": "^16.4.2",
     "secure-password": "^4.0.0",
+    "sodium-native": "^3.2.0",
     "speakeasy": "^2.0.0",
     "stripe": "^6.7.0",
     "svg-to-dataurl": "^1.0.0",

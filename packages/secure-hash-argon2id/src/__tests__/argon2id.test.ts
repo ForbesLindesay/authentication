@@ -1,19 +1,14 @@
-import SecureHash from '../argon2id';
-import {
-  OPSLIMIT_MIN,
-  MEMLIMIT_MIN,
-} from '../implementations/Argon2idImplemenation';
+import SecureHash from '../';
 
 jest.setTimeout(50000);
 const OLD_HASH =
   'JGFyZ29uMmlkJHY9MTkkbT05Mjc3NCx0PTI5LHA9MSRqQUI2SDlhbFN1bWhTWWxFYmdleFFBJDd6a3N3K3ZUVTQ4ZnJVTmEvVjRsenZ5aVRNUGRLd2wyTlh5SUsvdGhpMVUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=';
-const OPS_LIMIT = OPSLIMIT_MIN + 1;
-const MEM_LIMIT = MEMLIMIT_MIN + 1;
+const OPS_LIMIT = 21;
+const MEM_LIMIT = '65MB';
 test('argon2id', async () => {
-  const sh = new SecureHash({
-    opslimit: OPS_LIMIT,
-    memlimit: MEM_LIMIT,
-    minimumHashTime: '200ms',
+  const sh = SecureHash({
+    opsLimit: OPS_LIMIT,
+    memLimit: MEM_LIMIT,
   });
 
   const start = Date.now();
@@ -34,10 +29,9 @@ test('argon2id', async () => {
 });
 
 test('argon2id update', async () => {
-  const sh = new SecureHash({
-    opslimit: OPS_LIMIT,
-    memlimit: MEM_LIMIT,
-    minimumHashTime: '200ms',
+  const sh = SecureHash({
+    opsLimit: OPS_LIMIT,
+    memLimit: MEM_LIMIT,
   });
 
   let updated = false;
