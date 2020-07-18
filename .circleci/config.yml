@@ -83,10 +83,10 @@ workflows:
                 - master
   master:
     jobs:
-      - ? publish-dry-run
-        filters:
-          branches:
-            only: master
+      - publish-dry-run:
+          filters:
+            branches:
+              only: master
 
       - publish-approval:
           type: approval
