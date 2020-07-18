@@ -22,10 +22,11 @@ const users = [
 
 const siteConfig = {
   title: 'authentication' /* title for your website */,
-  tagline: 'Secure, Modular Authentication for Node.js',
-  url: 'https://facebook.github.io' /* your website url */,
+  tagline: 'Open source security libraries for node.js',
+  url: 'https://atauthentication.com' /* your website url */,
   baseUrl: '/' /* base url for your project */,
   projectName: 'authentication',
+  ogImage: 'img/ogImage.png',
   headerLinks: [
     {doc: 'getting-started', label: 'Docs'},
     // {doc: 'doc4', label: 'API'},

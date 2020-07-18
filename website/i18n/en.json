@@ -3,7 +3,7 @@
   "localized-strings": {
     "next": "Next",
     "previous": "Previous",
-    "tagline": "Secure, Modular Authentication for Node.js",
+    "tagline": "Open source security libraries for node.js",
     "cookie-session": "Cookie Session",
     "cookie": "Cookie",
     "csrf-protection": "CSRF Protection",
