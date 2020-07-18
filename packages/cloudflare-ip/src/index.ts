@@ -46,3 +46,5 @@ export default function isCloudflareIp(
   const cloudflareIps = getIPAddressesCached(cacheDuration, onError);
   return cloudflareIps.some(cf => testIp.isInSubnet(cf));
 }
+
+module.exports = Object.assign(isCloudflareIp, {default: isCloudflareIp});
