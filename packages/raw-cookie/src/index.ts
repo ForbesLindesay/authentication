@@ -33,7 +33,7 @@ export function getCookie(
   let header = req.headers['cookie'];
   if (!header) return;
   if (typeof header !== 'string') {
-    header = header.join(';');
+    header = (header as string[]).join(';');
   }
   const match = header.match(getPattern(name));
   if (!match) return;

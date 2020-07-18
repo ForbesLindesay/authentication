@@ -117,7 +117,7 @@ function getDefaultProvider(): ProviderConfig {
   );
 }
 
-function getValue<TParsed = TRaw, TRaw = string>(
+function getValue<TRaw = string, TParsed = TRaw>(
   values: (TRaw | void)[],
   parse: (v: TRaw) => TParsed | void,
   message: string,

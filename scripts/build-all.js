@@ -1,30 +1,36 @@
 const {sync: spawnSync} = require('cross-spawn');
 
 const onlyChanged = process.argv.includes('--only-changed');
-const boltArgs = process.argv.slice(2).filter(arg => arg !== '--only-changed');
+const extraArgs = process.argv
+  .slice(2)
+  .filter((arg) => arg !== '--only-changed');
+if (extraArgs.length) {
+  console.log('unrecognised args: ', extraArgs);
+}
 const scriptArgs = onlyChanged ? [] : ['--force'];
-console.log(
-  'bolt ' +
-    [
-      'ws',
-      'exec',
-      ...boltArgs,
-      '--',
-      'node',
-      '../../scripts/build',
-      ...scriptArgs,
-    ]
-      .map(v => JSON.stringify(v))
-      .join(' '),
-);
+console.log('wsrun', [
+  '--stages',
+  '--fast-exit',
+  '--concurrency',
+  4,
+  '--collect-logs',
+  '--bin',
+  'node',
+  '-c',
+  '../../scripts/build',
+  ...scriptArgs,
+]);
 const result = spawnSync(
-  'bolt',
+  'wsrun',
   [
-    'ws',
-    'exec',
-    ...boltArgs,
-    '--',
+    '--stages',
+    '--fast-exit',
+    '--concurrency',
+    4,
+    '--collect-logs',
+    '--bin',
     'node',
+    '-c',
     '../../scripts/build',
     ...scriptArgs,
   ],
