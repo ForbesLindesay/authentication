@@ -20,7 +20,8 @@ const tsconfig = `{
 }`;
 
 const dependencies = require('../package.json').devDependencies;
-readdirSync(__dirname + '/../packages').forEach(directory => {
+readdirSync(__dirname + '/../packages').forEach((directory) => {
+  if (directory === 'jwt-demo') return;
   if (!statSync(__dirname + '/../packages/' + directory).isDirectory()) {
     return;
   }

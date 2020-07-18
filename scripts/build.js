@@ -17,6 +17,10 @@ const cwd = process.cwd();
 const rootPkg = require('../package.json');
 const pkg = require(cwd + '/package.json');
 
+if (pkg.name === '@authentication/jwt-demo') {
+  process.exit(0);
+}
+
 // .last_build
 const buildHash = createHash('sha512');
 const IGNORED_NAMES = ['.cache', 'lib', 'node_modules', '.last_build'];
