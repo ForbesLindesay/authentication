@@ -23,7 +23,7 @@ const users = [
 const siteConfig = {
   title: 'authentication' /* title for your website */,
   tagline: 'Open source security libraries for node.js',
-  url: 'https://atauthentication.com' /* your website url */,
+  url: 'https://www.atauthentication.com' /* your website url */,
   baseUrl: '/' /* base url for your project */,
   projectName: 'authentication',
   ogImage: 'img/ogImage.png',
