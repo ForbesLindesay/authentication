@@ -1,0 +1,21 @@
+{
+  "name": "@authentication/cloudflare-ip",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "ip-address": "^6.3.0",
+    "then-request": "^6.0.2"
+  },
+  "devDependencies": {
+    "@types/ip-address": "^5.8.2"
+  },
+  "scripts": {},
+  "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/cloudflare-ip",
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}
