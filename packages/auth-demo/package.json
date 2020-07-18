@@ -24,7 +24,7 @@
     "moped": "^0.7.24",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
-    "then-request": "^6.0.0"
+    "then-request": "^6.0.2"
   },
   "scripts": {
     "start": "moped start"
