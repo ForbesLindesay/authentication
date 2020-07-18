@@ -19,18 +19,18 @@ refs:
     run:
       name: NPM Auth
       command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-  - &bolt_install
+  - &yarn_install
     run:
-      name: Bolt Install
-      command: yarn global add bolt && bolt
+      name: Yarn Install
+      command: yarn install --frozen-lockfile
   - &build
     run:
       name: Build
-      command: bolt run build:all
+      command: yarn run build:all
   - &test
     run:
       name: Test
-      command: bolt run test
+      command: yarn run test
 
 jobs:
   all:
@@ -39,7 +39,7 @@ jobs:
       - checkout
       - *restore_cache
       - *npm_auth
-      - *bolt_install
+      - *yarn_install
       - *save_cache
       - *build
       - *test
@@ -50,7 +50,7 @@ jobs:
       - checkout
       - *restore_cache
       - *npm_auth
-      - *bolt_install
+      - *yarn_install
       - *save_cache
       - *build
       - *test
@@ -64,7 +64,7 @@ jobs:
       - checkout
       - *restore_cache
       - *npm_auth
-      - *bolt_install
+      - *yarn_install
       - *save_cache
       - *build
       - *test
