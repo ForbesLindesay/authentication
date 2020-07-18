@@ -44,7 +44,21 @@ jobs:
       - *build
       - *test
 
-  master:
+  publish-dry-run:
+    <<: *container
+    steps:
+      - checkout
+      - *restore_cache
+      - *npm_auth
+      - *bolt_install
+      - *save_cache
+      - *build
+      - *test
+      - run:
+          name: Release (Dry Run)
+          command: npx rollingversions publish --dry-run
+
+  publish:
     <<: *container
     steps:
       - checkout
@@ -56,7 +70,7 @@ jobs:
       - *test
       - run:
           name: Release
-          command: bolt publish
+          command: npx rollingversions publish
 
 workflows:
   version: 2
@@ -69,7 +83,19 @@ workflows:
                 - master
   master:
     jobs:
-      - master:
-          filters:
-            branches:
-              only: master
+      - publish-dry-run: 
+        filters: 
+          branches: 
+            only: master
+
+    - publish-approval: 
+        type: approval
+        requires: 
+          - publish-dry-run
+
+    - publish: 
+        requires: 
+          - publish-approval
+        filters: 
+          branches: 
+            only: master
