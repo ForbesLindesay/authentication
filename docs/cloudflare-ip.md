@@ -20,32 +20,32 @@ Calling `isCloudflareIp` returns `true` if the IP address is within the range us
 import isCloudflareIp from '@authentication/cloudflare-ip';
 
 // non-cloudflare ips should be false
-isCloudflareIp('66.249.66.1')                // false
-isCloudflareIp('1.1.1.1')                    // false
+isCloudflareIp('66.249.66.1')           // false
+isCloudflareIp('1.1.1.1')               // false
 
 // localhost should be false
-isCloudflareIp('127.0.0.1'))                 // false
-isCloudflareIp('::1'))                       // false
+isCloudflareIp('127.0.0.1')             // false
+isCloudflareIp('::1')                   // false
 
 // cloudflare ips should pass
-isCloudflareIp('103.21.244.0'))              // true
-isCloudflareIp('2400:cb00:0000::0000'))      // true
+isCloudflareIp('103.21.244.0')          // true
+isCloudflareIp('2400:cb00:0000::0000')  // true
 ```
 
 ```javascript
 const isCloudflareIp = require('@authentication/cloudflare-ip');
 
 // non-cloudflare ips should be false
-isCloudflareIp('66.249.66.1')                // false
-isCloudflareIp('1.1.1.1')                    // false
+isCloudflareIp('66.249.66.1')           // false
+isCloudflareIp('1.1.1.1')               // false
 
 // localhost should be false
-isCloudflareIp('127.0.0.1'))                 // false
-isCloudflareIp('::1'))                       // false
+isCloudflareIp('127.0.0.1')             // false
+isCloudflareIp('::1')                   // false
 
 // cloudflare ips should pass
-isCloudflareIp('103.21.244.0'))              // true
-isCloudflareIp('2400:cb00:0000::0000'))      // true
+isCloudflareIp('103.21.244.0')          // true
+isCloudflareIp('2400:cb00:0000::0000')  // true
 ```
 
 If you pass in a string that does not represent a valid IPv4 or IPv6 address, an error will be thrown.
