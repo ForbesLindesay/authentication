@@ -1,4 +1,4 @@
-import {Agent, ClientResponse} from 'http';
+import {Agent} from 'http';
 import {URL} from 'url';
 import {Request, Response, NextFunction} from 'express';
 import Cookie from '@authentication/cookie';
@@ -11,6 +11,8 @@ import getUID from './getUID';
 import originalURL from './originalURL';
 const OAuth2Base = require('oauth').OAuth2;
 
+// This type used to be exported from http but has gone missing
+type ClientResponse = any;
 export interface Options {
   clientID: string;
   clientSecret: string;

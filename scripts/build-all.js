@@ -8,10 +8,25 @@ if (extraArgs.length) {
   console.log('unrecognised args: ', extraArgs);
 }
 const scriptArgs = onlyChanged ? [] : ['--force'];
+console.log('wsrun', [
+  '--stages',
+  '--fast-exit',
+  '--concurrency',
+  4,
+  '--collect-logs',
+  '--bin',
+  'node',
+  '-c',
+  '../../scripts/build',
+  ...scriptArgs,
+]);
 const result = spawnSync(
   'wsrun',
   [
     '--stages',
+    '--fast-exit',
+    '--concurrency',
+    4,
     '--collect-logs',
     '--bin',
     'node',
