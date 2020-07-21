@@ -1,4 +1,4 @@
-import {JsonObject} from './JsonValue';
+import {JsonObject} from './shared';
 
 export default function validator() {
   function validatorRecurse<T extends JsonObject, S extends JsonObject>(
