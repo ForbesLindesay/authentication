@@ -1,7 +1,4 @@
-import {
-  RateLimitState,
-  StoreAPI as RateLimitStoreAPI,
-} from '@authentication/rate-limit';
+import {RateLimitState, RateLimitStore} from '@authentication/rate-limit';
 import Token from './Token';
 
 export interface TokensAPI<State = undefined> {
@@ -12,7 +9,7 @@ export interface TokensAPI<State = undefined> {
 }
 export interface NamespacedStoreAPI<State = undefined> {
   tokens: TokensAPI<State>;
-  rateLimit: RateLimitStoreAPI<string>;
+  rateLimit: RateLimitStore<string>;
 }
 
 export interface UnnamespacedStoreAPI<State = undefined> {
@@ -29,18 +26,11 @@ export interface UnnamespacedStoreAPI<State = undefined> {
   removeRateLimit(id: string): Promise<void | null | {}>;
 }
 
-export type StoreAPI<State = undefined> =
+export type StoreConfig<State = undefined> =
   | NamespacedStoreAPI<State>
   | UnnamespacedStoreAPI<State>;
 
-export interface TransactionalStoreAPI<State = undefined> {
-  tx<T>(fn: (store: StoreAPI<State>) => Promise<T>): Promise<T>;
-}
-export type StoreConfig<State = undefined> =
-  | TransactionalStoreAPI<State>
-  | StoreAPI<State>;
-
-export class StoreTransaction<State = undefined> {
+export default class Store<State = undefined> {
   readonly saveToken: (token: Token<State>) => Promise<string>;
   readonly loadToken: (tokenID: string) => Promise<Token<State> | null>;
   readonly updateToken: (
@@ -55,36 +45,23 @@ export class StoreTransaction<State = undefined> {
   ) => Promise<void | null | {}>;
   readonly loadRateLimit: (id: string) => Promise<null | RateLimitState>;
   readonly removeRateLimit: (id: string) => Promise<void | null | {}>;
-  constructor(config: StoreAPI<State>) {
-    if ('tokens' in config) {
-      this.saveToken = t => config.tokens.save(t);
-      this.loadToken = t => config.tokens.load(t);
-      this.updateToken = (i, t) => config.tokens.update(i, t);
-      this.removeToken = i => config.tokens.remove(i);
-      this.saveRateLimit = (i, s, old) => config.rateLimit.save(i, s, old);
-      this.loadRateLimit = i => config.rateLimit.load(i);
-      this.removeRateLimit = i => config.rateLimit.remove(i);
-    } else {
-      this.saveToken = t => config.saveToken(t);
-      this.loadToken = t => config.loadToken(t);
-      this.updateToken = (i, t) => config.updateToken(i, t);
-      this.removeToken = i => config.removeToken(i);
-      this.saveRateLimit = (i, s, old) => config.saveRateLimit(i, s, old);
-      this.loadRateLimit = i => config.loadRateLimit(i);
-      this.removeRateLimit = i => config.removeRateLimit(i);
-    }
-  }
-}
-export default class Store<State = undefined> {
-  readonly tx: <T>(
-    fn: (store: StoreTransaction<State>) => Promise<T>,
-  ) => Promise<T>;
   constructor(config: StoreConfig<State>) {
-    if ('tx' in config) {
-      this.tx = fn => config.tx(store => fn(new StoreTransaction(store)));
+    if ('tokens' in config) {
+      this.saveToken = (t) => config.tokens.save(t);
+      this.loadToken = (t) => config.tokens.load(t);
+      this.updateToken = (i, t) => config.tokens.update(i, t);
+      this.removeToken = (i) => config.tokens.remove(i);
+      this.saveRateLimit = (i, s, old) => config.rateLimit.save(i, s, old);
+      this.loadRateLimit = (i) => config.rateLimit.load(i);
+      this.removeRateLimit = (i) => config.rateLimit.remove(i);
     } else {
-      const tx = new StoreTransaction(config);
-      this.tx = fn => fn(tx);
+      this.saveToken = (t) => config.saveToken(t);
+      this.loadToken = (t) => config.loadToken(t);
+      this.updateToken = (i, t) => config.updateToken(i, t);
+      this.removeToken = (i) => config.removeToken(i);
+      this.saveRateLimit = (i, s, old) => config.saveRateLimit(i, s, old);
+      this.loadRateLimit = (i) => config.loadRateLimit(i);
+      this.removeRateLimit = (i) => config.removeRateLimit(i);
     }
   }
 }

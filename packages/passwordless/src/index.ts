@@ -9,7 +9,7 @@ import {
   ExponentialOptions,
   BucketRateLimit,
   BucketOptions,
-  TransactionalStoreAPI as RateLimitStoreAPI,
+  RateLimitStore,
   isRateLimitExceededError,
   RateLimitExceededError,
 } from '@authentication/rate-limit';
@@ -17,12 +17,7 @@ import {hash, verify} from '@authentication/secure-hash';
 import {URL} from 'url';
 import {Request, Response} from 'express';
 import ms = require('ms');
-import Store, {
-  StoreConfig,
-  StoreAPI,
-  TransactionalStoreAPI,
-  StoreTransaction,
-} from './Store';
+import Store, {StoreConfig} from './Store';
 import Token from './Token';
 import getRequestURL from '@authentication/request-url';
 
@@ -38,7 +33,7 @@ import {
   VerifyPassCodeStatusKind,
 } from './VerifyPassCodeStatus';
 
-export {StoreConfig, StoreAPI, TransactionalStoreAPI};
+export {StoreConfig};
 export {CreateTokenStatusKind, CreateTokenStatus};
 export {VerifyPassCodeStatusKind, VerifyPassCodeError};
 export type CreateTokenResult =
@@ -210,7 +205,7 @@ export default class PasswordlessAuthentication<State> {
     // from behind a single router, but over the long run, we want to keep
     // this pretty low or someone could be quite abusive.
     this._createTokenByIpRateLimit = new BucketRateLimit(
-      this._getStore((ip) => 'create_ip_' + ip),
+      this._getRateLimitStore((ip) => 'create_ip_' + ip),
       {
         interval: '10 minutes',
         maxSize: 20,
@@ -223,7 +218,7 @@ export default class PasswordlessAuthentication<State> {
     // a few attempts.  It is possible a user might get spammed with a
     // few token e-mails, but this will quickly stem the tide.
     this._createTokenByUserRateLimit = new ExponentialRateLimit(
-      this._getStore((userID) => 'user_' + userID),
+      this._getRateLimitStore((userID) => 'user_' + userID),
       {
         baseDelay: '5 minutes',
         factor: 2,
@@ -235,7 +230,7 @@ export default class PasswordlessAuthentication<State> {
     // We don't use an exponential backoff because resetting it when a
     // correct token attempt happens would defeat the point.
     this._validatePassCodeByIpRateLimit = new BucketRateLimit(
-      this._getStore((ip) => 'validate_ip_' + ip),
+      this._getRateLimitStore((ip) => 'validate_ip_' + ip),
       {
         interval: '10 minutes',
         maxSize: 20,
@@ -266,26 +261,24 @@ export default class PasswordlessAuthentication<State> {
   }
   private _tx<T>(
     tokenID: string,
-    fn: (store: StoreTransaction<State>) => Promise<T>,
+    fn: (store: Store<State>) => Promise<T>,
   ): Promise<T> {
-    return this._lock.withLock(tokenID, () => this._store.tx(fn));
+    return this._lock.withLock(tokenID, () => fn(this._store));
   }
-  private _getStore<T>(idToString: (id: T) => string): RateLimitStoreAPI<T> {
+  private _getRateLimitStore<T>(
+    idToString: (id: T) => string,
+  ): RateLimitStore<T> {
+    const store = this._store;
     return {
-      tx: (fn) =>
-        this._store.tx((store) =>
-          fn({
-            save(id, state, oldState) {
-              return store.saveRateLimit(idToString(id), state, oldState);
-            },
-            load(id) {
-              return store.loadRateLimit(idToString(id));
-            },
-            remove(id) {
-              return store.removeRateLimit(idToString(id));
-            },
-          }),
-        ),
+      save(id, state, oldState) {
+        return store.saveRateLimit(idToString(id), state, oldState);
+      },
+      load(id) {
+        return store.loadRateLimit(idToString(id));
+      },
+      remove(id) {
+        return store.removeRateLimit(idToString(id));
+      },
     };
   }
   createToken = async (
@@ -330,7 +323,7 @@ export default class PasswordlessAuthentication<State> {
     ]);
     const passCodeHash = await hash(passCode);
     // store the token
-    const tokenID = await this._store.tx((store) =>
+    const tokenID = await this._tx(userID, (store) =>
       store.saveToken({
         userID,
         dos: dosCode,

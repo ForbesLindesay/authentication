@@ -8,7 +8,7 @@ export interface RateLimitState {
 }
 export {ConsumeOptions};
 
-export interface StoreAPI<ID> {
+export interface RateLimitStore<ID> {
   save(
     id: ID,
     state: RateLimitState,
@@ -17,10 +17,6 @@ export interface StoreAPI<ID> {
   load(id: ID): Promise<null | RateLimitState>;
   remove(id: ID): Promise<void | null | {}>;
 }
-export interface TransactionalStoreAPI<ID> {
-  tx<T>(fn: (store: StoreAPI<ID>) => Promise<T>): Promise<T>;
-}
-export type Store<ID> = TransactionalStoreAPI<ID> | StoreAPI<ID>;
 
 export interface RateLimitExceededError {
   code: 'RATE_LIMIT_EXCEEDED';
@@ -33,9 +29,20 @@ export function isRateLimitExceededError(
   return err && typeof err === 'object' && err.code === 'RATE_LIMIT_EXCEEDED';
 }
 
-class MemoryStore implements StoreAPI<string | number> {
+class MemoryStore implements RateLimitStore<string | number> {
   private _map = new Map<string | number, RateLimitState>();
-  async save(id: string | number, state: RateLimitState) {
+  async save(
+    id: string | number,
+    state: RateLimitState,
+    oldState: RateLimitState,
+  ) {
+    const currentState = this._map.get(id);
+    if (
+      currentState?.timestamp !== oldState.timestamp ||
+      currentState?.value !== oldState.value
+    ) {
+      throw new Error('Concurrent saves are not allowed');
+    }
     this._map.set(id, state);
   }
   async load(id: string | number): Promise<null | RateLimitState> {
@@ -48,22 +55,21 @@ class MemoryStore implements StoreAPI<string | number> {
 export default abstract class BaseRateLimit<
   ID extends string | number = string | number
 > implements RateLimit<ID> {
-  private readonly _store: Store<ID>;
+  private readonly _store: RateLimitStore<ID>;
   private readonly _lock = new LockByID();
   protected abstract _take(
     state: null | RateLimitState,
     now: number,
   ): RateLimitState;
-  constructor(store: 'memory' | Store<ID>) {
+  constructor(store: 'memory' | RateLimitStore<ID>) {
     this._store = store === 'memory' ? new MemoryStore() : store;
   }
-  private _tx<T>(id: ID, fn: (store: StoreAPI<ID>) => Promise<T>): Promise<T> {
+  private _tx<T>(
+    id: ID,
+    fn: (store: RateLimitStore<ID>) => Promise<T>,
+  ): Promise<T> {
     return this._lock.withLock(id, () => {
-      if (typeof (this._store as TransactionalStoreAPI<ID>).tx === 'function') {
-        return (this._store as TransactionalStoreAPI<ID>).tx(fn);
-      } else {
-        return fn(this._store as StoreAPI<ID>);
-      }
+      return fn(this._store);
     });
   }
   /**
@@ -73,7 +79,7 @@ export default abstract class BaseRateLimit<
    */
   async consume(id: ID, options: ConsumeOptions = {}) {
     const timeout = parseMs(options.timeout, 4000, 'options.timeout');
-    const {delay, nextTokenTimestamp} = await this._tx(id, async store => {
+    const {delay, nextTokenTimestamp} = await this._tx(id, async (store) => {
       const now = Date.now();
       const oldState = await store.load(id);
       const newState = this._take(oldState, now);
@@ -92,25 +98,23 @@ export default abstract class BaseRateLimit<
       throw err;
     }
     if (delay > 0) {
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
   /**
    * Get the timestamp at which a request will next be accepted
    */
-  getNextTime(id: ID): Promise<number> {
-    return this._tx(id, async store => {
-      const now = Date.now();
-      const oldState = await store.load(id);
-      const newState = this._take(oldState, now);
-      return newState.timestamp;
-    });
+  async getNextTime(id: ID): Promise<number> {
+    const now = Date.now();
+    const oldState = await this._store.load(id);
+    const newState = this._take(oldState, now);
+    return newState.timestamp;
   }
   /**
    * Reset the rate limit for a given ID. You might want to do this
    * after a successful password attempt (for example).
    */
   reset(id: ID) {
-    return this._tx(id, store => store.remove(id));
+    return this._tx(id, (store) => store.remove(id));
   }
 }

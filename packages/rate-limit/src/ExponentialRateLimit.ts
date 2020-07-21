@@ -1,4 +1,4 @@
-import BaseRateLimit, {Store} from './BaseRateLimit';
+import BaseRateLimit, {RateLimitStore} from './BaseRateLimit';
 import takeExponential, {
   ExponentialState,
   ExponentialOptions,
@@ -12,7 +12,10 @@ export default class ExponentialRateLimit<
   ID extends string | number = string | number
 > extends BaseRateLimit<ID> {
   private readonly _options: ParsedOptions;
-  constructor(store: 'memory' | Store<ID>, options: ExponentialOptions = {}) {
+  constructor(
+    store: 'memory' | RateLimitStore<ID>,
+    options: ExponentialOptions = {},
+  ) {
     super(store);
     this._options = parseExponentialOptions(options);
   }
