@@ -1,0 +1,16 @@
+{
+  "name": "@authentication/request-url",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {},
+  "scripts": {},
+  "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/request-url",
+  "bugs": "https://github.com/ForbesLindesay/authentication/issues",
+  "license": "GPL-3.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://www.atauthentication.com/docs/request-url.html"
+}

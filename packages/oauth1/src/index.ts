@@ -4,7 +4,7 @@ import Cookie from '@authentication/cookie';
 import {Mixed} from '@authentication/types';
 import AuthorizationError from './errors/AuthorizationError';
 import StateVerificationFailure from './errors/StateVerificationFailure';
-import originalURL from './originalURL';
+import getRequestURL from '@authentication/request-url';
 const OAuth1Base = require('oauth').OAuth;
 
 function parseURL(name: string, input: URL | string, base?: string | URL) {
@@ -239,7 +239,14 @@ export default class OAuth1Authentication<State = Mixed> {
       typeof callbackURLInitial === 'string'
         ? new URL(
             callbackURLInitial,
-            originalURL(req, {trustProxy: this._trustProxy}),
+            getRequestURL(req, {
+              trustProxy:
+                this._trustProxy === undefined
+                  ? req.app.get('trust proxy') ||
+                    process.env.NODE_ENV === 'development'
+                  : this._trustProxy,
+              baseURL: process.env.BASE_URL || process.env.BASE_URI,
+            }),
           )
         : callbackURLInitial;
     if (callbackURL) {
@@ -261,7 +268,7 @@ export default class OAuth1Authentication<State = Mixed> {
     }
     const userAuthorizationParams = options.userAuthorizationParams;
     if (userAuthorizationParams) {
-      Object.keys(userAuthorizationParams).forEach(key => {
+      Object.keys(userAuthorizationParams).forEach((key) => {
         userAuthorizationURL.searchParams.set(
           key,
           userAuthorizationParams[key],

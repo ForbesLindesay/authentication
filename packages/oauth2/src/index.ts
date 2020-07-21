@@ -8,7 +8,7 @@ import StateVerificationFailure from './errors/StateVerificationFailure';
 import TokenError from './errors/TokenError';
 import InternalOAuthError from './errors/InternalOAuthError';
 import getUID from './getUID';
-import originalURL from './originalURL';
+import getRequestURL from '@authentication/request-url';
 const OAuth2Base = require('oauth').OAuth2;
 
 // This type used to be exported from http but has gone missing
@@ -261,7 +261,14 @@ export default class OAuth2Authentication<State = Mixed, Results = Mixed> {
     return typeof this._callbackURL === 'string'
       ? new URL(
           this._callbackURL,
-          originalURL(req, {trustProxy: this._trustProxy}),
+          getRequestURL(req, {
+            trustProxy:
+              this._trustProxy === undefined
+                ? req.app.get('trust proxy') ||
+                  process.env.NODE_ENV === 'development'
+                : this._trustProxy,
+            baseURL: process.env.BASE_URL || process.env.BASE_URI,
+          }),
         )
       : this._callbackURL;
   }
@@ -279,7 +286,7 @@ export default class OAuth2Authentication<State = Mixed, Results = Mixed> {
     const authorizeUrl = new URL(this._authorizeURL.href);
     const p = options.params;
     if (p) {
-      Object.keys(p).forEach(key => {
+      Object.keys(p).forEach((key) => {
         authorizeUrl.searchParams.set(key, p[key]);
       });
     }

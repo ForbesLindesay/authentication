@@ -24,7 +24,7 @@ import Store, {
   StoreTransaction,
 } from './Store';
 import Token from './Token';
-import originalURL from './originalURL';
+import getRequestURL from '@authentication/request-url';
 
 import {
   CreateTokenStatusKind,
@@ -173,8 +173,8 @@ export default class PasswordlessAuthentication<State> {
       options.maxAge === undefined
         ? ms('1 hour')
         : typeof options.maxAge === 'number'
-          ? options.maxAge
-          : ms(options.maxAge);
+        ? options.maxAge
+        : ms(options.maxAge);
     if (
       typeof this._maxAge !== 'number' ||
       isNaN(this._maxAge) ||
@@ -210,7 +210,7 @@ export default class PasswordlessAuthentication<State> {
     // from behind a single router, but over the long run, we want to keep
     // this pretty low or someone could be quite abusive.
     this._createTokenByIpRateLimit = new BucketRateLimit(
-      this._getStore(ip => 'create_ip_' + ip),
+      this._getStore((ip) => 'create_ip_' + ip),
       {
         interval: '10 minutes',
         maxSize: 20,
@@ -223,7 +223,7 @@ export default class PasswordlessAuthentication<State> {
     // a few attempts.  It is possible a user might get spammed with a
     // few token e-mails, but this will quickly stem the tide.
     this._createTokenByUserRateLimit = new ExponentialRateLimit(
-      this._getStore(userID => 'user_' + userID),
+      this._getStore((userID) => 'user_' + userID),
       {
         baseDelay: '5 minutes',
         factor: 2,
@@ -235,7 +235,7 @@ export default class PasswordlessAuthentication<State> {
     // We don't use an exponential backoff because resetting it when a
     // correct token attempt happens would defeat the point.
     this._validatePassCodeByIpRateLimit = new BucketRateLimit(
-      this._getStore(ip => 'validate_ip_' + ip),
+      this._getStore((ip) => 'validate_ip_' + ip),
       {
         interval: '10 minutes',
         maxSize: 20,
@@ -253,7 +253,14 @@ export default class PasswordlessAuthentication<State> {
     return typeof this._callbackURL === 'string'
       ? new URL(
           this._callbackURL,
-          originalURL(req, {trustProxy: this._trustProxy}),
+          getRequestURL(req, {
+            trustProxy:
+              this._trustProxy === undefined
+                ? req.app.get('trust proxy') ||
+                  process.env.NODE_ENV === 'development'
+                : this._trustProxy,
+            baseURL: process.env.BASE_URL || process.env.BASE_URI,
+          }),
         )
       : new URL(this._callbackURL.href);
   }
@@ -265,8 +272,8 @@ export default class PasswordlessAuthentication<State> {
   }
   private _getStore<T>(idToString: (id: T) => string): RateLimitStoreAPI<T> {
     return {
-      tx: fn =>
-        this._store.tx(store =>
+      tx: (fn) =>
+        this._store.tx((store) =>
           fn({
             save(id, state, oldState) {
               return store.saveRateLimit(idToString(id), state, oldState);
@@ -323,7 +330,7 @@ export default class PasswordlessAuthentication<State> {
     ]);
     const passCodeHash = await hash(passCode);
     // store the token
-    const tokenID = await this._store.tx(store =>
+    const tokenID = await this._store.tx((store) =>
       store.saveToken({
         userID,
         dos: dosCode,
@@ -446,7 +453,7 @@ export default class PasswordlessAuthentication<State> {
           (await verify(
             passCode,
             token.passCodeHash,
-            async updatedPassCodeHash => {
+            async (updatedPassCodeHash) => {
               // we're about to delete the token anyway,
               // so no need to update it
             },
