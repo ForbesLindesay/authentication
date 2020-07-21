@@ -1,15 +1,14 @@
 export default interface Token<State = void> {
   userID: string;
   /**
-   * Un-hashed pass-code used to prevent denail of service. We'll check
-   * this before rate limiting
+   * An incrementing integer used for optimistic concurency
    */
-  dos: string;
+  version: number;
   /**
-   * Hash of the pass code, that gets sent in the e-mail and entered by
+   * The pass code, that gets sent in the e-mail and entered by
    * the user (or appears as the `code` parameter in "magic" link)
    */
-  passCodeHash: string;
+  passCode: string;
   /**
    * The number of attempts remaining before the token is disposed of.
    */
@@ -25,12 +24,8 @@ export default interface Token<State = void> {
    */
   expiry: number;
   /**
-   * The user agent string of the original request to create the token.
-   */
-  userAgent: string;
-  /**
    * Some arbirary state of your choice. This is a good place to store a
    * redirect URI for after the authentication is complete.
    */
   state: State;
-};
+}

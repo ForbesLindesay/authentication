@@ -72,12 +72,29 @@ export default abstract class BaseRateLimit<
       return fn(this._store);
     });
   }
+
   /**
    * Consume one from the rate limit specified by id.
    * If consuming would take more than `options.timeout` milliseconds,
    * a `RateLimitExceededError` is thrown.
    */
   async consume(id: ID, options: ConsumeOptions = {}) {
+    const result = await this.tryConsume(id, options);
+    if (!result.consumed) {
+      const {message, nextTokenTimestamp} = result;
+      const err: RateLimitExceededError = new Error(message) as any;
+      err.code = 'RATE_LIMIT_EXCEEDED';
+      err.nextTokenTimestamp = nextTokenTimestamp;
+      throw err;
+    }
+  }
+
+  /**
+   * Consume one from the rate limit specified by id.
+   * If consuming would take more than `options.timeout` milliseconds,
+   * a `RateLimitExceededError` is thrown.
+   */
+  private async _tryConsume(id: ID, options: ConsumeOptions = {}) {
     const timeout = parseMs(options.timeout, 4000, 'options.timeout');
     const {delay, nextTokenTimestamp} = await this._tx(id, async (store) => {
       const now = Date.now();
@@ -87,20 +104,36 @@ export default abstract class BaseRateLimit<
       if (delay <= timeout) {
         await store.save(id, newState, oldState);
       }
-      return {delay, nextTokenTimestamp: newState.timestamp};
+      return {
+        delay,
+        nextTokenTimestamp: newState.timestamp,
+      };
     });
     if (delay > timeout) {
-      const err: RateLimitExceededError = new Error(
-        'Rate limit exceeded, next token available in ' + delay + 'ms',
-      ) as any;
-      err.code = 'RATE_LIMIT_EXCEEDED';
-      err.nextTokenTimestamp = nextTokenTimestamp;
-      throw err;
+      return {
+        consumed: false,
+        message: 'Rate limit exceeded, next token available in ' + delay + 'ms',
+        delay,
+        nextTokenTimestamp,
+        map() {
+          return this;
+        },
+      } as const;
     }
     if (delay > 0) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
+    return {
+      consumed: true,
+      map<T>(fn: () => T) {
+        return fn();
+      },
+    } as const;
   }
+  tryConsume(id: ID, options: ConsumeOptions = {}) {
+    return this._tryConsume(id, options);
+  }
+
   /**
    * Get the timestamp at which a request will next be accepted
    */
@@ -110,6 +143,7 @@ export default abstract class BaseRateLimit<
     const newState = this._take(oldState, now);
     return newState.timestamp;
   }
+
   /**
    * Reset the rate limit for a given ID. You might want to do this
    * after a successful password attempt (for example).

@@ -21,19 +21,19 @@ ReactDOM.render(
       </li>
     </ul>
     <Passwordless
-      createToken={email =>
+      createToken={(email) =>
         request('POST', '/__/auth/passwordless/create-token', {json: {email}})
           .getBody('utf8')
           .then(JSON.parse)
       }
-      verifyPassCode={passCode =>
+      verifyPassCode={({tokenID, passCode}) =>
         request('POST', '/__/auth/passwordless/verify-pass-code', {
-          json: {passCode},
+          json: {tokenID, passCode},
         })
           .getBody('utf8')
           .then(JSON.parse)
       }
-      onPassCodeVerified={userID => alert('User ID: ' + userID)}
+      onPassCodeVerified={(userID) => alert('User ID: ' + userID)}
     />
   </div>,
   root,

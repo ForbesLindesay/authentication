@@ -3,9 +3,8 @@ import isEmail from '@authentication/is-email';
 import {
   Encoding,
   CreateTokenStatus,
-  CreateTokenStatusKind,
   VerifyPassCodeStatus,
-  VerifyPassCodeStatusKind,
+  PasswordlessResponseKind,
 } from '@authentication/passwordless/types';
 import DigitInput, {InputAttributes} from 'react-digit-input';
 import DefaultEmailForm from './DefaultEmailForm';
@@ -53,7 +52,10 @@ export interface Props {
   renderEmailForm?: (props: EmailFormProps) => React.ReactNode;
   renderPassCodeForm?: (props: PassCodeFormProps) => React.ReactNode;
   createToken: (email: string) => Promise<CreateTokenStatus>;
-  verifyPassCode: (passCode: string) => Promise<VerifyPassCodeStatus>;
+  verifyPassCode: (opts: {
+    tokenID: string;
+    passCode: string;
+  }) => Promise<VerifyPassCodeStatus>;
   onPassCodeVerified: (userID: string) => void | null | {};
 }
 export interface State {
@@ -61,7 +63,8 @@ export interface State {
   email: string;
   emailTouched: boolean;
   creatingToken: boolean;
-  createdToken: boolean;
+
+  tokenID: string | null;
   passCode: string;
   passCodeTouched: boolean;
   verifyingPassCode: boolean;
@@ -74,10 +77,10 @@ export default class Passwordless extends React.Component<Props, State> {
     error: null,
     email: '',
     emailTouched: false,
+    tokenID: null,
     passCode: '',
     passCodeTouched: false,
     creatingToken: false,
-    createdToken: false,
     verifyingPassCode: false,
     rateLimitUntil: null,
     attemptsRemaining: null,
@@ -94,7 +97,7 @@ export default class Passwordless extends React.Component<Props, State> {
   };
   _onEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (this.state.creatingToken || this.state.createdToken) {
+    if (this.state.creatingToken || this.state.tokenID) {
       return;
     }
     if (!isEmail(this.state.email)) {
@@ -111,15 +114,14 @@ export default class Passwordless extends React.Component<Props, State> {
     this.props.createToken(this.state.email).then(
       (status): true => {
         switch (status.kind) {
-          case CreateTokenStatusKind.CreatedToken:
-            this.setState({createdToken: true, creatingToken: false});
+          case PasswordlessResponseKind.CreatedToken:
+            this.setState({tokenID: status.tokenID, creatingToken: false});
             return true;
-          case CreateTokenStatusKind.InvalidEmail:
-            this.setState({createdToken: false, creatingToken: false});
+          case PasswordlessResponseKind.InvalidEmail:
+            this.setState({creatingToken: false});
             return true;
-          case CreateTokenStatusKind.RateLimitExceeded:
+          case PasswordlessResponseKind.RateLimitExceeded:
             this.setState({
-              createdToken: false,
               creatingToken: false,
               rateLimitUntil: status.nextTokenTimestamp,
             });
@@ -130,7 +132,7 @@ export default class Passwordless extends React.Component<Props, State> {
             return true;
         }
       },
-      error => {
+      (error) => {
         this.setState({creatingToken: false, error});
         setTimeout(() => {
           throw error;
@@ -161,13 +163,13 @@ export default class Passwordless extends React.Component<Props, State> {
     this.setState({
       passCode: '',
       verifyingPassCode: false,
-      createdToken: false,
+      tokenID: null,
       expiredToken: false,
       attemptsRemaining: null,
     });
   };
   _verifyPassCode(passCode: string) {
-    if (this.state.verifyingPassCode || !this.state.createdToken) {
+    if (this.state.verifyingPassCode || !this.state.tokenID) {
       return;
     }
     this.setState({
@@ -175,29 +177,29 @@ export default class Passwordless extends React.Component<Props, State> {
       passCode,
       error: null,
     });
-    this.props.verifyPassCode(passCode).then(
-      status => {
+    this.props.verifyPassCode({tokenID: this.state.tokenID, passCode}).then(
+      (status) => {
         switch (status.kind) {
-          case VerifyPassCodeStatusKind.CorrectPassCode:
+          case PasswordlessResponseKind.VerifiedToken:
             this.props.onPassCodeVerified(status.userID);
             return true;
-          case VerifyPassCodeStatusKind.ExpiredToken:
+          case PasswordlessResponseKind.ExpiredToken:
             this.setState({
               passCode: '',
               verifyingPassCode: false,
-              createdToken: false,
+              tokenID: null,
               expiredToken: true,
               attemptsRemaining: null,
             });
             return true;
-          case VerifyPassCodeStatusKind.IncorrectPassCode:
+          case PasswordlessResponseKind.IncorrectPassCode:
             this.setState({
               passCode: '',
               verifyingPassCode: false,
               attemptsRemaining: status.attemptsRemaining,
             });
             return true;
-          case VerifyPassCodeStatusKind.RateLimitExceeded:
+          case PasswordlessResponseKind.RateLimitExceeded:
             this.setState({
               verifyingPassCode: false,
               rateLimitUntil: status.nextTokenTimestamp,
@@ -205,7 +207,7 @@ export default class Passwordless extends React.Component<Props, State> {
             return true;
         }
       },
-      error => {
+      (error) => {
         this.setState({verifyingPassCode: false, error});
         setTimeout(() => {
           throw error;
@@ -214,7 +216,7 @@ export default class Passwordless extends React.Component<Props, State> {
     );
   }
   render() {
-    if (!this.state.createdToken) {
+    if (!this.state.tokenID) {
       return (this.props.renderEmailForm || DefaultEmailForm)({
         error: this.state.error,
         email: this.state.email,
