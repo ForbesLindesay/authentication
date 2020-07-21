@@ -278,11 +278,9 @@ Both `ExponentialRateLimit` and `BucketRateLimit` have the same API, except for 
 
 The store is used to persist rate limit info to the database. The data stored is always an object of the form `{value: number, timestamp: number}`. These two numbers provide enough info to compute the entire state of the rate limit.
 
-> If you have multiple processes, you will need to ensure your store handles concurrency correctly. In transactional stores, you can do this by ensuring strong consistency via database transactions. In non-transactional stores you can use optimistic concurrency by checking the value of `oldState` in the `save` function matches what you have stored and throwing an error if it does not. You do not need to worry about this if you only have a single process.
+> If you have multiple processes, you will need to ensure your store handles concurrency correctly. You can use optimistic concurrency by checking the value of `oldState` in the `save` function matches what you have stored and throwing an error if it does not. You do not need to worry about this if you only have a single process.
 
-#### Non Transactional Store
-
-If your store is not transactional, You must pass an object implementing:
+Your store must be an object that implements:
 
 - `save(id: ID, state: State, oldState: null | State): Promise<any>` - a function that saves the `state` for the given `id`.
 - `load(id: ID): Promise<State | null>` - a function that retrieves the `state` for the given `id` and returns `null` if no state was found with that `id`.
@@ -387,103 +385,7 @@ CREATE TABLE rate_limit (
 );
 ```
 
-#### Transactional Store
-
-If you are using a store that supports transactions, you can use them by implementing just `tx<T>(fn: (store: Store) => Promise<T>): T`, where `Store` is an implementation of the non-transactional API above. You should:
-
-1. start a transaction
-2. call `fn` with an object implementing `save`, `load` and `remove`
-3. wait for the promise returned by `fn`.
-4. if `fn` threw an exception, revert the transaction and re-throw the exception.
-5. if `fn` did not throw an exception, commit the transaction and return the result of `fn`.
-
-An example using [@databases/pg](https://www.atdatabases.org/docs/pg) might look like:
-
-```typescript
-import connect, {sql} from '@databases/pg';
-
-const db = connect();
-
-const rateLimit = new BucketRateLimit<string>({
-  async tx(fn) {
-    return await db.tx(async tx => {
-      return await fn({
-        save: async (id, state) => {
-          await db.query(sql`
-            INSERT INTO rate_limit (id, state)
-            VALUES (${id}, ${state})
-            ON CONFLICT id
-            DO UPDATE SET state = EXCLUDED.state;
-          `);
-        },
-        load: async id => {
-          const results = await db.query(sql`
-            SELECT state FROM rate_limit WHERE id=${id}
-          `);
-          if (results.length) {
-            return results[0].state;
-          } else {
-            return null;
-          }
-        },
-        remove: async id => {
-          await db.query(sql`
-            DELETE FROM rate_limit WHERE id=${id}
-          `);
-        },
-      });
-    });
-  },
-});
-```
-
-```javascript
-const connect = require('@databases/pg');
-const {sql} = require('@databases/pg');
-
-const db = connect();
-
-const rateLimit = new BucketRateLimit({
-  async tx(fn) {
-    return await db.tx(async tx => {
-      return await fn({
-        save: async (id, state) => {
-          await db.query(sql`
-            INSERT INTO rate_limit (id, state)
-            VALUES (${id}, ${state})
-            ON CONFLICT id
-            DO UPDATE SET state = EXCLUDED.state;
-          `);
-        },
-        load: async id => {
-          const results = await db.query(sql`
-            SELECT state FROM rate_limit WHERE id=${id}
-          `);
-          if (results.length) {
-            return results[0].state;
-          } else {
-            return null;
-          }
-        },
-        remove: async id => {
-          await db.query(sql`
-            DELETE FROM rate_limit WHERE id=${id}
-          `);
-        },
-      });
-    });
-  },
-});
-```
-
-To make this work, you'll need a table like:
-
-```sql
-CREATE TABLE rate_limit (
-  id TEXT NOT NULL PRIMARY KEY,
-  state JSONB NOT NULL
-);
-```
+> N.B. the "PRIMARY KEY" annotation enforces that id is unique. You must enforce that the id is unique within your database.
 
 ### `RateLimit.consume(id, options)`
 
