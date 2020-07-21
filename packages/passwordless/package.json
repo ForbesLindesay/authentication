@@ -10,6 +10,7 @@
     "@authentication/is-email": "^0.0.2",
     "@authentication/lock-by-id": "^0.0.2",
     "@authentication/rate-limit": "^0.0.7",
+    "@authentication/request-url": "^0.0.0",
     "@authentication/secure-hash": "^1.0.0",
     "@types/ms": "^0.7.30",
     "ms": "^2.1.1"
