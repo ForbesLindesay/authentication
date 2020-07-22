@@ -14,13 +14,14 @@ yarn add @authentication/passwordless
 
 ## Usage
 
-Passwordless login requires a client side integration. This example uses `react-passwordless`, but you can always use that code as a guide to create your own client if you are not using React.
+Passwordless login requires a client side integration. This example uses `@authentication/react-passwordless`, but you can always use that code as a guide to create your own client if you are not using React.
 
 ### Server
 
 ```typescript
 import PasswordlessAuthentication from '@authentication/passwordless';
 import getTransport from '@authentication/send-message';
+import getRequestURL from '@authentication/request-url';
 import express = require('express');
 
 const app = express();
@@ -35,10 +36,7 @@ const rateLimit = new Map<string, RateLimitState>();
 // We need to tell passwordless how to store the single use passwords
 // it generates, and the rate limit information (to stop one person)
 // generating thousands of tokens.
-// We also need to tell passwordless what the callback will be, used for
-// the "Magic" link that lets people log in by just clicking the button.
 const passwordlessAuthentication = new PasswordlessAuthentication<string>({
-  callbackURL: '/__/auth/passwordless/callback',
   store: {
     tokens: {
       async save(token: Token<string>) {
@@ -49,7 +47,16 @@ const passwordlessAuthentication = new PasswordlessAuthentication<string>({
       async load(tokenID: string) {
         return tokens.get(tokenID) || null;
       },
-      async update(tokenID: string, token: Token<string>) {
+      async update(tokenID: string, token: Token<string>, oldToken: Token<string>) {
+        const expectedOldToken = tokens.get(tokenID);
+        if (
+          !expectedOldToken ||
+          expectedOldToken.version !== oldToken.version
+        ) {
+          throw new Error(
+            'Rejecting multiple concurrent attempts to verify pass codes',
+          );
+        }
         tokens.set(tokenID, token);
       },
       async remove(tokenID: string) {
@@ -82,45 +89,57 @@ app.post(
   async (req, res, next) => {
     try {
       const userID = req.body.email;
-      const result = await passwordlessAuthentication.createToken(
-        req,
-        res,
+      const result = await passwordlessAuthentication.createToken({
+        // N.B. this will not be the correct IP address if we are
+        // running behind a proxy, but since it is used for rate
+        // limiting, the important thing is that it cannot be spoofed.
+        ipAddress: req.connection.remoteAddress || 'unknown_ip',
         userID,
-        'Hello World'
-      );
-      if (result.created) {
-        const {magicLink, passCode} = result;
-        await mailTransport.sendMail({
-          from: 'noreply@example.com',
-          to: userID,
-          subject: 'Confirm your e-mail',
-          text:
-            'Thank your for signing in to ' +
-            magicLink.hostname +
-            '. Please enter the following code into the box provided:\n\n  ' +
-            passCode +
-            '\n\nor click this "magic" link:\n\n  ' +
-            magicLink.href,
-          html: `
-          <p>
-            Thank your for signing in to
-            <a href="${magicLink.href}">${magicLink.hostname}</a>.
-            Please enter the following code into the box provided:
-          </p>
-          <p style="font-size: 40px; font-weight: bold; margin: 20px;">
-            ${passCode}
-          </p>
-          <p>or click:</p>
-          <a
-            style="display:inline-block;background:blue;font-size:40px;font-weight:bold;margin:20px;padding:20px;border-radius:4px;color:white;text-decoration:none;"
-            href="${magicLink.href}"
-          >
-            Magic Link
-          </a>
-        `
-        });
-      }
-      res.json(result.status);
+        state: 'Hello World',
+        async sendTokenToUser({passCode, withCode}) {
+          const magicLink = withCode(
+            new URL(
+              '/__/auth/passwordless/callback',
+              // N.B. to keep this working when running
+              // behind a proxy in production, you should
+              // specify the baseURL explicitly, e.g. via
+              // an enviornment variable.
+              getRequestURL(req),
+            ),
+          );
+          const {magicLink, passCode} = result;
+          await mailTransport.sendMail({
+            from: 'noreply@example.com',
+            to: userID,
+            subject: 'Confirm your e-mail',
+            text:
+              'Thank your for signing in to ' +
+              magicLink.hostname +
+              '. Please enter the following code into the box provided:\n\n  ' +
+              passCode +
+              '\n\nor click this "magic" link:\n\n  ' +
+              magicLink.href,
+            html: `
+              <p>
+                Thank your for signing in to
+                <a href="${magicLink.href}">${magicLink.hostname}</a>.
+                Please enter the following code into the box provided:
+              </p>
+              <p style="font-size: 40px; font-weight: bold; margin: 20px;">
+                ${passCode}
+              </p>
+              <p>or click:</p>
+              <a
+                style="display:inline-block;background:blue;font-size:40px;font-weight:bold;margin:20px;padding:20px;border-radius:4px;color:white;text-decoration:none;"
+                href="${magicLink.href}"
+              >
+                Magic Link
+              </a>
+            `
+          });
+        },
+      });
+      res.json(result);
     } catch (ex) {
       next(ex);
     }
@@ -136,7 +155,9 @@ app.post(
   async (req, res, next) => {
     try {
       const result = await passwordlessAuthentication.verifyPassCode(req, res, {
-        passCode: req.body.passCode
+        tokenID: req.body.tokenID,
+        passCode: req.body.passCode,
+        ipAddress: req.connection.remoteAddress || 'unknown_ip',
       });
       if (result.verified) {
         const {userID, state} = result;
@@ -151,20 +172,34 @@ app.post(
 
 // The callback handles the "magic" link. It logs the user in, and in a real app
 // would then redirect the user to the home page/to where they were logging in to
-app.get(passwordlessAuthentication.callbackPath, async (req, res, next) => {
+app.get('/__/auth/passwordless/callback', async (req, res, next) => {
   try {
-    const result = await passwordlessAuthentication.verifyPassCode(req, res);
+    const result = await passwordlessAuthentication.verifyPassCodeFromRequest(req, {
+      ipAddress: req.connection.remoteAddress || 'unknown_ip',
+    });
     if (result.verified) {
       const {userID, state} = result;
       res.json({userID, state});
     } else {
       const {status} = result;
       switch (status.kind) {
-        case VerifyPassCodeStatusKind.ExpiredToken:
+        case PasswordlessResponseKind.ExpiredToken:
           res.redirect('/?err=EXPIRED_TOKEN');
           break;
+        case PasswordlessResponseKind.IncorrectPassCode:
+          res.status(400).send('This pass code is not valid.');
+          break;
+        case PasswordlessResponseKind.RateLimitExceeded:
+          res
+            .status(400)
+            .send(
+              `You have made too many attempts. Wait ${
+                (Date.now() - status.nextTokenTimestamp) / 1000
+              } seconds before retrying.`,
+            );
+          break;
         default:
-          throw new Error(status.message);
+          throw new Error('Unexpected error');
       }
     }
   } catch (ex) {
@@ -178,6 +213,7 @@ app.listen(3000);
 ```javascript
 const PasswordlessAuthentication = require('@authentication/passwordless');
 const getTransport = require('@authentication/send-message');
+const getRequestURL = require('@authentication/request-url');
 const express = require('express');
 
 const app = express();
@@ -186,18 +222,13 @@ const app = express();
 // lines.  You'll need one table to store `Token`s and another
 // to store `RateLimitState`s
 let nextTokenID = 0;
-// map from string to Token<State>
 const tokens = new Map();
-// map from string to RateLimitState
 const rateLimit = new Map();
 
 // We need to tell passwordless how to store the single use passwords
 // it generates, and the rate limit information (to stop one person)
 // generating thousands of tokens.
-// We also need to tell passwordless what the callback will be, used for
-// the "Magic" link that lets people log in by just clicking the button.
-const passwordlessAuthentication = new PasswordlessAuthentication({
-  callbackURL: '/__/auth/passwordless/callback',
+const passwordlessAuthentication = new PasswordlessAuthentication{
   store: {
     tokens: {
       async save(token) {
@@ -209,6 +240,15 @@ const passwordlessAuthentication = new PasswordlessAuthentication({
         return tokens.get(tokenID) || null;
       },
       async update(tokenID, token) {
+        const expectedOldToken = tokens.get(tokenID);
+        if (
+          !expectedOldToken ||
+          expectedOldToken.version !== oldToken.version
+        ) {
+          throw new Error(
+            'Rejecting multiple concurrent attempts to verify pass codes',
+          );
+        }
         tokens.set(tokenID, token);
       },
       async remove(tokenID) {
@@ -241,45 +281,57 @@ app.post(
   async (req, res, next) => {
     try {
       const userID = req.body.email;
-      const result = await passwordlessAuthentication.createToken(
-        req,
-        res,
+      const result = await passwordlessAuthentication.createToken({
+        // N.B. this will not be the correct IP address if we are
+        // running behind a proxy, but since it is used for rate
+        // limiting, the important thing is that it cannot be spoofed.
+        ipAddress: req.connection.remoteAddress || 'unknown_ip',
         userID,
-        'Hello World'
-      );
-      if (result.created) {
-        const {magicLink, passCode} = result;
-        await mailTransport.sendMail({
-          from: 'noreply@example.com',
-          to: userID,
-          subject: 'Confirm your e-mail',
-          text:
-            'Thank your for signing in to ' +
-            magicLink.hostname +
-            '. Please enter the following code into the box provided:\n\n  ' +
-            passCode +
-            '\n\nor click this "magic" link:\n\n  ' +
-            magicLink.href,
-          html: `
-          <p>
-            Thank your for signing in to
-            <a href="${magicLink.href}">${magicLink.hostname}</a>.
-            Please enter the following code into the box provided:
-          </p>
-          <p style="font-size: 40px; font-weight: bold; margin: 20px;">
-            ${passCode}
-          </p>
-          <p>or click:</p>
-          <a
-            style="display:inline-block;background:blue;font-size:40px;font-weight:bold;margin:20px;padding:20px;border-radius:4px;color:white;text-decoration:none;"
-            href="${magicLink.href}"
-          >
-            Magic Link
-          </a>
-        `
-        });
-      }
-      res.json(result.status);
+        state: 'Hello World',
+        async sendTokenToUser({passCode, withCode}) {
+          const magicLink = withCode(
+            new URL(
+              '/__/auth/passwordless/callback',
+              // N.B. to keep this working when running
+              // behind a proxy in production, you should
+              // specify the baseURL explicitly, e.g. via
+              // an enviornment variable.
+              getRequestURL(req),
+            ),
+          );
+          const {magicLink, passCode} = result;
+          await mailTransport.sendMail({
+            from: 'noreply@example.com',
+            to: userID,
+            subject: 'Confirm your e-mail',
+            text:
+              'Thank your for signing in to ' +
+              magicLink.hostname +
+              '. Please enter the following code into the box provided:\n\n  ' +
+              passCode +
+              '\n\nor click this "magic" link:\n\n  ' +
+              magicLink.href,
+            html: `
+              <p>
+                Thank your for signing in to
+                <a href="${magicLink.href}">${magicLink.hostname}</a>.
+                Please enter the following code into the box provided:
+              </p>
+              <p style="font-size: 40px; font-weight: bold; margin: 20px;">
+                ${passCode}
+              </p>
+              <p>or click:</p>
+              <a
+                style="display:inline-block;background:blue;font-size:40px;font-weight:bold;margin:20px;padding:20px;border-radius:4px;color:white;text-decoration:none;"
+                href="${magicLink.href}"
+              >
+                Magic Link
+              </a>
+            `
+          });
+        },
+      });
+      res.json(result);
     } catch (ex) {
       next(ex);
     }
@@ -295,7 +347,9 @@ app.post(
   async (req, res, next) => {
     try {
       const result = await passwordlessAuthentication.verifyPassCode(req, res, {
-        passCode: req.body.passCode
+        tokenID: req.body.tokenID,
+        passCode: req.body.passCode,
+        ipAddress: req.connection.remoteAddress || 'unknown_ip',
       });
       if (result.verified) {
         const {userID, state} = result;
@@ -310,21 +364,34 @@ app.post(
 
 // The callback handles the "magic" link. It logs the user in, and in a real app
 // would then redirect the user to the home page/to where they were logging in to
-app.get(passwordlessAuthentication.callbackPath, async (req, res, next) => {
+app.get('/__/auth/passwordless/callback', async (req, res, next) => {
   try {
-    const result = await passwordlessAuthentication.verifyPassCode(req, res);
+    const result = await passwordlessAuthentication.verifyPassCodeFromRequest(req, {
+      ipAddress: req.connection.remoteAddress || 'unknown_ip',
+    });
     if (result.verified) {
       const {userID, state} = result;
-      console.log({userID, state});
       res.json({userID, state});
     } else {
       const {status} = result;
       switch (status.kind) {
-        case VerifyPassCodeStatusKind.ExpiredToken:
+        case PasswordlessResponseKind.ExpiredToken:
           res.redirect('/?err=EXPIRED_TOKEN');
           break;
+        case PasswordlessResponseKind.IncorrectPassCode:
+          res.status(400).send('This pass code is not valid.');
+          break;
+        case PasswordlessResponseKind.RateLimitExceeded:
+          res
+            .status(400)
+            .send(
+              `You have made too many attempts. Wait ${
+                (Date.now() - status.nextTokenTimestamp) / 1000
+              } seconds before retrying.`,
+            );
+          break;
         default:
-          throw new Error(status.message);
+          throw new Error('Unexpected error');
       }
     }
   } catch (ex) {
@@ -337,10 +404,10 @@ app.listen(3000);
 
 ### Client
 
-If you want to override the look and feel of passwordless login (which you normally do) you can pass `renderEmailForm` and `renderPassCodeForm` as props.
+If you want to override the look and feel of passwordless login (which you normally do) you can use the state returned by the `usePasswordless` hook. For this example we just use the `DefaultForm` though, which offers a basic form with very little styling.
 
 ```typescript
-import Passwordless from '@authentication/react-passwordless';
+import Passwordless from '@authentication/react-passwordless/DefaultForm';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import request from 'then-request';
@@ -354,9 +421,9 @@ ReactDOM.render(
         .getBody('utf8')
         .then(JSON.parse)
     }
-    verifyPassCode={passCode =>
+    verifyPassCode={({passCode, tokenID}) =>
       request('POST', '/__/auth/passwordless/verify-pass-code', {
-        json: {passCode}
+        json: {passCode, tokenID}
       })
         .getBody('utf8')
         .then(JSON.parse)
@@ -382,9 +449,9 @@ ReactDOM.render(
         .getBody('utf8')
         .then(JSON.parse)
     }
-    verifyPassCode={passCode =>
+    verifyPassCode={({passCode, tokenID}) =>
       request('POST', '/__/auth/passwordless/verify-pass-code', {
-        json: {passCode}
+        json: {passCode, tokenID}
       })
         .getBody('utf8')
         .then(JSON.parse)

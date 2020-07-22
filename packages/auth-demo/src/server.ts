@@ -1,15 +1,17 @@
+import {URL} from 'url';
 import FacebookAuthentication from '@authentication/facebook';
 import GitHubAuthentication from '@authentication/github';
 import GoogleAuthentication from '@authentication/google';
 import PasswordlessAuthentication, {
   RateLimitState,
   Token,
-  VerifyPassCodeStatusKind,
+  PasswordlessResponseKind,
 } from '@authentication/passwordless';
 import getTransport from '@authentication/send-message';
 import TwitterAuthentication from '@authentication/twitter';
 import {json} from 'body-parser';
 import express = require('express');
+import getRequestURL from '@authentication/request-url';
 
 const app: express.Express = express();
 
@@ -27,30 +29,46 @@ let nextTokenID = 0;
 const tokens = new Map<string, Token<string>>();
 const rateLimit = new Map<string, RateLimitState>();
 const passwordlessAuthentication = new PasswordlessAuthentication<string>({
-  callbackURL: '/__/auth/passwordless/callback',
   store: {
-    async saveToken(token: Token<string>) {
-      const tokenID = '' + nextTokenID++;
-      tokens.set(tokenID, token);
-      return tokenID;
+    tokens: {
+      async insert(token: Token<string>) {
+        const tokenID = '' + nextTokenID++;
+        tokens.set(tokenID, token);
+        return tokenID;
+      },
+      async load(tokenID: string) {
+        return tokens.get(tokenID) || null;
+      },
+      async update(
+        tokenID: string,
+        token: Token<string>,
+        oldToken: Token<string>,
+      ) {
+        const expectedOldToken = tokens.get(tokenID);
+        if (
+          !expectedOldToken ||
+          expectedOldToken.version !== oldToken.version
+        ) {
+          throw new Error(
+            'Rejecting multiple concurrent attempts to verify pass codes',
+          );
+        }
+        tokens.set(tokenID, token);
+      },
+      async remove(tokenID: string) {
+        tokens.delete(tokenID);
+      },
     },
-    async loadToken(tokenID: string) {
-      return tokens.get(tokenID) || null;
-    },
-    async updateToken(tokenID: string, token: Token<string>) {
-      tokens.set(tokenID, token);
-    },
-    async removeToken(tokenID: string) {
-      tokens.delete(tokenID);
-    },
-    async saveRateLimit(id: string, state: RateLimitState) {
-      rateLimit.set(id, state);
-    },
-    async loadRateLimit(id: string) {
-      return rateLimit.get(id) || null;
-    },
-    async removeRateLimit(id: string) {
-      rateLimit.delete(id);
+    rateLimit: {
+      async save(id: string, state: RateLimitState) {
+        rateLimit.set(id, state);
+      },
+      async load(id: string) {
+        return rateLimit.get(id) || null;
+      },
+      async remove(id: string) {
+        rateLimit.delete(id);
+      },
     },
   },
 });
@@ -171,45 +189,49 @@ app.post(
   async (req, res, next) => {
     try {
       const userID = req.body.email;
-      const result = await passwordlessAuthentication.createToken(
-        req,
-        res,
+      const result = await passwordlessAuthentication.createToken({
+        // N.B. this will not be the correct IP address if we are
+        // running behind a proxy, but since it is used for rate
+        // limiting, the important thing is that it cannot be spoofed.
+        ipAddress: req.connection.remoteAddress || 'unknown_ip',
         userID,
-        'Hello World',
-      );
-      if (result.created) {
-        const {magicLink, passCode} = result;
-        await mailTransport.sendMail({
-          from: 'noreply@example.com',
-          to: userID,
-          subject: 'Confirm your e-mail',
-          text:
-            'Thank your for signing in to ' +
-            magicLink.hostname +
-            '. Please enter the following code into the box provided:\n\n  ' +
-            passCode +
-            '\n\nor click this "magic" link:\n\n  ' +
-            magicLink.href,
-          html: `
-          <p>
-            Thank your for signing in to
-            <a href="${magicLink.href}">${magicLink.hostname}</a>.
-            Please enter the following code into the box provided:
-          </p>
-          <p style="font-size: 40px; font-weight: bold; margin: 20px;">
-            ${passCode}
-          </p>
-          <p>or click:</p>
-          <a
-            style="display:inline-block;background:blue;font-size:40px;font-weight:bold;margin:20px;padding:20px;border-radius:4px;color:white;text-decoration:none;"
-            href="${magicLink.href}"
-          >
-            Magic Link
-          </a>
-        `,
-        });
-      }
-      res.json(result.status);
+        state: 'Hello World',
+        async sendTokenToUser({passCode, withCode}) {
+          const magicLink = withCode(
+            new URL('/__/auth/passwordless/callback', getRequestURL(req)),
+          );
+          await mailTransport.sendMail({
+            from: 'noreply@example.com',
+            to: userID,
+            subject: 'Confirm your e-mail',
+            text:
+              'Thank your for signing in to ' +
+              magicLink.hostname +
+              '. Please enter the following code into the box provided:\n\n  ' +
+              passCode +
+              '\n\nor click this "magic" link:\n\n  ' +
+              magicLink.href,
+            html: `
+            <p>
+              Thank your for signing in to
+              <a href="${magicLink.href}">${magicLink.hostname}</a>.
+              Please enter the following code into the box provided:
+            </p>
+            <p style="font-size: 40px; font-weight: bold; margin: 20px;">
+              ${passCode}
+            </p>
+            <p>or click:</p>
+            <a
+              style="display:inline-block;background:blue;font-size:40px;font-weight:bold;margin:20px;padding:20px;border-radius:4px;color:white;text-decoration:none;"
+              href="${magicLink.href}"
+            >
+              Magic Link
+            </a>
+          `,
+          });
+        },
+      });
+      res.json(result);
     } catch (ex) {
       next(ex);
     }
@@ -220,8 +242,10 @@ app.post(
   json(),
   async (req, res, next) => {
     try {
-      const result = await passwordlessAuthentication.verifyPassCode(req, res, {
+      const result = await passwordlessAuthentication.verifyPassCode({
+        tokenID: req.body.tokenID,
         passCode: req.body.passCode,
+        ipAddress: req.connection.remoteAddress || 'unknown_ip',
       });
       if (result.verified) {
         const {userID, state} = result;
@@ -233,20 +257,39 @@ app.post(
     }
   },
 );
-app.get(passwordlessAuthentication.callbackPath, async (req, res, next) => {
+app.get('/__/auth/passwordless/callback', async (req, res, next) => {
   try {
-    const result = await passwordlessAuthentication.verifyPassCode(req, res);
+    const result = await passwordlessAuthentication.verifyPassCodeFromRequest(
+      req,
+      {ipAddress: req.connection.remoteAddress || 'unknown_ip'},
+    );
+    if (!result) {
+      res.status(400).send('Missing the expected parameters');
+      return;
+    }
     if (result.verified) {
       const {userID, state} = result;
       res.json({userID, state});
     } else {
       const {status} = result;
       switch (status.kind) {
-        case VerifyPassCodeStatusKind.ExpiredToken:
+        case PasswordlessResponseKind.ExpiredToken:
           res.redirect('/?err=EXPIRED_TOKEN');
           break;
+        case PasswordlessResponseKind.IncorrectPassCode:
+          res.status(400).send('This pass code is not valid.');
+          break;
+        case PasswordlessResponseKind.RateLimitExceeded:
+          res
+            .status(400)
+            .send(
+              `You have made too many attempts. Wait ${
+                (Date.now() - status.nextTokenTimestamp) / 1000
+              } seconds before retrying.`,
+            );
+          break;
         default:
-          throw new Error(status.message);
+          throw new Error('Unexpected error');
       }
     }
   } catch (ex) {

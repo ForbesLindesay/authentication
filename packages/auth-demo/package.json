@@ -22,8 +22,8 @@
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "moped": "^0.7.24",
-    "react": "^16.4.2",
-    "react-dom": "^16.4.2",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "then-request": "^6.0.2"
   },
   "scripts": {

@@ -1,4 +1,3 @@
-import Cookie from '@authentication/cookie';
 import generatePassCode, {Encoding} from '@authentication/generate-passcode';
 import isEmail from '@authentication/is-email';
 import LockByID from '@authentication/lock-by-id';
@@ -10,70 +9,38 @@ import {
   BucketRateLimit,
   BucketOptions,
   RateLimitStore,
-  isRateLimitExceededError,
   RateLimitExceededError,
+  isRateLimitExceededError,
 } from '@authentication/rate-limit';
-import {hash, verify} from '@authentication/secure-hash';
 import {URL} from 'url';
-import {Request, Response} from 'express';
 import ms = require('ms');
-import Store, {StoreConfig} from './Store';
+import PasswordlessStore, {TokensStore} from './Store';
 import Token from './Token';
-import getRequestURL from '@authentication/request-url';
 
 import {
-  CreateTokenStatusKind,
-  CreateTokenError,
-  CreatedToken,
+  PasswordlessResponseKind,
   CreateTokenStatus,
-} from './CreateTokenStatus';
-import {
-  CorrectPassCode,
-  VerifyPassCodeError,
-  VerifyPassCodeStatusKind,
-} from './VerifyPassCodeStatus';
+  VerifyTokenError,
+  VerifiedToken,
+} from './types';
 
-export {StoreConfig};
-export {CreateTokenStatusKind, CreateTokenStatus};
-export {VerifyPassCodeStatusKind, VerifyPassCodeError};
-export type CreateTokenResult =
-  | {
-      created: false;
-      status: CreateTokenError;
-      magicLink: void;
-      passCode: void;
-    }
-  | {
-      created: true;
-      status: CreatedToken;
-      magicLink: URL;
-      passCode: string;
-    };
-export type VerifyPassCodeResult<State> =
-  | {
-      verified: true;
-      status: CorrectPassCode;
-      userID: string;
-      state: State;
-    }
-  | {verified: false; status: VerifyPassCodeError};
+import {
+  rateLimitExceededError,
+  createdToken,
+  invalidEmailError,
+  expiredTokenError,
+  incorrectPassCodeError,
+  verifiedToken,
+} from './responses';
+import ExpressRequestOrKoaContext from './types/ExpressRequestOrKoaContext';
+import {timingSafeEqual} from 'crypto';
 
 export {
+  PasswordlessResponseKind,
   RateLimitExceededError,
   RateLimitState,
   Token,
-  isRateLimitExceededError,
 };
-
-export interface IncorrectDosCodeError {
-  code: 'INCORRECT_DOS_CODE';
-  message: string;
-}
-export function isIncorrectDosCodeError(
-  err: any,
-): err is IncorrectDosCodeError {
-  return err && err.code === 'INCORRECT_DOS_CODE';
-}
 
 export enum UserKind {
   Custom = 'custom',
@@ -82,14 +49,6 @@ export enum UserKind {
 }
 export {Encoding};
 export interface Options<State = undefined> {
-  callbackURL: string | URL;
-  cookieName?: string;
-  /**
-   * By default the tokenID and dosCode is stored in a cookie. This is not
-   * necessary if users will be using the magic link, but is needed if
-   * they want to use the short code.
-   */
-  disableCookie?: boolean;
   userKind?: UserKind;
   /**
    * Max age of tokens sent in e-mails before they expire.
@@ -112,44 +71,60 @@ export interface Options<State = undefined> {
    * The character set of the pass code, defaults to decimal.
    */
   passCodeEncoding?: Encoding;
-  store: StoreConfig<State>;
+  store: PasswordlessStore<State>;
 
   createTokenByIpRateLimit?: BucketOptions;
   createTokenByUserRateLimit?: ExponentialOptions;
+  sendEmailByUserRateLimit?: ExponentialOptions;
   validatePassCodeByIpRateLimit?: BucketOptions;
   trustProxy?: boolean;
 }
-export interface VerifyPassCodeOptions {
-  tokenID?: string;
-  dos?: string;
-  passCode?: string;
+
+interface CreateTokenOptionsBase {
+  userID: string;
+  ipAddress: string;
+  sendTokenToUser: (token: {
+    userID: string;
+    passCode: string;
+    withCode(url: URL): URL;
+  }) => Promise<void>;
 }
+
+export type CreateTokenOptions<State> = undefined extends State
+  ? CreateTokenOptionsBase & {state?: State}
+  : CreateTokenOptionsBase & {state: State};
+
+export interface VerifyPassCodeOptions {
+  tokenID: string;
+  passCode: string;
+  ipAddress: string;
+}
+
+export type VerifyPassCodeResult<State> =
+  | {verified: true; status: VerifiedToken; userID: string; state: State}
+  | {verified: false; status: VerifyTokenError};
+
+function verifyPassCodeError(status: VerifyTokenError) {
+  return {verified: false as const, status};
+}
+
 export default class PasswordlessAuthentication<State> {
   static readonly Encoding = Encoding;
   static readonly UserKind = UserKind;
-  static readonly CreateTokenStatusKind = CreateTokenStatusKind;
-  static readonly VerifyPassCodeStatusKind = VerifyPassCodeStatusKind;
-
-  static readonly isIncorrectDosCodeError = isIncorrectDosCodeError;
+  static readonly PasswordlessResponseKind = PasswordlessResponseKind;
 
   private readonly _passCodeLength: number;
   private readonly _passCodeEncoding: Encoding;
-
-  private readonly _store: Store<State>;
   private readonly _maxAge: number;
   private readonly _maxAttempts: number;
-  private readonly _cookie: Cookie<{i: string; d: string}>;
+  private readonly _multiUse: boolean;
+
+  private readonly _store: PasswordlessStore<State>;
   private readonly _lock = new LockByID();
 
   private readonly _createTokenByIpRateLimit: RateLimit<string>;
   private readonly _createTokenByUserRateLimit: RateLimit<string>;
   private readonly _validatePassCodeByIpRateLimit: RateLimit<string>;
-
-  private readonly _disableCookie: boolean;
-  private readonly _multiUse: boolean;
-  private readonly _trustProxy: undefined | boolean;
-  private readonly _callbackURL: string | URL;
-  public readonly callbackPath: string;
 
   private readonly _userKind: UserKind;
 
@@ -163,7 +138,7 @@ export default class PasswordlessAuthentication<State> {
     }
     this._passCodeEncoding = options.passCodeEncoding || Encoding.decimal;
     this._userKind = options.userKind || UserKind.EMail;
-    this._store = new Store(options.store);
+    this._store = options.store;
     this._maxAge =
       options.maxAge === undefined
         ? ms('1 hour')
@@ -178,7 +153,7 @@ export default class PasswordlessAuthentication<State> {
     ) {
       throw new Error('maxAge is not a valid number of milliseconds.');
     }
-    this._maxAttempts = options.maxAttempts || 5;
+    this._maxAttempts = options.maxAttempts || 3;
     if (
       typeof this._maxAttempts !== 'number' ||
       isNaN(this._maxAttempts) ||
@@ -186,17 +161,8 @@ export default class PasswordlessAuthentication<State> {
     ) {
       throw new Error('maxAttempts is not a valid integer.');
     }
-    this._disableCookie = options.disableCookie || false;
     this._multiUse = options.multiUse || false;
-    this._cookie = new Cookie(
-      options.cookieName || 'authentication_passwordless',
-      {
-        sameSitePolicy: Cookie.SameSitePolicy.AnySite,
-        maxAge: this._maxAge,
-        encryptionPolicy: Cookie.EncryptionPolicy.Optional,
-        signingPolicy: Cookie.SigningPolicy.Optional,
-      },
-    );
+
     // This prevents someone spamming different e-mail addresses into the
     // system, generating lots of noise for users and lots of un-used tokens.
     // It makes it harder to DoS the other createTokenByUserRateLimit for
@@ -212,6 +178,7 @@ export default class PasswordlessAuthentication<State> {
         ...(options.createTokenByIpRateLimit || {}),
       },
     );
+
     // This prevents someone spamming an individual user. We reset the
     // rate limit as soon as one of the tokens is actually used, so we
     // can use an exponential backoff and a significant delay after only
@@ -237,33 +204,13 @@ export default class PasswordlessAuthentication<State> {
         ...(options.validatePassCodeByIpRateLimit || {}),
       },
     );
+  }
 
-    this._callbackURL = options.callbackURL;
-    this.callbackPath = (typeof options.callbackURL === 'string'
-      ? new URL(options.callbackURL, 'http://example.com')
-      : options.callbackURL
-    ).pathname;
-  }
-  private getCallbackURL(req: Request) {
-    return typeof this._callbackURL === 'string'
-      ? new URL(
-          this._callbackURL,
-          getRequestURL(req, {
-            trustProxy:
-              this._trustProxy === undefined
-                ? req.app.get('trust proxy') ||
-                  process.env.NODE_ENV === 'development'
-                : this._trustProxy,
-            baseURL: process.env.BASE_URL || process.env.BASE_URI,
-          }),
-        )
-      : new URL(this._callbackURL.href);
-  }
   private _tx<T>(
-    tokenID: string,
-    fn: (store: Store<State>) => Promise<T>,
+    lockKey: string,
+    fn: (store: TokensStore<State>) => Promise<T>,
   ): Promise<T> {
-    return this._lock.withLock(tokenID, () => fn(this._store));
+    return this._lock.withLock(lockKey, () => fn(this._store.tokens));
   }
   private _getRateLimitStore<T>(
     idToString: (id: T) => string,
@@ -271,233 +218,187 @@ export default class PasswordlessAuthentication<State> {
     const store = this._store;
     return {
       save(id, state, oldState) {
-        return store.saveRateLimit(idToString(id), state, oldState);
+        return store.rateLimit.save(idToString(id), state, oldState);
       },
       load(id) {
-        return store.loadRateLimit(idToString(id));
+        return store.rateLimit.load(idToString(id));
       },
       remove(id) {
-        return store.removeRateLimit(idToString(id));
+        return store.rateLimit.remove(idToString(id));
       },
     };
   }
-  createToken = async (
-    req: Request,
-    res: Response,
-    userID: string,
-    state: State,
-  ): Promise<CreateTokenResult> => {
+
+  createToken = async ({
+    userID,
+    ipAddress,
+    state,
+    sendTokenToUser,
+  }: CreateTokenOptions<State>): Promise<CreateTokenStatus> => {
     if (this._userKind === UserKind.EMail && !isEmail(userID)) {
-      return {
-        created: false,
-        status: {
-          kind: CreateTokenStatusKind.InvalidEmail,
-          message: 'Please enter a valid e-mail address',
-          email: userID,
-        },
-        magicLink: undefined,
-        passCode: undefined,
-      };
+      return invalidEmailError(userID);
     }
+
     try {
-      await this._createTokenByIpRateLimit.consume(req.ip);
+      await this._createTokenByIpRateLimit.consume(ipAddress);
       await this._createTokenByUserRateLimit.consume(userID);
-    } catch (ex) {
+    } catch (e) {
+      const ex: unknown = e;
       if (!isRateLimitExceededError(ex)) {
         throw ex;
       }
-      return {
-        created: false,
-        status: {
-          kind: CreateTokenStatusKind.RateLimitExceeded,
-          message: ex.message,
-          nextTokenTimestamp: ex.nextTokenTimestamp,
-        },
-        magicLink: undefined,
-        passCode: undefined,
-      };
+      return rateLimitExceededError(ex);
     }
-    const [passCode, dosCode] = await Promise.all([
-      generatePassCode(this._passCodeLength, this._passCodeEncoding),
-      generatePassCode(10, Encoding.base64),
-    ]);
-    const passCodeHash = await hash(passCode);
+
+    const passCode = await generatePassCode(
+      this._passCodeLength,
+      this._passCodeEncoding,
+    );
+
     // store the token
-    const tokenID = await this._tx(userID, (store) =>
-      store.saveToken({
+    const tokenID = await this._tx(`user:${userID}`, (store) =>
+      store.insert({
+        version: 1,
         userID,
-        dos: dosCode,
-        passCodeHash,
+        passCode,
         attemptsRemaining: this._maxAttempts,
         created: Date.now(),
         expiry: Date.now() + this._maxAge,
-        state,
-        userAgent: '' + (req.headers['user-agent'] || ''),
+        state: state!,
       }),
     );
-    if (!this._disableCookie) {
-      this._cookie.set(req, res, {i: tokenID, d: dosCode});
-    }
-    const magicLink = this.getCallbackURL(req);
-    magicLink.searchParams.set('token_id', tokenID);
-    magicLink.searchParams.set('dos', dosCode);
-    magicLink.searchParams.set('code', passCode);
-    return {
-      created: true,
-      status: {
-        kind: CreateTokenStatusKind.CreatedToken,
-        tokenID,
-        dos: dosCode,
-      },
-      magicLink,
+
+    await sendTokenToUser({
+      userID,
       passCode,
-    };
+      withCode: (baseURL) => {
+        const magicLink = new URL(baseURL.href);
+        if (
+          process.env.NODE_ENV !== 'development' &&
+          magicLink.protocol !== 'http:'
+        ) {
+          throw new Error(
+            `Cannot use non-ssl callback URL in production. If you are running ` +
+              `locally, you can set the NODE_ENV environment variable to development. ` +
+              `If you are running in production you can set BASE_URL to the https ` +
+              `URL for your app.`,
+          );
+        }
+        magicLink.searchParams.set('id', tokenID);
+        magicLink.searchParams.set('code', passCode);
+        return magicLink;
+      },
+    });
+
+    return createdToken(tokenID);
   };
 
-  isCallbackRequest = (req: Request): boolean => {
-    return !!(req.query && req.query.token_id);
-  };
-  verifyPassCode = async (
-    req: Request,
-    res: Response,
-    options: VerifyPassCodeOptions = {},
-  ): Promise<VerifyPassCodeResult<State>> => {
-    try {
-      await this._validatePassCodeByIpRateLimit.consume(req.ip);
-    } catch (ex) {
-      if (!isRateLimitExceededError(ex)) {
-        throw ex;
+  verifyPassCodeFromRequest = async (
+    req: ExpressRequestOrKoaContext,
+    options: Omit<VerifyPassCodeOptions, 'tokenID' | 'passCode'>,
+  ) => {
+    const query = req.query;
+    if (typeof query === 'object' && query) {
+      const tokenID: unknown = 'id' in query ? (query as any).id : undefined;
+      const passCode: unknown =
+        'code' in query ? (query as any).code : undefined;
+      if (
+        typeof tokenID === 'string' &&
+        tokenID &&
+        typeof passCode === 'string' &&
+        passCode
+      ) {
+        return this.verifyPassCode({...options, tokenID, passCode});
       }
-      return {
-        verified: false,
-        status: {
-          kind: VerifyPassCodeStatusKind.RateLimitExceeded,
-          message: ex.message,
-          nextTokenTimestamp: ex.nextTokenTimestamp,
-        },
-      };
     }
-    const cookieData = this._disableCookie ? null : this._cookie.get(req, res);
-    const query: {[key: string]: string | void} = req.query || {};
-    const tokenID =
-      options.tokenID || query.token_id || (cookieData && cookieData.i);
-    if (!tokenID) {
-      return {
-        verified: false,
-        status: {
-          kind: VerifyPassCodeStatusKind.ExpiredToken,
-          message: 'Missing token_id parameter',
-        },
-      };
+    return null;
+  };
+
+  verifyPassCode = async ({
+    tokenID,
+    passCode,
+    ipAddress,
+  }: VerifyPassCodeOptions): Promise<VerifyPassCodeResult<State>> => {
+    if (!tokenID || typeof tokenID !== 'string') {
+      throw new Error('Expected tokenID to be a non-empty string');
     }
-    if (typeof tokenID !== 'string') {
-      throw new Error('Expected token id to be a string');
+    if (!passCode || typeof passCode !== 'string') {
+      throw new Error('Expected passCode to be a non-empty string');
     }
-    const dos = options.dos || query.dos || (cookieData && cookieData.d);
-    if (!dos) {
-      return {
-        verified: false,
-        status: {
-          kind: VerifyPassCodeStatusKind.ExpiredToken,
-          message: 'Missing dos parameter',
-        },
-      };
+
+    const rateLimit = await this._validatePassCodeByIpRateLimit.tryConsume(
+      ipAddress,
+    );
+    if (!rateLimit.consumed) {
+      return verifyPassCodeError(rateLimitExceededError(rateLimit));
     }
-    if (typeof dos !== 'string') {
-      throw new Error('Expected dos to be a string');
-    }
-    const passCode = options.passCode || query.code;
-    if (passCode != null && typeof passCode !== 'string') {
-      throw new Error('Expected passCode to be a string');
-    }
+
     return await this._tx(
-      tokenID,
+      `token:${tokenID}`,
       async (store): Promise<VerifyPassCodeResult<State>> => {
-        const token = await store.loadToken(tokenID);
-        if (token == null || token.expiry < Date.now()) {
-          if (token) {
-            await store.removeToken(tokenID);
-          }
-          return {
-            verified: false,
-            status: {
-              kind: VerifyPassCodeStatusKind.ExpiredToken,
-              message:
-                'This token has expired, please generate a new one and try again.',
-            },
-          };
+        const token = await store.load(tokenID);
+        if (!token) {
+          return verifyPassCodeError(expiredTokenError());
         }
-        // dos is only to make it hard to take down your system by hitting every
-        // token and using up all the attempts before users can do so. This is why
-        // it is not heavily rate limited
-        if (token.dos !== dos) {
-          const err: IncorrectDosCodeError = new Error('Invalid token') as any;
-          err.code = 'INCORRECT_DOS_CODE';
-          throw err;
+        if (token.expiry < Date.now()) {
+          await store.remove(tokenID);
+          return verifyPassCodeError(expiredTokenError());
         }
+
         // pass code attempts remaining, after this one
-        await store.updateToken(tokenID, {
-          ...token,
-          attemptsRemaining: token.attemptsRemaining - 1,
-        });
+        await store.update(
+          tokenID,
+          {
+            ...token,
+            version: token.version + 1,
+            attemptsRemaining: token.attemptsRemaining - 1,
+          },
+          token,
+        );
+
         if (
           passCode &&
           passCode.length === this._passCodeLength &&
-          (await verify(
-            passCode,
-            token.passCodeHash,
-            async (updatedPassCodeHash) => {
-              // we're about to delete the token anyway,
-              // so no need to update it
-            },
-          )) === true
+          timingSafeEqual(
+            Buffer.from(passCode),
+            Buffer.from(token.passCode),
+          ) === true
         ) {
-          if (this._multiUse) {
-            await store.updateToken(tokenID, {
-              ...token,
-              attemptsRemaining: this._maxAttempts,
-            });
-          } else {
-            await store.removeToken(tokenID);
-            if (!this._disableCookie) {
-              this._cookie.remove(req, res);
-            }
-          }
           await this._createTokenByUserRateLimit.reset(token.userID);
+          if (this._multiUse) {
+            await store.update(
+              tokenID,
+              {
+                ...token,
+                attemptsRemaining: this._maxAttempts,
+                version: token.version + 1,
+              },
+              token,
+            );
+          } else {
+            await store.remove(tokenID);
+          }
           return {
             verified: true,
             state: token.state,
             userID: token.userID,
-            status: {
-              kind: VerifyPassCodeStatusKind.CorrectPassCode,
-              userID: token.userID,
-            },
+            status: verifiedToken(token.userID),
           };
         }
+
         // this was the last attempt
         if (token.attemptsRemaining <= 1) {
-          await store.removeToken(tokenID);
-          return {
-            verified: false,
-            status: {
-              kind: VerifyPassCodeStatusKind.ExpiredToken,
-              message:
-                'The pass code was incorrect and you have no more attempts available, please generate a new token and try again.',
-            },
-          };
+          await store.remove(tokenID);
         }
-        return {
-          verified: false,
-          status: {
-            kind: VerifyPassCodeStatusKind.IncorrectPassCode,
-            message: 'Incorrect pass code, please try again.',
-            attemptsRemaining: token.attemptsRemaining - 1,
-          },
-        };
+
+        return verifyPassCodeError(
+          incorrectPassCodeError(token.attemptsRemaining - 1),
+        );
       },
     );
   };
 }
 
-module.exports = PasswordlessAuthentication;
-module.exports.default = PasswordlessAuthentication;
+module.exports = Object.assign(PasswordlessAuthentication, {
+  default: PasswordlessAuthentication,
+});
