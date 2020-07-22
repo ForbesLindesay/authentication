@@ -61,6 +61,7 @@ export interface EnteringEmail extends EnteringEmailState {
 
 interface EnteringPassCodeState {
   stage: PasswordlessStage.EnteringPassCode;
+  email: string;
   tokenID: string;
   passCode: string;
   passCodeTouched: boolean;
@@ -185,6 +186,7 @@ export default function usePasswordless({
                 if (result.kind === PasswordlessResponseKind.CreatedToken) {
                   return {
                     stage: PasswordlessStage.EnteringPassCode,
+                    email: st.email,
                     tokenID: result.tokenID,
                     passCode: '',
                     passCodeTouched: false,
