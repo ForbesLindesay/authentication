@@ -46,7 +46,10 @@ const passwordlessAuthentication = new PasswordlessAuthentication<string>({
         oldToken: Token<string>,
       ) {
         const expectedOldToken = tokens.get(tokenID);
-        if (expectedOldToken?.version !== oldToken.version) {
+        if (
+          !expectedOldToken ||
+          expectedOldToken.version !== oldToken.version
+        ) {
           throw new Error(
             'Rejecting multiple concurrent attempts to verify pass codes',
           );
