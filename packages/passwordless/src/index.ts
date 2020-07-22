@@ -9,8 +9,8 @@ import {
   BucketRateLimit,
   BucketOptions,
   RateLimitStore,
-  isRateLimitExceededError,
   RateLimitExceededError,
+  isRateLimitExceededError,
 } from '@authentication/rate-limit';
 import {URL} from 'url';
 import ms = require('ms');
@@ -40,7 +40,6 @@ export {
   RateLimitExceededError,
   RateLimitState,
   Token,
-  isRateLimitExceededError,
 };
 
 export enum UserKind {
@@ -400,5 +399,6 @@ export default class PasswordlessAuthentication<State> {
   };
 }
 
-module.exports = PasswordlessAuthentication;
-module.exports.default = PasswordlessAuthentication;
+module.exports = Object.assign(PasswordlessAuthentication, {
+  default: PasswordlessAuthentication,
+});

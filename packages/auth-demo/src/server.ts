@@ -29,7 +29,6 @@ let nextTokenID = 0;
 const tokens = new Map<string, Token<string>>();
 const rateLimit = new Map<string, RateLimitState>();
 const passwordlessAuthentication = new PasswordlessAuthentication<string>({
-  // callbackURL: '/__/auth/passwordless/callback',
   store: {
     tokens: {
       async insert(token: Token<string>) {
@@ -195,7 +194,7 @@ app.post(
         // running behind a proxy, but since it is used for rate
         // limiting, the important thing is that it cannot be spoofed.
         ipAddress: req.connection.remoteAddress || 'unknown_ip',
-        userID: userID,
+        userID,
         state: 'Hello World',
         async sendTokenToUser({passCode, withCode}) {
           const magicLink = withCode(
