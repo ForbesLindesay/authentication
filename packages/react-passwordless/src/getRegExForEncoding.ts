@@ -1,7 +1,7 @@
 import {Encoding} from '@authentication/passwordless/types';
 
 export default function getRegExForEncoding(
-  passCodeEncoding: Encoding = Encoding.decimal,
+  passCodeEncoding: Encoding,
 ): RegExp {
   switch (passCodeEncoding) {
     case Encoding.base91:

@@ -1,8 +1,9 @@
+// @public
+
 import * as React from 'react';
-import DigitInput, {InputAttributes} from 'react-digit-input';
+import useDigitInput, {InputAttributes} from 'react-digit-input';
 import CountdownTimer from './CountdownTimer';
-import PassCodeFormProps from './PassCodeFormProps';
-import getRegExForEncoding from './getRegExForEncoding';
+import {EnteringPassCode, PasswordlessResponseKind} from '.';
 
 const inputStyle: React.CSSProperties = {
   width: '1em',
@@ -17,7 +18,7 @@ function CharacterInput(props: {
 }) {
   return (
     <input
-      type="tel"
+      inputMode="decimal"
       style={inputStyle}
       disabled={props.disabled}
       {...props.digitProps}
@@ -36,61 +37,51 @@ function Hyphen() {
     />
   );
 }
-export default function DefaultPassCodeForm(props: PassCodeFormProps) {
+export default function DefaultPassCodeForm(props: EnteringPassCode) {
+  const digits = useDigitInput({
+    acceptedCharacters: props.acceptedCharacters,
+    length: props.passCodeLength,
+    value: props.passCode,
+    onChange: props.onChange,
+  });
+  const inputs: React.ReactElement<{}>[] = [];
+  const interval =
+    digits.length % 3 === 0
+      ? 3
+      : digits.length % 4 === 0
+      ? 4
+      : digits.length % 2 === 0
+      ? 2
+      : 0;
+  digits.forEach((p, i) => {
+    if (interval !== 0 && i !== 0 && i % interval === 0) {
+      inputs.push(<Hyphen key={i + '_hyphen'} />);
+    }
+    inputs.push(
+      <CharacterInput key={i} disabled={props.submitting} digitProps={p} />,
+    );
+  });
   return (
     <form onSubmit={props.onSubmit}>
       <h1>Check your e-mail</h1>
       <label>
-        Enter the 6-digit code:
-        <DigitInput
-          acceptedCharacters={getRegExForEncoding(props.passCodeEncoding)}
-          length={props.passCodeLength}
-          value={props.passCode}
-          onChange={props.onChange}
-        >
-          {inputProps => {
-            const inputs: React.ReactElement<{}>[] = [];
-            const interval =
-              inputProps.length % 3 === 0
-                ? 3
-                : inputProps.length % 4 === 0
-                  ? 4
-                  : inputProps.length % 2 === 0 ? 2 : 0;
-            inputProps.forEach((p, i) => {
-              if (interval !== 0 && i !== 0 && i % interval === 0) {
-                inputs.push(<Hyphen key={i + '_hyphen'} />);
-              }
-              inputs.push(
-                <CharacterInput
-                  key={i}
-                  disabled={props.validatingPassCode}
-                  digitProps={p}
-                />,
-              );
-            });
-
-            return (
-              <div
-                style={{alignItems: 'center', display: 'flex', fontSize: '5em'}}
-              >
-                {inputs}
-              </div>
-            );
-          }}
-        </DigitInput>
+        Enter the {digits.length}-digit code:
+        <div style={{alignItems: 'center', display: 'flex', fontSize: '5em'}}>
+          {inputs}
+        </div>
       </label>
       <p style={{color: 'red'}}>
-        {props.attemptsRemaining ? (
+        {props.error?.kind === PasswordlessResponseKind.IncorrectPassCode ? (
           'This pass code was incorrect, please check you have entred exacty the value in your e-mail. You have ' +
-          props.attemptsRemaining +
+          props.error.attemptsRemaining +
           ' attempts remaining.'
-        ) : props.touched && !props.isPassCodeValid ? (
+        ) : props.passCodeTouched && !props.isPassCodeValid ? (
           'This pass code is incorrect, please check you have entered exactly the value in your e-mail.'
-        ) : props.rateLimitUntil ? (
+        ) : props.error?.kind === PasswordlessResponseKind.RateLimitExceeded ? (
           <span>
             You have exceeded the rate limit. You need to wait{' '}
-            <CountdownTimer time={props.rateLimitUntil} /> before you can try
-            again.
+            <CountdownTimer time={props.error.nextTokenTimestamp} /> before you
+            can try again.
           </span>
         ) : props.error ? (
           props.error.message
@@ -99,9 +90,9 @@ export default function DefaultPassCodeForm(props: PassCodeFormProps) {
       <p>Altenatively you can just click the "Magic" link in the e-mail</p>
       <button
         disabled={
-          props.validatingPassCode ||
-          !!props.rateLimitUntil ||
-          (props.touched && !props.isPassCodeValid)
+          props.submitting ||
+          props.error?.kind === PasswordlessResponseKind.RateLimitExceeded ||
+          (props.passCodeTouched && !props.isPassCodeValid)
         }
         type="submit"
       >
@@ -110,3 +101,7 @@ export default function DefaultPassCodeForm(props: PassCodeFormProps) {
     </form>
   );
 }
+
+module.exports = Object.assign(DefaultPassCodeForm, {
+  default: DefaultPassCodeForm,
+});
