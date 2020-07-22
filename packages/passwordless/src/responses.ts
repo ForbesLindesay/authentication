@@ -1,8 +1,3 @@
-// export interface CreatedToken {
-//   kind: CreateTokenStatusKind.CreatedToken;
-//   tokenID: string;
-// }
-
 import {
   PasswordlessResponseKind,
   RateLimitExceededError,
