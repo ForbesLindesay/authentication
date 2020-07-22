@@ -31,16 +31,26 @@ export default function CountdownTimer({time}: {time: number}) {
   }, [getIntervalFrequency(delta)]);
 
   if (delta < 1500) {
-    return <>1 second</>;
+    return <React.Fragment>1 second</React.Fragment>;
   }
   if (delta < 90000) {
-    return <>{Math.round(delta / 1000)} seconds</>;
+    return <React.Fragment>{Math.round(delta / 1000)} seconds</React.Fragment>;
   }
   if (delta < 90 * 60 * 1000) {
-    return <>{Math.round(delta / (60 * 1000))} minutes</>;
+    return (
+      <React.Fragment>{Math.round(delta / (60 * 1000))} minutes</React.Fragment>
+    );
   }
   if (delta < 72 * 60 * 60 * 1000) {
-    return <>{Math.round(delta / (60 * 60 * 1000))} hours</>;
+    return (
+      <React.Fragment>
+        {Math.round(delta / (60 * 60 * 1000))} hours
+      </React.Fragment>
+    );
   }
-  return <>{Math.round(delta / (24 * 60 * 60 * 1000))} days</>;
+  return (
+    <React.Fragment>
+      {Math.round(delta / (24 * 60 * 60 * 1000))} days
+    </React.Fragment>
+  );
 }

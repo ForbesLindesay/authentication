@@ -1,4 +1,4 @@
-import Passwordless from '@authentication/react-passwordless';
+import Passwordless from '@authentication/react-passwordless/DefaultForm';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import request from 'then-request';

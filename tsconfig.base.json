@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2016",
+    "target": "es2020",
     "module": "commonjs",
     "declaration": true,
     "sourceMap": true,
@@ -10,7 +10,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "jsx": "preserve",
-    "lib": ["es2016", "dom"],
+    "lib": ["es2020", "dom"],
     "pretty": true
   }
 }
