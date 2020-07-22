@@ -1,6 +1,6 @@
 // @public
 
-export enum Encoding {
+enum Encoding {
   base91 = 'base91',
   base64 = 'base64',
   base32 = 'base32',
@@ -11,4 +11,3 @@ export default Encoding;
 
 module.exports = Encoding;
 module.exports.default = Encoding;
-module.exports.Encoding = Encoding;

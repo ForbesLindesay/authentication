@@ -1,6 +1,6 @@
 // @public
 
-import {Encoding} from '@authentication/generate-passcode/Encoding';
+import Encoding from '@authentication/generate-passcode/Encoding';
 import PasswordlessResponseKind from './PasswordlessResponseKind';
 import RateLimitExceededError from './RateLimitExceededError';
 import {
