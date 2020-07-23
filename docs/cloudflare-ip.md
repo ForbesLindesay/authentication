@@ -2,7 +2,7 @@
 title: Cloudflare IP
 ---
 
-A small utility to test if an IP address belongs to Cloudflare. This is based off their [publicly available list of IP Ranges](https://www.cloudflare.com/ips/). This utility automatically re-fetches that list once every 24 hours, and it has historically only changed once every few years, so your library shoudl always be up to date.
+A small utility to test if an IP address belongs to Cloudflare. This is based off their [publicly available list of IP Ranges](https://www.cloudflare.com/ips/). This utility automatically re-fetches that list once every 24 hours, and it has historically only changed once every few years, so your library should always be up to date.
 
 ## Installation
 
