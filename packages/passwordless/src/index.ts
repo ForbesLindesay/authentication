@@ -275,10 +275,10 @@ export default class PasswordlessAuthentication<State> {
         const magicLink = new URL(baseURL.href);
         if (
           process.env.NODE_ENV !== 'development' &&
-          magicLink.protocol !== 'http:'
+          magicLink.protocol !== 'https:'
         ) {
           throw new Error(
-            `Cannot use non-ssl callback URL in production. If you are running ` +
+            `Cannot use the non-ssl callback URL, "${magicLink.href}", in production. If you are running ` +
               `locally, you can set the NODE_ENV environment variable to development. ` +
               `If you are running in production you can set BASE_URL to the https ` +
               `URL for your app.`,
