@@ -4,7 +4,7 @@ title: Profile
 
 Authentication providers always return a `profile` after the user has been authenticated. This profile is in a normalized form so that you can handle it in a consistent way within your application. It is loosely based on the [Google+ People](https://developers.google.com/+/web/api/rest/latest/people#resource) format.
 
-If you are using TypeSciprt you can import the `Profile` interface as:
+If you are using TypeScript you can import the `Profile` interface as:
 
 ```typescript
 import {Profile} from '@authentication/types';
