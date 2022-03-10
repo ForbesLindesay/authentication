@@ -1,5 +1,3 @@
-// @public
-
 enum Encoding {
   base91 = 'base91',
   base64 = 'base64',

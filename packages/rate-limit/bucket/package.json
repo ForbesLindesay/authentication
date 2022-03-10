@@ -1,0 +1,4 @@
+{
+  "main": "../lib/bucket.js",
+  "types": "../lib/bucket.d.ts"
+}

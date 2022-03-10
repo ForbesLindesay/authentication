@@ -1,0 +1,1412 @@
+{
+  "declaration": {
+    "attributes": {
+      "version": "1.0",
+      "encoding": "utf-8"
+    }
+  },
+  "elements": [
+    {
+      "type": "doctype",
+      "doctype": "schema\n  PUBLIC \"-//W3C//DTD XMLSchema 200102//EN\" \"http://www.w3.org/2001/XMLSchema.dtd\"\n [\n   <!ATTLIST schema \n     xmlns:ds CDATA #FIXED \"http://www.w3.org/2000/09/xmldsig#\">\n   <!ENTITY dsig 'http://www.w3.org/2000/09/xmldsig#'>\n   <!ENTITY % p ''>\n   <!ENTITY % s ''>\n  ]"
+    },
+    {
+      "type": "comment",
+      "comment": " Schema for XML Signatures\n    http://www.w3.org/2000/09/xmldsig#\n    $Revision: 1.1 $ on $Date: 2002/02/08 20:32:26 $ by $Author: reagle $\n\n    Copyright 2001 The Internet Society and W3C (Massachusetts Institute\n    of Technology, Institut National de Recherche en Informatique et en\n    Automatique, Keio University). All Rights Reserved.\n    http://www.w3.org/Consortium/Legal/\n\n    This document is governed by the W3C Software License [1] as described\n    in the FAQ [2].\n\n    [1] http://www.w3.org/Consortium/Legal/copyright-software-19980720\n    [2] http://www.w3.org/Consortium/Legal/IPR-FAQ-20000620.html#DTD\n"
+    },
+    {
+      "type": "element",
+      "name": "schema",
+      "attributes": {
+        "xmlns": "http://www.w3.org/2001/XMLSchema",
+        "xmlns:ds": "http://www.w3.org/2000/09/xmldsig#",
+        "targetNamespace": "http://www.w3.org/2000/09/xmldsig#",
+        "version": "0.1",
+        "elementFormDefault": "qualified"
+      },
+      "elements": [
+        {
+          "type": "comment",
+          "comment": " Basic Types Defined for Signatures "
+        },
+        {
+          "type": "element",
+          "name": "simpleType",
+          "attributes": {
+            "name": "CryptoBinary"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "restriction",
+              "attributes": {
+                "base": "base64Binary"
+              }
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " Start Signature "
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Signature",
+            "type": "ds:SignatureType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "SignatureType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:SignedInfo"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:SignatureValue"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:KeyInfo",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:Object",
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Id",
+                "type": "ID",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "SignatureValue",
+            "type": "ds:SignatureValueType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "SignatureValueType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "simpleContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "base64Binary"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "Id",
+                        "type": "ID",
+                        "use": "optional"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " Start SignedInfo "
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "SignedInfo",
+            "type": "ds:SignedInfoType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "SignedInfoType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:CanonicalizationMethod"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:SignatureMethod"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:Reference",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Id",
+                "type": "ID",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "CanonicalizationMethod",
+            "type": "ds:CanonicalizationMethodType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "CanonicalizationMethodType",
+            "mixed": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##any",
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  }
+                },
+                {
+                  "type": "comment",
+                  "comment": " (0,unbounded) elements from (1,1) namespace "
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Algorithm",
+                "type": "anyURI",
+                "use": "required"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "SignatureMethod",
+            "type": "ds:SignatureMethodType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "SignatureMethodType",
+            "mixed": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "HMACOutputLength",
+                    "minOccurs": "0",
+                    "type": "ds:HMACOutputLengthType"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##other",
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  }
+                },
+                {
+                  "type": "comment",
+                  "comment": " (0,unbounded) elements from (1,1) external namespace "
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Algorithm",
+                "type": "anyURI",
+                "use": "required"
+              }
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " Start Reference "
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Reference",
+            "type": "ds:ReferenceType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ReferenceType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:Transforms",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:DigestMethod"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:DigestValue"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Id",
+                "type": "ID",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "URI",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Type",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Transforms",
+            "type": "ds:TransformsType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "TransformsType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:Transform",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Transform",
+            "type": "ds:TransformType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "TransformType",
+            "mixed": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "attributes": {
+                "minOccurs": "0",
+                "maxOccurs": "unbounded"
+              },
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##other",
+                    "processContents": "lax"
+                  }
+                },
+                {
+                  "type": "comment",
+                  "comment": " (1,1) elements from (0,unbounded) namespaces "
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "XPath",
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Algorithm",
+                "type": "anyURI",
+                "use": "required"
+              }
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " End Reference "
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "DigestMethod",
+            "type": "ds:DigestMethodType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "DigestMethodType",
+            "mixed": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##other",
+                    "processContents": "lax",
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Algorithm",
+                "type": "anyURI",
+                "use": "required"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "DigestValue",
+            "type": "ds:DigestValueType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "simpleType",
+          "attributes": {
+            "name": "DigestValueType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "restriction",
+              "attributes": {
+                "base": "base64Binary"
+              }
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " End SignedInfo "
+        },
+        {
+          "type": "comment",
+          "comment": " Start KeyInfo "
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "KeyInfo",
+            "type": "ds:KeyInfoType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "KeyInfoType",
+            "mixed": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "attributes": {
+                "maxOccurs": "unbounded"
+              },
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:KeyName"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:KeyValue"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:RetrievalMethod"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:X509Data"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:PGPData"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:SPKIData"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:MgmtData"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "processContents": "lax",
+                    "namespace": "##other"
+                  }
+                },
+                {
+                  "type": "comment",
+                  "comment": " (1,1) elements from (0,unbounded) namespaces "
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Id",
+                "type": "ID",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "KeyName",
+            "type": "string"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "MgmtData",
+            "type": "string"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "KeyValue",
+            "type": "ds:KeyValueType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "KeyValueType",
+            "mixed": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:DSAKeyValue"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:RSAKeyValue"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##other",
+                    "processContents": "lax"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "RetrievalMethod",
+            "type": "ds:RetrievalMethodType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "RetrievalMethodType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:Transforms",
+                    "minOccurs": "0"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "URI",
+                "type": "anyURI"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Type",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " Start X509Data "
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "X509Data",
+            "type": "ds:X509DataType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "X509DataType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "attributes": {
+                "maxOccurs": "unbounded"
+              },
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "choice",
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "X509IssuerSerial",
+                        "type": "ds:X509IssuerSerialType"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "X509SKI",
+                        "type": "base64Binary"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "X509SubjectName",
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "X509Certificate",
+                        "type": "base64Binary"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "X509CRL",
+                        "type": "base64Binary"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "any",
+                      "attributes": {
+                        "namespace": "##other",
+                        "processContents": "lax"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "X509IssuerSerialType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "X509IssuerName",
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "X509SerialNumber",
+                    "type": "integer"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " End X509Data "
+        },
+        {
+          "type": "comment",
+          "comment": " Begin PGPData "
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "PGPData",
+            "type": "ds:PGPDataType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "PGPDataType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "sequence",
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "PGPKeyID",
+                        "type": "base64Binary"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "PGPKeyPacket",
+                        "type": "base64Binary",
+                        "minOccurs": "0"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "any",
+                      "attributes": {
+                        "namespace": "##other",
+                        "processContents": "lax",
+                        "minOccurs": "0",
+                        "maxOccurs": "unbounded"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "name": "sequence",
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "PGPKeyPacket",
+                        "type": "base64Binary"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "any",
+                      "attributes": {
+                        "namespace": "##other",
+                        "processContents": "lax",
+                        "minOccurs": "0",
+                        "maxOccurs": "unbounded"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " End PGPData "
+        },
+        {
+          "type": "comment",
+          "comment": " Begin SPKIData "
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "SPKIData",
+            "type": "ds:SPKIDataType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "SPKIDataType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "attributes": {
+                "maxOccurs": "unbounded"
+              },
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "SPKISexp",
+                    "type": "base64Binary"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##other",
+                    "processContents": "lax",
+                    "minOccurs": "0"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " End SPKIData "
+        },
+        {
+          "type": "comment",
+          "comment": " End KeyInfo "
+        },
+        {
+          "type": "comment",
+          "comment": " Start Object (Manifest, SignatureProperty) "
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Object",
+            "type": "ds:ObjectType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ObjectType",
+            "mixed": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "attributes": {
+                "minOccurs": "0",
+                "maxOccurs": "unbounded"
+              },
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##any",
+                    "processContents": "lax"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Id",
+                "type": "ID",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "MimeType",
+                "type": "string",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "comment",
+              "comment": " add a grep facet "
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Encoding",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Manifest",
+            "type": "ds:ManifestType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ManifestType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:Reference",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Id",
+                "type": "ID",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "SignatureProperties",
+            "type": "ds:SignaturePropertiesType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "SignaturePropertiesType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:SignatureProperty",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Id",
+                "type": "ID",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "SignatureProperty",
+            "type": "ds:SignaturePropertyType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "SignaturePropertyType",
+            "mixed": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "attributes": {
+                "maxOccurs": "unbounded"
+              },
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##other",
+                    "processContents": "lax"
+                  }
+                },
+                {
+                  "type": "comment",
+                  "comment": " (1,1) elements from (1,unbounded) namespaces "
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Target",
+                "type": "anyURI",
+                "use": "required"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Id",
+                "type": "ID",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " End Object (Manifest, SignatureProperty) "
+        },
+        {
+          "type": "comment",
+          "comment": " Start Algorithm Parameters "
+        },
+        {
+          "type": "element",
+          "name": "simpleType",
+          "attributes": {
+            "name": "HMACOutputLengthType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "restriction",
+              "attributes": {
+                "base": "integer"
+              }
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " Start KeyValue Element-types "
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "DSAKeyValue",
+            "type": "ds:DSAKeyValueType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "DSAKeyValueType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "sequence",
+                  "attributes": {
+                    "minOccurs": "0"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "P",
+                        "type": "ds:CryptoBinary"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "Q",
+                        "type": "ds:CryptoBinary"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "G",
+                    "type": "ds:CryptoBinary",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "Y",
+                    "type": "ds:CryptoBinary"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "J",
+                    "type": "ds:CryptoBinary",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "sequence",
+                  "attributes": {
+                    "minOccurs": "0"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "Seed",
+                        "type": "ds:CryptoBinary"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "PgenCounter",
+                        "type": "ds:CryptoBinary"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "RSAKeyValue",
+            "type": "ds:RSAKeyValueType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "RSAKeyValueType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "Modulus",
+                    "type": "ds:CryptoBinary"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "Exponent",
+                    "type": "ds:CryptoBinary"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " End KeyValue Element-types "
+        },
+        {
+          "type": "comment",
+          "comment": " End Signature "
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1599 @@
+{
+  "declaration": {
+    "attributes": {
+      "version": "1.0",
+      "encoding": "UTF-8"
+    }
+  },
+  "elements": [
+    {
+      "type": "element",
+      "name": "schema",
+      "attributes": {
+        "targetNamespace": "urn:oasis:names:tc:SAML:2.0:protocol",
+        "xmlns": "http://www.w3.org/2001/XMLSchema",
+        "xmlns:samlp": "urn:oasis:names:tc:SAML:2.0:protocol",
+        "xmlns:saml": "urn:oasis:names:tc:SAML:2.0:assertion",
+        "xmlns:ds": "http://www.w3.org/2000/09/xmldsig#",
+        "elementFormDefault": "unqualified",
+        "attributeFormDefault": "unqualified",
+        "blockDefault": "substitution",
+        "version": "2.0"
+      },
+      "elements": [
+        {
+          "type": "element",
+          "name": "import",
+          "attributes": {
+            "namespace": "urn:oasis:names:tc:SAML:2.0:assertion",
+            "schemaLocation": "saml-schema-assertion-2.0.xsd"
+          }
+        },
+        {
+          "type": "element",
+          "name": "import",
+          "attributes": {
+            "namespace": "http://www.w3.org/2000/09/xmldsig#",
+            "schemaLocation": "http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"
+          }
+        },
+        {
+          "type": "element",
+          "name": "annotation",
+          "elements": [
+            {
+              "type": "element",
+              "name": "documentation",
+              "elements": [
+                {
+                  "type": "text",
+                  "text": "\r\n            Document identifier: saml-schema-protocol-2.0\r\n            Location: http://docs.oasis-open.org/security/saml/v2.0/\r\n            Revision history:\r\n            V1.0 (November, 2002):\r\n              Initial Standard Schema.\r\n            V1.1 (September, 2003):\r\n              Updates within the same V1.0 namespace.\r\n            V2.0 (March, 2005):\r\n              New protocol schema based in a SAML V2.0 namespace.\r\n     "
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "RequestAbstractType",
+            "abstract": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:Issuer",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:Signature",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "samlp:Extensions",
+                    "minOccurs": "0"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "ID",
+                "type": "ID",
+                "use": "required"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Version",
+                "type": "string",
+                "use": "required"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "IssueInstant",
+                "type": "dateTime",
+                "use": "required"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Destination",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Consent",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Extensions",
+            "type": "samlp:ExtensionsType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ExtensionsType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##other",
+                    "processContents": "lax",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "StatusResponseType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:Issuer",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:Signature",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "samlp:Extensions",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "samlp:Status"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "ID",
+                "type": "ID",
+                "use": "required"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "InResponseTo",
+                "type": "NCName",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Version",
+                "type": "string",
+                "use": "required"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "IssueInstant",
+                "type": "dateTime",
+                "use": "required"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Destination",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Consent",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Status",
+            "type": "samlp:StatusType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "StatusType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "samlp:StatusCode"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "samlp:StatusMessage",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "samlp:StatusDetail",
+                    "minOccurs": "0"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "StatusCode",
+            "type": "samlp:StatusCodeType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "StatusCodeType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "samlp:StatusCode",
+                    "minOccurs": "0"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Value",
+                "type": "anyURI",
+                "use": "required"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "StatusMessage",
+            "type": "string"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "StatusDetail",
+            "type": "samlp:StatusDetailType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "StatusDetailType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##any",
+                    "processContents": "lax",
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AssertionIDRequest",
+            "type": "samlp:AssertionIDRequestType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AssertionIDRequestType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:RequestAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:AssertionIDRef",
+                            "maxOccurs": "unbounded"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "SubjectQuery",
+            "type": "samlp:SubjectQueryAbstractType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "SubjectQueryAbstractType",
+            "abstract": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:RequestAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:Subject"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AuthnQuery",
+            "type": "samlp:AuthnQueryType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AuthnQueryType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:SubjectQueryAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "samlp:RequestedAuthnContext",
+                            "minOccurs": "0"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "SessionIndex",
+                        "type": "string",
+                        "use": "optional"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "RequestedAuthnContext",
+            "type": "samlp:RequestedAuthnContextType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "RequestedAuthnContextType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:AuthnContextClassRef",
+                    "maxOccurs": "unbounded"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:AuthnContextDeclRef",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Comparison",
+                "type": "samlp:AuthnContextComparisonType",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "simpleType",
+          "attributes": {
+            "name": "AuthnContextComparisonType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "restriction",
+              "attributes": {
+                "base": "string"
+              },
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "enumeration",
+                  "attributes": {
+                    "value": "exact"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "enumeration",
+                  "attributes": {
+                    "value": "minimum"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "enumeration",
+                  "attributes": {
+                    "value": "maximum"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "enumeration",
+                  "attributes": {
+                    "value": "better"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AttributeQuery",
+            "type": "samlp:AttributeQueryType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AttributeQueryType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:SubjectQueryAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:Attribute",
+                            "minOccurs": "0",
+                            "maxOccurs": "unbounded"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AuthzDecisionQuery",
+            "type": "samlp:AuthzDecisionQueryType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AuthzDecisionQueryType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:SubjectQueryAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:Action",
+                            "maxOccurs": "unbounded"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:Evidence",
+                            "minOccurs": "0"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "Resource",
+                        "type": "anyURI",
+                        "use": "required"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AuthnRequest",
+            "type": "samlp:AuthnRequestType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AuthnRequestType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:RequestAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:Subject",
+                            "minOccurs": "0"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "samlp:NameIDPolicy",
+                            "minOccurs": "0"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:Conditions",
+                            "minOccurs": "0"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "samlp:RequestedAuthnContext",
+                            "minOccurs": "0"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "samlp:Scoping",
+                            "minOccurs": "0"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "ForceAuthn",
+                        "type": "boolean",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "IsPassive",
+                        "type": "boolean",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "ProtocolBinding",
+                        "type": "anyURI",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "AssertionConsumerServiceIndex",
+                        "type": "unsignedShort",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "AssertionConsumerServiceURL",
+                        "type": "anyURI",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "AttributeConsumingServiceIndex",
+                        "type": "unsignedShort",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "ProviderName",
+                        "type": "string",
+                        "use": "optional"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "NameIDPolicy",
+            "type": "samlp:NameIDPolicyType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "NameIDPolicyType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Format",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "SPNameQualifier",
+                "type": "string",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "AllowCreate",
+                "type": "boolean",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Scoping",
+            "type": "samlp:ScopingType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ScopingType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "samlp:IDPList",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "samlp:RequesterID",
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "ProxyCount",
+                "type": "nonNegativeInteger",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "RequesterID",
+            "type": "anyURI"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "IDPList",
+            "type": "samlp:IDPListType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "IDPListType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "samlp:IDPEntry",
+                    "maxOccurs": "unbounded"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "samlp:GetComplete",
+                    "minOccurs": "0"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "IDPEntry",
+            "type": "samlp:IDPEntryType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "IDPEntryType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "ProviderID",
+                "type": "anyURI",
+                "use": "required"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Name",
+                "type": "string",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Loc",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "GetComplete",
+            "type": "anyURI"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Response",
+            "type": "samlp:ResponseType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ResponseType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:StatusResponseType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "choice",
+                      "attributes": {
+                        "minOccurs": "0",
+                        "maxOccurs": "unbounded"
+                      },
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:Assertion"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:EncryptedAssertion"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "ArtifactResolve",
+            "type": "samlp:ArtifactResolveType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ArtifactResolveType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:RequestAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "samlp:Artifact"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Artifact",
+            "type": "string"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "ArtifactResponse",
+            "type": "samlp:ArtifactResponseType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ArtifactResponseType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:StatusResponseType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "any",
+                          "attributes": {
+                            "namespace": "##any",
+                            "processContents": "lax",
+                            "minOccurs": "0"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "ManageNameIDRequest",
+            "type": "samlp:ManageNameIDRequestType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ManageNameIDRequestType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:RequestAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "choice",
+                          "elements": [
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "saml:NameID"
+                              }
+                            },
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "saml:EncryptedID"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "choice",
+                          "elements": [
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "samlp:NewID"
+                              }
+                            },
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "samlp:NewEncryptedID"
+                              }
+                            },
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "samlp:Terminate"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "NewID",
+            "type": "string"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "NewEncryptedID",
+            "type": "saml:EncryptedElementType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Terminate",
+            "type": "samlp:TerminateType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "TerminateType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "ManageNameIDResponse",
+            "type": "samlp:StatusResponseType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "LogoutRequest",
+            "type": "samlp:LogoutRequestType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "LogoutRequestType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:RequestAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "choice",
+                          "elements": [
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "saml:BaseID"
+                              }
+                            },
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "saml:NameID"
+                              }
+                            },
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "saml:EncryptedID"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "samlp:SessionIndex",
+                            "minOccurs": "0",
+                            "maxOccurs": "unbounded"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "Reason",
+                        "type": "string",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "NotOnOrAfter",
+                        "type": "dateTime",
+                        "use": "optional"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "SessionIndex",
+            "type": "string"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "LogoutResponse",
+            "type": "samlp:StatusResponseType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "NameIDMappingRequest",
+            "type": "samlp:NameIDMappingRequestType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "NameIDMappingRequestType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:RequestAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "choice",
+                          "elements": [
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "saml:BaseID"
+                              }
+                            },
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "saml:NameID"
+                              }
+                            },
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "saml:EncryptedID"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "samlp:NameIDPolicy"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "NameIDMappingResponse",
+            "type": "samlp:NameIDMappingResponseType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "NameIDMappingResponseType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "samlp:StatusResponseType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "choice",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:NameID"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:EncryptedID"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

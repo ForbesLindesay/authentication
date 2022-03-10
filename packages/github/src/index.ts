@@ -43,7 +43,8 @@ export const DEFAULT_SCOPE = ['read:user', 'user:email'];
  * GitHub using the OAuth 2.0 protocol.
  */
 export default class GitHubAuthentication<State = Mixed>
-  implements RedirectStrategy<State, InitOptions<State>> {
+  implements RedirectStrategy<State, InitOptions<State>>
+{
   static DEFAULT_SCOPE: ReadonlyArray<string> = DEFAULT_SCOPE;
   private readonly _oauth: OAuth2Authentication<State>;
   public readonly callbackPath: string;
@@ -85,9 +86,7 @@ export default class GitHubAuthentication<State = Mixed>
    *
    * This function constructs a normalized profile
    */
-  async getUserProfile(
-    accessToken: string,
-  ): Promise<{
+  async getUserProfile(accessToken: string): Promise<{
     profile: Profile;
     rawProfile: RawGitHubProfile;
     rawEmails: null | RawEmail[];
@@ -95,7 +94,7 @@ export default class GitHubAuthentication<State = Mixed>
     let body = '';
     try {
       body = (await this._oauth.get(userProfileURL, accessToken)).data;
-    } catch (err) {
+    } catch (err: any) {
       let json: any = null;
       if (err.data) {
         try {
@@ -125,7 +124,7 @@ export default class GitHubAuthentication<State = Mixed>
     let emailsBody = '';
     try {
       emailsBody = (await this._oauth.get(userEmailsURL, accessToken)).data;
-    } catch (err) {
+    } catch (err: any) {
       // 404 likely means we just didn't get the user:email OAuth scope
       if (err.statusCode !== 404) {
         let json: any = null;
@@ -182,19 +181,13 @@ export default class GitHubAuthentication<State = Mixed>
     });
   }
   async completeAuthenticationWithoutProfile(req: Request, res: Response) {
-    const {
-      accessToken,
-      refreshToken,
-      state,
-    } = await this._oauth.completeAuthentication(req, res);
+    const {accessToken, refreshToken, state} =
+      await this._oauth.completeAuthentication(req, res);
     return {accessToken, refreshToken, state};
   }
   async completeAuthentication(req: Request, res: Response) {
-    const {
-      accessToken,
-      refreshToken,
-      state,
-    } = await this._oauth.completeAuthentication(req, res);
+    const {accessToken, refreshToken, state} =
+      await this._oauth.completeAuthentication(req, res);
     const {profile, rawProfile, rawEmails} = await this.getUserProfile(
       accessToken,
     );

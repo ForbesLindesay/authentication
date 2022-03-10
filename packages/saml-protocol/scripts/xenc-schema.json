@@ -1,0 +1,639 @@
+{
+  "declaration": {
+    "attributes": {
+      "version": "1.0",
+      "encoding": "utf-8"
+    }
+  },
+  "elements": [
+    {
+      "type": "doctype",
+      "doctype": "schema  PUBLIC \"-//W3C//DTD XMLSchema 200102//EN\"\n \"http://www.w3.org/2001/XMLSchema.dtd\"\n [\n   <!ATTLIST schema\n     xmlns:xenc CDATA #FIXED 'http://www.w3.org/2001/04/xmlenc#'\n     xmlns:ds CDATA #FIXED 'http://www.w3.org/2000/09/xmldsig#'>\n   <!ENTITY xenc 'http://www.w3.org/2001/04/xmlenc#'>\n   <!ENTITY % p ''>\n   <!ENTITY % s ''>\n  ]"
+    },
+    {
+      "type": "element",
+      "name": "schema",
+      "attributes": {
+        "xmlns": "http://www.w3.org/2001/XMLSchema",
+        "version": "1.0",
+        "xmlns:xenc": "http://www.w3.org/2001/04/xmlenc#",
+        "xmlns:ds": "http://www.w3.org/2000/09/xmldsig#",
+        "targetNamespace": "http://www.w3.org/2001/04/xmlenc#",
+        "elementFormDefault": "qualified"
+      },
+      "elements": [
+        {
+          "type": "element",
+          "name": "import",
+          "attributes": {
+            "namespace": "http://www.w3.org/2000/09/xmldsig#",
+            "schemaLocation": "http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "EncryptedType",
+            "abstract": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "EncryptionMethod",
+                    "type": "xenc:EncryptionMethodType",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:KeyInfo",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "xenc:CipherData"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "xenc:EncryptionProperties",
+                    "minOccurs": "0"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Id",
+                "type": "ID",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Type",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "MimeType",
+                "type": "string",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Encoding",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "EncryptionMethodType",
+            "mixed": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "KeySize",
+                    "minOccurs": "0",
+                    "type": "xenc:KeySizeType"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "OAEPparams",
+                    "minOccurs": "0",
+                    "type": "base64Binary"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##other",
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Algorithm",
+                "type": "anyURI",
+                "use": "required"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "simpleType",
+          "attributes": {
+            "name": "KeySizeType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "restriction",
+              "attributes": {
+                "base": "integer"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "CipherData",
+            "type": "xenc:CipherDataType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "CipherDataType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "CipherValue",
+                    "type": "base64Binary"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "xenc:CipherReference"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "CipherReference",
+            "type": "xenc:CipherReferenceType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "CipherReferenceType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "Transforms",
+                    "type": "xenc:TransformsType",
+                    "minOccurs": "0"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "URI",
+                "type": "anyURI",
+                "use": "required"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "TransformsType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:Transform",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "EncryptedData",
+            "type": "xenc:EncryptedDataType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "EncryptedDataType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "xenc:EncryptedType"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " Children of ds:KeyInfo "
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "EncryptedKey",
+            "type": "xenc:EncryptedKeyType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "EncryptedKeyType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "xenc:EncryptedType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "xenc:ReferenceList",
+                            "minOccurs": "0"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "name": "CarriedKeyName",
+                            "type": "string",
+                            "minOccurs": "0"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "Recipient",
+                        "type": "string",
+                        "use": "optional"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AgreementMethod",
+            "type": "xenc:AgreementMethodType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AgreementMethodType",
+            "mixed": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "KA-Nonce",
+                    "minOccurs": "0",
+                    "type": "base64Binary"
+                  }
+                },
+                {
+                  "type": "comment",
+                  "comment": " <element ref=\"ds:DigestMethod\" minOccurs=\"0\"/> "
+                },
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##other",
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "OriginatorKeyInfo",
+                    "minOccurs": "0",
+                    "type": "ds:KeyInfoType"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "name": "RecipientKeyInfo",
+                    "minOccurs": "0",
+                    "type": "ds:KeyInfoType"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Algorithm",
+                "type": "anyURI",
+                "use": "required"
+              }
+            }
+          ]
+        },
+        {
+          "type": "comment",
+          "comment": " End Children of ds:KeyInfo "
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "ReferenceList"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexType",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "choice",
+                  "attributes": {
+                    "minOccurs": "1",
+                    "maxOccurs": "unbounded"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "DataReference",
+                        "type": "xenc:ReferenceType"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "name": "KeyReference",
+                        "type": "xenc:ReferenceType"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ReferenceType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##other",
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "URI",
+                "type": "anyURI",
+                "use": "required"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "EncryptionProperties",
+            "type": "xenc:EncryptionPropertiesType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "EncryptionPropertiesType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "xenc:EncryptionProperty",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Id",
+                "type": "ID",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "EncryptionProperty",
+            "type": "xenc:EncryptionPropertyType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "EncryptionPropertyType",
+            "mixed": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "attributes": {
+                "maxOccurs": "unbounded"
+              },
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##other",
+                    "processContents": "lax"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Target",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Id",
+                "type": "ID",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "anyAttribute",
+              "attributes": {
+                "namespace": "http://www.w3.org/XML/1998/namespace"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

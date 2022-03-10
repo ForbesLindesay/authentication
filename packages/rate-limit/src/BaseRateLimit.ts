@@ -29,32 +29,32 @@ export function isRateLimitExceededError(
   return err && typeof err === 'object' && err.code === 'RATE_LIMIT_EXCEEDED';
 }
 
-class MemoryStore implements RateLimitStore<string | number> {
-  private _map = new Map<string | number, RateLimitState>();
-  async save(
-    id: string | number,
-    state: RateLimitState,
-    oldState: RateLimitState,
-  ) {
-    const currentState = this._map.get(id);
-    if (
-      currentState?.timestamp !== oldState.timestamp ||
-      currentState?.value !== oldState.value
-    ) {
-      throw new Error('Concurrent saves are not allowed');
-    }
-    this._map.set(id, state);
-  }
-  async load(id: string | number): Promise<null | RateLimitState> {
-    return this._map.get(id) || null;
-  }
-  async remove(id: string | number) {
-    this._map.delete(id);
-  }
+function createMemoryStore(): RateLimitStore<string | number> {
+  const store = new Map<string | number, RateLimitState>();
+  return {
+    async save(id, state, oldState) {
+      const currentState = store.get(id);
+      if (
+        currentState?.timestamp !== oldState?.timestamp ||
+        currentState?.value !== oldState?.value
+      ) {
+        throw new Error('Concurrent saves are not allowed');
+      }
+      store.set(id, state);
+    },
+    async load(id): Promise<null | RateLimitState> {
+      return store.get(id) || null;
+    },
+    async remove(id) {
+      store.delete(id);
+    },
+  };
 }
+
 export default abstract class BaseRateLimit<
-  ID extends string | number = string | number
-> implements RateLimit<ID> {
+  ID extends string | number = string | number,
+> implements RateLimit<ID>
+{
   private readonly _store: RateLimitStore<ID>;
   private readonly _lock = new LockByID();
   protected abstract _take(
@@ -62,7 +62,7 @@ export default abstract class BaseRateLimit<
     now: number,
   ): RateLimitState;
   constructor(store: 'memory' | RateLimitStore<ID>) {
-    this._store = store === 'memory' ? new MemoryStore() : store;
+    this._store = store === 'memory' ? createMemoryStore() : store;
   }
   private _tx<T>(
     id: ID,

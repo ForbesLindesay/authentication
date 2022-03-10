@@ -1,0 +1,1544 @@
+{
+  "declaration": {
+    "attributes": {
+      "version": "1.0",
+      "encoding": "US-ASCII"
+    }
+  },
+  "elements": [
+    {
+      "type": "element",
+      "name": "schema",
+      "attributes": {
+        "targetNamespace": "urn:oasis:names:tc:SAML:2.0:assertion",
+        "xmlns": "http://www.w3.org/2001/XMLSchema",
+        "xmlns:saml": "urn:oasis:names:tc:SAML:2.0:assertion",
+        "xmlns:ds": "http://www.w3.org/2000/09/xmldsig#",
+        "xmlns:xenc": "http://www.w3.org/2001/04/xmlenc#",
+        "elementFormDefault": "unqualified",
+        "attributeFormDefault": "unqualified",
+        "blockDefault": "substitution",
+        "version": "2.0"
+      },
+      "elements": [
+        {
+          "type": "element",
+          "name": "import",
+          "attributes": {
+            "namespace": "http://www.w3.org/2000/09/xmldsig#",
+            "schemaLocation": "http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"
+          }
+        },
+        {
+          "type": "element",
+          "name": "import",
+          "attributes": {
+            "namespace": "http://www.w3.org/2001/04/xmlenc#",
+            "schemaLocation": "http://www.w3.org/TR/2002/REC-xmlenc-core-20021210/xenc-schema.xsd"
+          }
+        },
+        {
+          "type": "element",
+          "name": "annotation",
+          "elements": [
+            {
+              "type": "element",
+              "name": "documentation",
+              "elements": [
+                {
+                  "type": "text",
+                  "text": "\r\n            Document identifier: saml-schema-assertion-2.0\r\n            Location: http://docs.oasis-open.org/security/saml/v2.0/\r\n            Revision history:\r\n            V1.0 (November, 2002):\r\n              Initial Standard Schema.\r\n            V1.1 (September, 2003):\r\n              Updates within the same V1.0 namespace.\r\n            V2.0 (March, 2005):\r\n              New assertion schema for SAML V2.0 namespace.\r\n        "
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "attributeGroup",
+          "attributes": {
+            "name": "IDNameQualifiers"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "NameQualifier",
+                "type": "string",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "SPNameQualifier",
+                "type": "string",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "BaseID",
+            "type": "saml:BaseIDAbstractType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "BaseIDAbstractType",
+            "abstract": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "attributeGroup",
+              "attributes": {
+                "ref": "saml:IDNameQualifiers"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "NameID",
+            "type": "saml:NameIDType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "NameIDType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "simpleContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "string"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "attributeGroup",
+                      "attributes": {
+                        "ref": "saml:IDNameQualifiers"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "Format",
+                        "type": "anyURI",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "SPProvidedID",
+                        "type": "string",
+                        "use": "optional"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "EncryptedElementType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "xenc:EncryptedData"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "xenc:EncryptedKey",
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "EncryptedID",
+            "type": "saml:EncryptedElementType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Issuer",
+            "type": "saml:NameIDType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AssertionIDRef",
+            "type": "NCName"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AssertionURIRef",
+            "type": "anyURI"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Assertion",
+            "type": "saml:AssertionType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AssertionType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:Issuer"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "ds:Signature",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:Subject",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:Conditions",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:Advice",
+                    "minOccurs": "0"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "choice",
+                  "attributes": {
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "ref": "saml:Statement"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "ref": "saml:AuthnStatement"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "ref": "saml:AuthzDecisionStatement"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "ref": "saml:AttributeStatement"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Version",
+                "type": "string",
+                "use": "required"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "ID",
+                "type": "ID",
+                "use": "required"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "IssueInstant",
+                "type": "dateTime",
+                "use": "required"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Subject",
+            "type": "saml:SubjectType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "SubjectType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "sequence",
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "choice",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:BaseID"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:NameID"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:EncryptedID"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "ref": "saml:SubjectConfirmation",
+                        "minOccurs": "0",
+                        "maxOccurs": "unbounded"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:SubjectConfirmation",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "SubjectConfirmation",
+            "type": "saml:SubjectConfirmationType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "SubjectConfirmationType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "choice",
+                  "attributes": {
+                    "minOccurs": "0"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "ref": "saml:BaseID"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "ref": "saml:NameID"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "element",
+                      "attributes": {
+                        "ref": "saml:EncryptedID"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:SubjectConfirmationData",
+                    "minOccurs": "0"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Method",
+                "type": "anyURI",
+                "use": "required"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "SubjectConfirmationData",
+            "type": "saml:SubjectConfirmationDataType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "SubjectConfirmationDataType",
+            "mixed": "true"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "restriction",
+                  "attributes": {
+                    "base": "anyType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "any",
+                          "attributes": {
+                            "namespace": "##any",
+                            "processContents": "lax",
+                            "minOccurs": "0",
+                            "maxOccurs": "unbounded"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "NotBefore",
+                        "type": "dateTime",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "NotOnOrAfter",
+                        "type": "dateTime",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "Recipient",
+                        "type": "anyURI",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "InResponseTo",
+                        "type": "NCName",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "Address",
+                        "type": "string",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "anyAttribute",
+                      "attributes": {
+                        "namespace": "##other",
+                        "processContents": "lax"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "KeyInfoConfirmationDataType",
+            "mixed": "false"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "restriction",
+                  "attributes": {
+                    "base": "saml:SubjectConfirmationDataType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "ds:KeyInfo",
+                            "maxOccurs": "unbounded"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Conditions",
+            "type": "saml:ConditionsType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ConditionsType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "attributes": {
+                "minOccurs": "0",
+                "maxOccurs": "unbounded"
+              },
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:Condition"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:AudienceRestriction"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:OneTimeUse"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:ProxyRestriction"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "NotBefore",
+                "type": "dateTime",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "NotOnOrAfter",
+                "type": "dateTime",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Condition",
+            "type": "saml:ConditionAbstractType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ConditionAbstractType",
+            "abstract": "true"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AudienceRestriction",
+            "type": "saml:AudienceRestrictionType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AudienceRestrictionType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "saml:ConditionAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:Audience",
+                            "maxOccurs": "unbounded"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Audience",
+            "type": "anyURI"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "OneTimeUse",
+            "type": "saml:OneTimeUseType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "OneTimeUseType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "saml:ConditionAbstractType"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "ProxyRestriction",
+            "type": "saml:ProxyRestrictionType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ProxyRestrictionType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "saml:ConditionAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:Audience",
+                            "minOccurs": "0",
+                            "maxOccurs": "unbounded"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "Count",
+                        "type": "nonNegativeInteger",
+                        "use": "optional"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Advice",
+            "type": "saml:AdviceType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AdviceType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "attributes": {
+                "minOccurs": "0",
+                "maxOccurs": "unbounded"
+              },
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:AssertionIDRef"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:AssertionURIRef"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:Assertion"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:EncryptedAssertion"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "any",
+                  "attributes": {
+                    "namespace": "##other",
+                    "processContents": "lax"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "EncryptedAssertion",
+            "type": "saml:EncryptedElementType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Statement",
+            "type": "saml:StatementAbstractType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "StatementAbstractType",
+            "abstract": "true"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AuthnStatement",
+            "type": "saml:AuthnStatementType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AuthnStatementType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "saml:StatementAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:SubjectLocality",
+                            "minOccurs": "0"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:AuthnContext"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "AuthnInstant",
+                        "type": "dateTime",
+                        "use": "required"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "SessionIndex",
+                        "type": "string",
+                        "use": "optional"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "SessionNotOnOrAfter",
+                        "type": "dateTime",
+                        "use": "optional"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "SubjectLocality",
+            "type": "saml:SubjectLocalityType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "SubjectLocalityType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Address",
+                "type": "string",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "DNSName",
+                "type": "string",
+                "use": "optional"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AuthnContext",
+            "type": "saml:AuthnContextType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AuthnContextType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "choice",
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:AuthnContextClassRef"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "choice",
+                          "attributes": {
+                            "minOccurs": "0"
+                          },
+                          "elements": [
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "saml:AuthnContextDecl"
+                              }
+                            },
+                            {
+                              "type": "element",
+                              "name": "element",
+                              "attributes": {
+                                "ref": "saml:AuthnContextDeclRef"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "name": "choice",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:AuthnContextDecl"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:AuthnContextDeclRef"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:AuthenticatingAuthority",
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AuthnContextClassRef",
+            "type": "anyURI"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AuthnContextDeclRef",
+            "type": "anyURI"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AuthnContextDecl",
+            "type": "anyType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AuthenticatingAuthority",
+            "type": "anyURI"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AuthzDecisionStatement",
+            "type": "saml:AuthzDecisionStatementType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AuthzDecisionStatementType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "saml:StatementAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "sequence",
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:Action",
+                            "maxOccurs": "unbounded"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:Evidence",
+                            "minOccurs": "0"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "Resource",
+                        "type": "anyURI",
+                        "use": "required"
+                      }
+                    },
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "Decision",
+                        "type": "saml:DecisionType",
+                        "use": "required"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "simpleType",
+          "attributes": {
+            "name": "DecisionType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "restriction",
+              "attributes": {
+                "base": "string"
+              },
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "enumeration",
+                  "attributes": {
+                    "value": "Permit"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "enumeration",
+                  "attributes": {
+                    "value": "Deny"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "enumeration",
+                  "attributes": {
+                    "value": "Indeterminate"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Action",
+            "type": "saml:ActionType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "ActionType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "simpleContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "string"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "attribute",
+                      "attributes": {
+                        "name": "Namespace",
+                        "type": "anyURI",
+                        "use": "required"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Evidence",
+            "type": "saml:EvidenceType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "EvidenceType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "choice",
+              "attributes": {
+                "maxOccurs": "unbounded"
+              },
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:AssertionIDRef"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:AssertionURIRef"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:Assertion"
+                  }
+                },
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:EncryptedAssertion"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AttributeStatement",
+            "type": "saml:AttributeStatementType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AttributeStatementType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "complexContent",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "extension",
+                  "attributes": {
+                    "base": "saml:StatementAbstractType"
+                  },
+                  "elements": [
+                    {
+                      "type": "element",
+                      "name": "choice",
+                      "attributes": {
+                        "maxOccurs": "unbounded"
+                      },
+                      "elements": [
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:Attribute"
+                          }
+                        },
+                        {
+                          "type": "element",
+                          "name": "element",
+                          "attributes": {
+                            "ref": "saml:EncryptedAttribute"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "Attribute",
+            "type": "saml:AttributeType"
+          }
+        },
+        {
+          "type": "element",
+          "name": "complexType",
+          "attributes": {
+            "name": "AttributeType"
+          },
+          "elements": [
+            {
+              "type": "element",
+              "name": "sequence",
+              "elements": [
+                {
+                  "type": "element",
+                  "name": "element",
+                  "attributes": {
+                    "ref": "saml:AttributeValue",
+                    "minOccurs": "0",
+                    "maxOccurs": "unbounded"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "Name",
+                "type": "string",
+                "use": "required"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "NameFormat",
+                "type": "anyURI",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "attribute",
+              "attributes": {
+                "name": "FriendlyName",
+                "type": "string",
+                "use": "optional"
+              }
+            },
+            {
+              "type": "element",
+              "name": "anyAttribute",
+              "attributes": {
+                "namespace": "##other",
+                "processContents": "lax"
+              }
+            }
+          ]
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "AttributeValue",
+            "type": "anyType",
+            "nillable": "true"
+          }
+        },
+        {
+          "type": "element",
+          "name": "element",
+          "attributes": {
+            "name": "EncryptedAttribute",
+            "type": "saml:EncryptedElementType"
+          }
+        }
+      ]
+    }
+  ]
+}
