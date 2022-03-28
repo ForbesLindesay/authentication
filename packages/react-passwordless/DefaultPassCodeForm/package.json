@@ -1,0 +1,4 @@
+{
+  "main": "../lib/DefaultPassCodeForm.js",
+  "types": "../lib/DefaultPassCodeForm.d.ts"
+}

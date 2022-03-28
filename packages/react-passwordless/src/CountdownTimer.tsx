@@ -1,5 +1,3 @@
-// @public
-
 import * as React from 'react';
 
 function useForceUpdate() {

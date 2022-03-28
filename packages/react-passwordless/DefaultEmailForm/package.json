@@ -1,0 +1,4 @@
+{
+  "main": "../lib/DefaultEmailForm.js",
+  "types": "../lib/DefaultEmailForm.d.ts"
+}

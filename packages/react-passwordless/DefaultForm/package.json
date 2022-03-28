@@ -1,0 +1,4 @@
+{
+  "main": "../lib/DefaultForm.js",
+  "types": "../lib/DefaultForm.d.ts"
+}

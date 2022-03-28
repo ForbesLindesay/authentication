@@ -3,7 +3,7 @@ import {URL} from 'url';
 
 export type ErrorHandler<
   TRequest extends IncomingMessage = IncomingMessage,
-  TResponse extends ServerResponse = ServerResponse
+  TResponse extends ServerResponse = ServerResponse,
 > = (
   req: TRequest,
   res: TResponse,
@@ -12,7 +12,7 @@ export type ErrorHandler<
 ) => any;
 export interface Options<
   TRequest extends IncomingMessage = IncomingMessage,
-  TResponse extends ServerResponse = ServerResponse
+  TResponse extends ServerResponse = ServerResponse,
 > {
   errorHandler?: ErrorHandler<TRequest, TResponse>;
   host?: string;
@@ -61,7 +61,7 @@ export function getMatcher(host?: string) {
 }
 export default function csrfProtection<
   TRequest extends IncomingMessage = IncomingMessage,
-  TResponse extends ServerResponse = ServerResponse
+  TResponse extends ServerResponse = ServerResponse,
 >(options: Options<TRequest, TResponse> = {}) {
   const ignoreMethods = options.ignoreMethods || ['GET', 'HEAD', 'OPTIONS'];
   const matcher = getMatcher(options.host);
@@ -110,7 +110,7 @@ function getHostFromEnvironment(): undefined | string {
   if (typeof baseURL === 'string') {
     try {
       return new URL(baseURL).host;
-    } catch (ex) {
+    } catch (ex: any) {
       throw new Error(
         `Error parsing ${
           process.env.BASE_URL ? 'BASE_URL' : 'BASE_URI'

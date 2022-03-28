@@ -6,10 +6,10 @@
   ],
   "scripts": {
     "postinstall": "node scripts/postinstall",
-    "build": "node scripts/build-all --only-changed",
-    "build:all": "node scripts/build-all",
+    "build": "tsc --build scripts",
+    "build:watch": "yarn build --watch",
     "prerelease": "yarn build:all",
-    "prettier": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
+    "prettier:write": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
     "test": "jest",
     "posttest": "wsrun --parallel --exclude-missing test",
     "watch:jest": "jest --watch",
@@ -41,10 +41,10 @@
     "jest": "^26.1.0",
     "lsr": "^2.0.0",
     "mkdirp": "^1.0.4",
-    "prettier": "^2.0.5",
+    "prettier": "^2.5.1",
     "rimraf": "^3.0.2",
     "ts-jest": "^26.1.3",
-    "typescript": "^3.9.7",
+    "typescript": "^4.5.5",
     "wsrun": "^5.2.1"
   },
   "resolutions": {

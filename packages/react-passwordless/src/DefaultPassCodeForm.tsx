@@ -1,5 +1,3 @@
-// @public
-
 import * as React from 'react';
 import useDigitInput, {InputAttributes} from 'react-digit-input';
 import CountdownTimer from './CountdownTimer';
@@ -84,7 +82,7 @@ export default function DefaultPassCodeForm(props: EnteringPassCode) {
             can try again.
           </span>
         ) : props.error ? (
-          props.error.message
+          (props.error as any).message
         ) : null}
       </p>
       <p>Altenatively you can just click the "Magic" link in the e-mail</p>

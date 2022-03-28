@@ -11,7 +11,7 @@ function parseURL(name: string, input: URL | string, base?: string | URL) {
   if (typeof input === 'string') {
     try {
       return new URL(input, base);
-    } catch (ex) {
+    } catch (ex: any) {
       throw new Error(`${name} was not a valid URL. ${ex.message}`);
     }
   }
@@ -110,9 +110,10 @@ export default class OAuth1Authentication<State = Mixed> {
       throw new TypeError('OAuthStrategy requires a consumerSecret option');
     }
     this._callbackURL = options.callbackURL;
-    this.callbackPath = (typeof options.callbackURL === 'string'
-      ? new URL(options.callbackURL, 'http://example.com')
-      : options.callbackURL
+    this.callbackPath = (
+      typeof options.callbackURL === 'string'
+        ? new URL(options.callbackURL, 'http://example.com')
+        : options.callbackURL
     ).pathname;
     this._base = new OAuth1Base(
       requestTokenURL.href,
@@ -159,9 +160,7 @@ export default class OAuth1Authentication<State = Mixed> {
       );
     });
   }
-  private getOAuthRequestToken(params: {
-    [key: string]: string;
-  }): Promise<{
+  private getOAuthRequestToken(params: {[key: string]: string}): Promise<{
     token: string;
     tokenSecret: string;
     params: {

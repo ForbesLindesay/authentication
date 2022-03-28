@@ -6,7 +6,7 @@
   "types": "./lib/index.d.ts",
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/types",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },

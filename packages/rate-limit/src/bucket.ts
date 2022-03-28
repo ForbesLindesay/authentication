@@ -1,5 +1,3 @@
-// @public
-
 import takeBucket, {
   updateBucketState,
   BucketOptions,
