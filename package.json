@@ -8,7 +8,7 @@
     "postinstall": "node scripts/postinstall",
     "build": "tsc --build scripts",
     "build:watch": "yarn build --watch",
-    "prerelease": "yarn build:all",
+    "prerelease": "yarn build",
     "prettier:write": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
     "test": "jest",
     "posttest": "wsrun --parallel --exclude-missing test",
