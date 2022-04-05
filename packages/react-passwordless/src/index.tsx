@@ -128,14 +128,12 @@ export default function usePasswordless({
   useEffect(() => {
     if (state.error?.kind === PasswordlessResponseKind.RateLimitExceeded) {
       const time = setTimeout(() => {
-        setState(
-          (s): State => {
-            if (s.error) {
-              return {...s, error: null};
-            }
-            return s;
-          },
-        );
+        setState((s): State => {
+          if (s.error) {
+            return {...s, error: null};
+          }
+          return s;
+        });
       }, Math.max(100, state.error.nextTokenTimestamp - Date.now()));
       return () => {
         clearTimeout(time);
@@ -145,8 +143,8 @@ export default function usePasswordless({
   }, [state.error]);
 
   switch (state.stage) {
-    case PasswordlessStage.EnteringEmail:
-      return {
+    case PasswordlessStage.EnteringEmail: {
+      const result: EnteringEmail = {
         ...state,
         isEmailValid: isEmail(state.email),
         onBlur: () =>
@@ -178,29 +176,27 @@ export default function usePasswordless({
           );
           try {
             const result = await createToken(state.email);
-            setState(
-              (st): State => {
-                if (st.stage !== PasswordlessStage.EnteringEmail) {
-                  return st;
-                }
-                if (result.kind === PasswordlessResponseKind.CreatedToken) {
-                  return {
-                    stage: PasswordlessStage.EnteringPassCode,
-                    email: st.email,
-                    tokenID: result.tokenID,
-                    passCode: '',
-                    passCodeTouched: false,
-                    submitting: false,
-                    error: null,
-                  };
-                } else {
-                  return {
-                    ...st,
-                    error: result,
-                  };
-                }
-              },
-            );
+            setState((st): State => {
+              if (st.stage !== PasswordlessStage.EnteringEmail) {
+                return st;
+              }
+              if (result.kind === PasswordlessResponseKind.CreatedToken) {
+                return {
+                  stage: PasswordlessStage.EnteringPassCode,
+                  email: st.email,
+                  tokenID: result.tokenID,
+                  passCode: '',
+                  passCodeTouched: false,
+                  submitting: false,
+                  error: null,
+                };
+              } else {
+                return {
+                  ...st,
+                  error: result,
+                };
+              }
+            });
           } finally {
             setState((st) =>
               st.stage === PasswordlessStage.EnteringEmail
@@ -210,8 +206,10 @@ export default function usePasswordless({
           }
         },
       };
-    case PasswordlessStage.EnteringPassCode:
-      return {
+      return result;
+    }
+    case PasswordlessStage.EnteringPassCode: {
+      const result: EnteringPassCode = {
         ...state,
         acceptedCharacters: getRegExForEncoding(passCodeEncoding),
         isPassCodeValid: isPassCodeValid(state.passCode, {
@@ -252,33 +250,31 @@ export default function usePasswordless({
               tokenID: state.tokenID,
               passCode: state.passCode,
             });
-            setState(
-              (st): State => {
-                if (st.stage !== PasswordlessStage.EnteringPassCode) {
-                  return st;
-                }
-                if (result.kind === PasswordlessResponseKind.VerifiedToken) {
-                  return {
-                    stage: PasswordlessStage.VerifiedPassCode,
-                    userID: result.userID,
-                  };
-                } else if (
-                  result.kind === PasswordlessResponseKind.ExpiredToken ||
-                  (result.kind === PasswordlessResponseKind.IncorrectPassCode &&
-                    result.attemptsRemaining === 0)
-                ) {
-                  return {
-                    ...DEFAULT_STATE,
-                    error: result,
-                  };
-                } else {
-                  return {
-                    ...st,
-                    error: result,
-                  };
-                }
-              },
-            );
+            setState((st): State => {
+              if (st.stage !== PasswordlessStage.EnteringPassCode) {
+                return st;
+              }
+              if (result.kind === PasswordlessResponseKind.VerifiedToken) {
+                return {
+                  stage: PasswordlessStage.VerifiedPassCode,
+                  userID: result.userID,
+                };
+              } else if (
+                result.kind === PasswordlessResponseKind.ExpiredToken ||
+                (result.kind === PasswordlessResponseKind.IncorrectPassCode &&
+                  result.attemptsRemaining === 0)
+              ) {
+                return {
+                  ...DEFAULT_STATE,
+                  error: result,
+                };
+              } else {
+                return {
+                  ...st,
+                  error: result,
+                };
+              }
+            });
           } finally {
             setState((st) =>
               st.stage === PasswordlessStage.EnteringEmail
@@ -288,6 +284,8 @@ export default function usePasswordless({
           }
         },
       };
+      return result;
+    }
     case PasswordlessStage.VerifiedPassCode:
       return state;
   }

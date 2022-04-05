@@ -1,0 +1,4 @@
+{
+  "main": "../lib/exponential.js",
+  "types": "../lib/exponential.d.ts"
+}

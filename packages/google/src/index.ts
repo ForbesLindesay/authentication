@@ -98,7 +98,8 @@ export {GooglePlusAPIError, UserInfoError};
  * Google using the OAuth 2.0 protocol.
  */
 export default class GoogleAuthentication<State = Mixed>
-  implements RedirectStrategy<State, InitOptions<State>> {
+  implements RedirectStrategy<State, InitOptions<State>>
+{
   static DEFAULT_SCOPE: ReadonlyArray<string> = DEFAULT_SCOPE;
   private readonly _oauth: OAuth2Authentication<State>;
   public readonly callbackPath: string;
@@ -143,7 +144,7 @@ export default class GoogleAuthentication<State = Mixed>
     let body = '';
     try {
       body = (await this._oauth.get(userProfileURL, accessToken)).data;
-    } catch (err) {
+    } catch (err: any) {
       let json: any = null;
       if (err.data) {
         try {
@@ -191,11 +192,8 @@ export default class GoogleAuthentication<State = Mixed>
     });
   }
   async completeAuthentication(req: Request, res: Response) {
-    const {
-      accessToken,
-      refreshToken,
-      state,
-    } = await this._oauth.completeAuthentication(req, res);
+    const {accessToken, refreshToken, state} =
+      await this._oauth.completeAuthentication(req, res);
     const {profile} = await this.getUserProfile(accessToken);
     return {accessToken, refreshToken, profile, state};
   }

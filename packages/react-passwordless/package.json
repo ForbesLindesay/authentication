@@ -19,7 +19,7 @@
   "scripts": {},
   "repository": "https://github.com/ForbesLindesay/authentication/tree/master/packages/react-passwordless",
   "bugs": "https://github.com/ForbesLindesay/authentication/issues",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "publishConfig": {
     "access": "public"
   },

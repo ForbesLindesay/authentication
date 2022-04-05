@@ -57,7 +57,8 @@ export const DEFAULT_SCOPE: string[] = [];
  * Facebook using the OAuth 2.0 protocol.
  */
 export default class FacebookAuthentication<State = Mixed>
-  implements RedirectStrategy<State, InitOptions<State>, CallbackOptions> {
+  implements RedirectStrategy<State, InitOptions<State>, CallbackOptions>
+{
   static DEFAULT_SCOPE: ReadonlyArray<string> = DEFAULT_SCOPE;
   private readonly _oauth: OAuth2Authentication<State>;
   private readonly _clientSecret: string;
@@ -121,7 +122,7 @@ export default class FacebookAuthentication<State = Mixed>
     let body = '';
     try {
       body = (await this._oauth.get(url, accessToken)).data;
-    } catch (err) {
+    } catch (err: any) {
       let json: any = null;
       if (err.data) {
         try {
@@ -218,7 +219,7 @@ export default class FacebookAuthentication<State = Mixed>
     let body = '';
     try {
       body = (await this._oauth.get(url, accessToken)).data;
-    } catch (err) {
+    } catch (err: any) {
       let json: any = null;
       if (err.data) {
         try {
@@ -285,11 +286,8 @@ export default class FacebookAuthentication<State = Mixed>
       );
     }
 
-    const {
-      accessToken,
-      refreshToken,
-      state,
-    } = await this._oauth.completeAuthentication(req, res);
+    const {accessToken, refreshToken, state} =
+      await this._oauth.completeAuthentication(req, res);
     const {profile, rawProfile} = await this.getUserProfile(
       accessToken,
       options,

@@ -1,0 +1,4 @@
+{
+  "main": "../lib/CountdownTimer.js",
+  "types": "../lib/CountdownTimer.d.ts"
+}

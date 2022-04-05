@@ -1,5 +1,3 @@
-// @public
-
 import takeExponential, {
   ExponentialOptions,
   ExponentialState,

@@ -1,0 +1,4 @@
+{
+  "main": "../lib/Encoding.js",
+  "types": "../lib/Encoding.d.ts"
+}
