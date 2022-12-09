@@ -20,7 +20,7 @@
     "@types/react": "*",
     "@types/react-dom": "*",
     "body-parser": "^1.18.3",
-    "express": "^4.16.3",
+    "express": "^4.17.3",
     "moped": "^0.7.24",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
